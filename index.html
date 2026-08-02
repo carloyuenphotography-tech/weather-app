@@ -16,26 +16,33 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            /* 針對手機螢幕將左右邊距稍微收窄，避免超出畫面 */
+            padding: 12px;
+            box-sizing: border-box;
         }
-        header { text-align: center; margin-bottom: 20px; }
-        header h1 { margin: 0 0 5px 0; color: var(--primary-color); }
-        header p { margin: 0; color: #64748b; font-size: 0.9rem; }
+        header { text-align: center; margin-bottom: 15px; }
+        header h1 { margin: 0 0 5px 0; color: var(--primary-color); font-size: 1.4rem; }
+        header p { margin: 0; color: #64748b; font-size: 0.85rem; }
         
         .dashboard {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
             max-width: 1400px;
             margin: 0 auto;
+            box-sizing: border-box;
+            width: 100%;
         }
         .card {
             background-color: var(--card-bg);
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
+            box-sizing: border-box;
+            width: 100%;
+            overflow: hidden;
         }
         .card-header {
             display: flex;
@@ -43,17 +50,18 @@
             align-items: center;
             border-bottom: 2px solid #e2e8f0;
             padding-bottom: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
-        .card-header h2 { font-size: 1.2rem; margin: 0; color: #334155; }
+        .card-header h2 { font-size: 1.1rem; margin: 0; color: #334155; }
         .btn-link {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             background-color: #e0f2fe;
             color: #0284c7;
-            padding: 4px 10px;
+            padding: 4px 8px;
             border-radius: 6px;
             text-decoration: none;
             font-weight: bold;
+            white-space: nowrap;
         }
         .btn-link:hover { background-color: #bae6fd; }
         
@@ -61,13 +69,14 @@
             position: relative;
             width: 100%;
             flex-grow: 1;
-            min-height: 300px;
+            min-height: 260px;
             background: #000;
             border-radius: 8px;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-sizing: border-box;
         }
         .media-container a {
             width: 100%;
@@ -76,19 +85,21 @@
         }
         .media-container img, .media-container iframe {
             width: 100%; height: 100%; border: none; object-fit: contain;
+            box-sizing: border-box;
         }
         
         .text-content { 
-            font-size: 0.95rem; 
-            line-height: 1.6; 
+            font-size: 0.9rem; 
+            line-height: 1.5; 
             overflow-y: auto; 
-            max-height: 350px; 
-            padding: 0;
+            max-height: 300px; 
+            padding: 10px;
             background: #f8fafc;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
+            box-sizing: border-box;
+            word-break: break-word;
         }
-        .hko-forecast { width: 100%; height: 350px; border: none; }
     </style>
 </head>
 <body>
@@ -103,7 +114,7 @@
         <div class="card">
             <div class="card-header">
                 <h2><span id="photo-title">1. 天文台天氣照片</span></h2>
-                <a href="photo.html" class="btn-link" target="_blank">查看全部 11 個定點 ↗</a>
+                <a href="photo.html" class="btn-link" target="_blank">查看 19 定點 ↗</a>
             </div>
             <div class="media-container">
                 <a id="photo-link" href="https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPA_photo.htm" target="_blank">
@@ -115,8 +126,8 @@
         <!-- 第二項：天氣預測地圖 (衛星/雷達/風速) -->
         <div class="card">
             <div class="card-header">
-                <h2>2. 天氣預測地圖 (衛星/雷達/風速)</h2>
-                <a href="satellite.html" class="btn-link" target="_blank">獨立全螢幕檢視 ↗</a>
+                <h2>2. 天氣預測地圖</h2>
+                <a href="satellite.html" class="btn-link" target="_blank">全螢幕 ↗</a>
             </div>
             <div class="media-container" style="background: #f1f5f9;">
                 <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=6&level=surface&overlay=satellite&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"></iframe>
@@ -127,7 +138,7 @@
         <div class="card">
             <div class="card-header">
                 <h2>3. Windy 雷達圖</h2>
-                <a href="satellite.html" class="btn-link" target="_blank">獨立全螢幕檢視 ↗</a>
+                <a href="satellite.html" class="btn-link" target="_blank">全螢幕 ↗</a>
             </div>
             <div class="media-container" style="background: #f1f5f9;">
                 <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=8&level=surface&overlay=radar&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"></iframe>
@@ -137,11 +148,11 @@
         <!-- 第四項：天文台本港天氣預測 -->
         <div class="card">
             <div class="card-header">
-                <h2>4. 天文台本港天氣預測</h2>
-                <a href="https://www.hko.gov.hk/tc/wxinfo/currwx/flw.htm" class="btn-link" target="_blank">天文台原網頁 ↗</a>
+                <h2>4. 本港天氣預測</h2>
+                <a href="https://www.hko.gov.hk/tc/wxinfo/currwx/flw.htm" class="btn-link" target="_blank">原網頁 ↗</a>
             </div>
-            <div class="text-content">
-                <iframe class="hko-forecast" src="https://www.hko.gov.hk/textonly/forecast/english/localfl.htm"></iframe>
+            <div class="text-content" id="rss-local-forecast">
+                正在從天文台載入最新天氣預測...
             </div>
         </div>
 
@@ -149,28 +160,35 @@
         <div class="card" style="grid-column: 1 / -1;">
             <div class="card-header">
                 <h2>5. 天文台九天天氣預報</h2>
-                <a href="https://www.hko.gov.hk/tc/wxinfo/currwx/fnd.htm" class="btn-link" target="_blank">天文台原網頁 ↗</a>
+                <a href="https://www.hko.gov.hk/tc/wxinfo/currwx/fnd.htm" class="btn-link" target="_blank">原網頁 ↗</a>
             </div>
-            <div class="text-content" style="max-height: 400px;">
-                <iframe class="hko-forecast" style="height: 400px;" src="https://www.hko.gov.hk/textonly/forecast/english/flatc.htm"></iframe>
+            <div class="text-content" style="max-height: 350px;" id="rss-9day-forecast">
+                正在載入九天天氣預報...
             </div>
         </div>
     </div>
 
     <script>
-        // 11 個定點照片的資料清單
         const weatherPhotos = [
-            { name: "1. 太平山（東）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPA_photo.htm" },
-            { name: "2. 太平山（東北偏北）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPB_photo.htm" },
-            { name: "3. 環球貿易中心（東南）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/icc1/latest_ICC1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/ICC1_photo.htm" },
-            { name: "4. 環球貿易廣場（西南面）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic2/latest_IC2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC2_photo.htm" },
-            { name: "5. 清水灣（向東）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwb/latest_CWB.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CWB_photo.htm" },
-            { name: "6. 中環（維多利亞港）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CP1_photo.htm" },
-            { name: "7. 流浮山（向西）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lfs/latest_LFS.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/LFS_photo.htm" },
-            { name: "8. 大帽山（東北）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm2/latest_TM2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TM2_photo.htm" },
-            { name: "9. 大帽山（西北）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm3/latest_TM3.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TM3_photo.htm" },
-            { name: "10. 坪洲（遠眺維多利亞港）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/PE2_photo.htm" },
-            { name: "11. 滘西洲（望向西北偏西面）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ks2/latest_KS2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/KS2_photo.htm" }
+            { name: "1. 太平山 (東面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPA_photo.htm" },
+            { name: "2. 太平山 (東北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPB_photo.htm" },
+            { name: "3. 環球貿易廣場 (東南)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/icc1/latest_ICC1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/ICC1_photo.htm" },
+            { name: "4. 環球貿易廣場 (西南)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic2/latest_IC2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC2_photo.htm" },
+            { name: "5. 清水灣 (向東)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwb/latest_CWB.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CWB_photo.htm" },
+            { name: "6. 中環 (維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CP1_photo.htm" },
+            { name: "7. 流浮山 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lfs/latest_LFS.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/LFS_photo.htm" },
+            { name: "8. 大帽山 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm2/latest_TM2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TM2_photo.htm" },
+            { name: "9. 大帽山 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm3/latest_TM3.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TM3_photo.htm" },
+            { name: "10. 坪洲 (遠眺維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/PE2_photo.htm" },
+            { name: "11. 滘西洲 (西北偏西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ks2/latest_KS2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/KS2_photo.htm" },
+            { name: "12. 橫瀾島 (西北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wag1/latest_WAG1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/WAG1_photo.htm" },
+            { name: "13. 橫瀾島 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wag2/latest_WAG2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/WAG2_photo.htm" },
+            { name: "14. 南丫島 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lki/latest_LKI.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/LKI_photo.htm" },
+            { name: "15. 長洲 (向北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cc1/latest_CC1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CC1_photo.htm" },
+            { name: "16. 德瑞國際學校 (海洋公園)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/gsis/latest_GSIS.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/GSIS_photo.htm" },
+            { name: "17. 尖沙咀 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tst/latest_TST.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TST_photo.htm" },
+            { name: "18. 大欖涌 (大嶼山北部)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tlc/latest_TLC.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TLC_photo.htm" },
+            { name: "19. 西貢水警東 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/skg/latest_SKG.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/SKG_photo.htm" }
         ];
 
         function updateTimestamp() {
@@ -179,7 +197,6 @@
         }
         updateTimestamp();
 
-        // 隨機選擇一張照片並更新畫面
         function setRandomPhoto() {
             const randomIndex = Math.floor(Math.random() * weatherPhotos.length);
             const selected = weatherPhotos[randomIndex];
@@ -189,11 +206,32 @@
             document.getElementById('photo-link').href = selected.link;
             document.getElementById('hko-photo').src = `${selected.img}?t=${timestamp}`;
         }
-
-        // 網頁載入時隨機顯示一張
         setRandomPhoto();
 
-        // 每 10 分鐘自動切換另一張隨機照片並更新時間
+        async function loadRSS(url, elementId) {
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+            try {
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                if (data.contents) {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(data.contents, 'text/xml');
+                    const description = xmlDoc.querySelector('item description');
+                    if (description) {
+                        document.getElementById(elementId).innerHTML = description.textContent;
+                    } else {
+                        document.getElementById(elementId).innerText = '暫時無法取得預報內容。';
+                    }
+                }
+            } catch (error) {
+                console.error('載入 RSS 失敗:', error);
+                document.getElementById(elementId).innerHTML = '載入失敗，請點擊上方按鈕前往天文台原網頁查看。';
+            }
+        }
+
+        loadRSS('https://rss.weather.gov.hk/rss/LocalWeatherForecast_uc.xml', 'rss-local-forecast');
+        loadRSS('https://rss.weather.gov.hk/rss/SeveralDaysWeatherForecast_uc.xml', 'rss-9day-forecast');
+
         setInterval(() => {
             setRandomPhoto();
             updateTimestamp();
