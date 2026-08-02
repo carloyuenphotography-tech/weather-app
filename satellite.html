@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>香港天氣多維度即時與預測地圖</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: rgba(30, 41, 59, 0.9);
+            border-bottom: 1px solid #334155;
+            flex-shrink: 0;
+        }
+
+        header a {
+            color: #38bdf8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: bold;
+            background: #0284c720;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+
+        header a:hover {
+            background: #0284c740;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        /* 2x2 格狀佈局 */
+        .container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 10px;
+            padding: 10px;
+            flex-grow: 1;
+            height: calc(100% - 50px);
+            box-sizing: border-box;
+        }
+
+        .pane {
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        }
+
+        .pane h2 {
+            margin: 0;
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            background: #334155;
+            color: #e2e8f0;
+            border-bottom: 1px solid #475569;
+        }
+
+        .pane iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            flex-grow: 1;
+        }
+
+        /* 手機或窄螢幕時自動改為單欄上下滾動 */
+        @media (max-width: 1024px) {
+            body, html {
+                overflow: auto;
+            }
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(4, 400px);
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html">← 返回主面板</a>
+        <h1>香港氣象監控：衛星、雷達、雲量與風速</h1>
+        <div style="width: 80px;"></div>
+    </header>
+
+    <div class="container">
+        <!-- 第一格：衛星雲圖 -->
+        <div class="pane">
+            <h2>1. 衛星雲圖 (Satellite)</h2>
+            <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=6&level=surface&overlay=satellite&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1" title="Satellite"></iframe>
+        </div>
+
+        <!-- 第二格：雷達圖 -->
+        <div class="pane">
+            <h2>2. 雷達圖 (Radar)</h2>
+            <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=8&level=surface&overlay=radar&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1" title="Radar"></iframe>
+        </div>
+
+        <!-- 第三格：雲量預測 -->
+        <div class="pane">
+            <h2>3. 雲量預測 (Clouds)</h2>
+            <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=7&level=surface&overlay=clouds&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1" title="Clouds"></iframe>
+        </div>
+
+        <!-- 第四格：風速預測 -->
+        <div class="pane">
+            <h2>4. 風速預測 (Wind)</h2>
+            <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=7&level=surface&overlay=wind&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=default&radarRange=-1" title="Wind"></iframe>
+        </div>
+    </div>
+
+</body>
+</html>
