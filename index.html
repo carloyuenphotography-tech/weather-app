@@ -11,31 +11,17 @@
             --card-bg: #ffffff;
             --text-color: #1e293b;
         }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
             padding: 20px;
         }
-
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        header h1 {
-            margin: 0 0 5px 0;
-            color: var(--primary-color);
-        }
-
-        header p {
-            margin: 0;
-            color: #64748b;
-            font-size: 0.9rem;
-        }
-
+        header { text-align: center; margin-bottom: 20px; }
+        header h1 { margin: 0 0 5px 0; color: var(--primary-color); }
+        header p { margin: 0; color: #64748b; font-size: 0.9rem; }
+        
         .dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -43,7 +29,6 @@
             max-width: 1400px;
             margin: 0 auto;
         }
-
         .card {
             background-color: var(--card-bg);
             border-radius: 12px;
@@ -52,50 +37,58 @@
             display: flex;
             flex-direction: column;
         }
-
-        .card h2 {
-            font-size: 1.2rem;
-            margin-top: 0;
-            margin-bottom: 15px;
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border-bottom: 2px solid #e2e8f0;
             padding-bottom: 8px;
-            color: #334155;
+            margin-bottom: 15px;
         }
-
+        .card-header h2 { font-size: 1.2rem; margin: 0; color: #334155; }
+        .btn-link {
+            font-size: 0.85rem;
+            background-color: #e0f2fe;
+            color: #0284c7;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .btn-link:hover { background-color: #bae6fd; }
+        
         .media-container {
             position: relative;
             width: 100%;
             flex-grow: 1;
             min-height: 300px;
-            background: #f1f5f9;
+            background: #000;
             border-radius: 8px;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-
-        .media-container img, 
-        .media-container iframe {
+        .media-container a {
             width: 100%;
             height: 100%;
-            border: none;
-            object-fit: cover;
+            display: block;
         }
-
-        .text-content {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            overflow-y: auto;
-            max-height: 400px;
+        .media-container img, .media-container iframe {
+            width: 100%; height: 100%; border: none; object-fit: contain;
         }
-
-        /* 調整天文台嵌入內容的外觀 */
-        .hko-forecast {
-            width: 100%;
-            height: 350px;
-            border: none;
+        
+        .text-content { 
+            font-size: 0.95rem; 
+            line-height: 1.6; 
+            overflow-y: auto; 
+            max-height: 350px; 
+            padding: 0;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
         }
+        .hko-forecast { width: 100%; height: 350px; border: none; }
     </style>
 </head>
 <body>
@@ -106,75 +99,105 @@
     </header>
 
     <div class="dashboard">
-
-        <!-- 第一項：天文台天氣照片 (以京士柏/尖沙咀等定點快照或天文台網頁圖片為例) -->
+        <!-- 第一項：隨機天文台天氣照片 -->
         <div class="card">
-            <h2>1. 天文台天氣照片</h2>
-            <div class="media-container">
-                <!-- 這裡使用香港天文台公開的天氣照片連結（例如尖沙咀天文台總部方向） -->
-                <img id="hko-photo" src="https://www.hko.gov.hk/wxinfo/aws/hko_met/ka/latest_KA.JPG" alt="天文台天氣照片">
+            <div class="card-header">
+                <h2><span id="photo-title">1. 天文台天氣照片</span></h2>
+                <a href="photo.html" class="btn-link" target="_blank">查看全部 11 個定點 ↗</a>
             </div>
-            <p style="font-size: 0.8rem; color: #64748b; margin-top: 8px; text-align: right;">來源：香港天文台 (圖片每 10 分鐘自動更新)</p>
+            <div class="media-container">
+                <a id="photo-link" href="https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPA_photo.htm" target="_blank">
+                    <img id="hko-photo" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg" alt="隨機天氣照片">
+                </a>
+            </div>
         </div>
 
-        <!-- 第二項：Windy 衛星雲圖 -->
+        <!-- 第二項：天氣預測地圖 (衛星/雷達/風速) -->
         <div class="card">
-            <h2>2. Windy 衛星雲圖</h2>
-            <div class="media-container">
-                <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=6&level=surface&overlay=satellite&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1" title="Windy Satellite"></iframe>
+            <div class="card-header">
+                <h2>2. 天氣預測地圖 (衛星/雷達/風速)</h2>
+                <a href="satellite.html" class="btn-link" target="_blank">獨立全螢幕檢視 ↗</a>
+            </div>
+            <div class="media-container" style="background: #f1f5f9;">
+                <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=6&level=surface&overlay=satellite&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"></iframe>
             </div>
         </div>
 
         <!-- 第三項：Windy 雷達圖 -->
         <div class="card">
-            <h2>3. Windy 雷達圖</h2>
-            <div class="media-container">
-                <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=8&level=surface&overlay=radar&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1" title="Windy Radar"></iframe>
+            <div class="card-header">
+                <h2>3. Windy 雷達圖</h2>
+                <a href="satellite.html" class="btn-link" target="_blank">獨立全螢幕檢視 ↗</a>
+            </div>
+            <div class="media-container" style="background: #f1f5f9;">
+                <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=8&level=surface&overlay=radar&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"></iframe>
             </div>
         </div>
 
         <!-- 第四項：天文台本港天氣預測 -->
         <div class="card">
-            <h2>4. 天文台本港天氣預測</h2>
-            <div class="text-content">
-                <!-- 使用 iframe 嵌入香港天文台的本港地區天氣預報頁面局部，或使用文字框 -->
-                <iframe class="hko-forecast" src="https://www.hko.gov.hk/textonly/forecast/english/localfl.htm" title="本港地區天氣預報"></iframe>
+            <div class="card-header">
+                <h2>4. 天文台本港天氣預測</h2>
+                <a href="https://www.hko.gov.hk/tc/wxinfo/currwx/flw.htm" class="btn-link" target="_blank">天文台原網頁 ↗</a>
             </div>
-            <p style="font-size: 0.8rem; color: #64748b; margin-top: 8px; text-align: right;">來源：香港天文台文字版天氣預報</p>
+            <div class="text-content">
+                <iframe class="hko-forecast" src="https://www.hko.gov.hk/textonly/forecast/english/localfl.htm"></iframe>
+            </div>
         </div>
 
         <!-- 第五項：天文台九天天氣預報 -->
         <div class="card" style="grid-column: 1 / -1;">
-            <h2>5. 天文台九天天氣預報</h2>
-            <div class="text-content">
-                <iframe class="hko-forecast" style="height: 400px;" src="https://www.hko.gov.hk/textonly/forecast/english/flatc.htm" title="九天天氣預報"></iframe>
+            <div class="card-header">
+                <h2>5. 天文台九天天氣預報</h2>
+                <a href="https://www.hko.gov.hk/tc/wxinfo/currwx/fnd.htm" class="btn-link" target="_blank">天文台原網頁 ↗</a>
             </div>
-            <p style="font-size: 0.8rem; color: #64748b; margin-top: 8px; text-align: right;">來源：香港天文台九天氣象預報</p>
+            <div class="text-content" style="max-height: 400px;">
+                <iframe class="hko-forecast" style="height: 400px;" src="https://www.hko.gov.hk/textonly/forecast/english/flatc.htm"></iframe>
+            </div>
         </div>
-
     </div>
 
     <script>
-        // 顯示最後更新時間
+        // 11 個定點照片的資料清單
+        const weatherPhotos = [
+            { name: "1. 太平山（東）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPA_photo.htm" },
+            { name: "2. 太平山（東北偏北）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPB_photo.htm" },
+            { name: "3. 環球貿易中心（東南）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/icc1/latest_ICC1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/ICC1_photo.htm" },
+            { name: "4. 環球貿易廣場（西南面）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic2/latest_IC2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC2_photo.htm" },
+            { name: "5. 清水灣（向東）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwb/latest_CWB.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CWB_photo.htm" },
+            { name: "6. 中環（維多利亞港）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CP1_photo.htm" },
+            { name: "7. 流浮山（向西）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lfs/latest_LFS.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/LFS_photo.htm" },
+            { name: "8. 大帽山（東北）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm2/latest_TM2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TM2_photo.htm" },
+            { name: "9. 大帽山（西北）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm3/latest_TM3.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TM3_photo.htm" },
+            { name: "10. 坪洲（遠眺維多利亞港）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/PE2_photo.htm" },
+            { name: "11. 滘西洲（望向西北偏西面）", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ks2/latest_KS2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/KS2_photo.htm" }
+        ];
+
         function updateTimestamp() {
             const now = new Date();
             document.getElementById('update-time').innerText = `最後更新時間：${now.toLocaleString('zh-HK')}`;
         }
         updateTimestamp();
 
-        // 1. 天文台圖片自動防快取重新載入（每 10 分鐘更新一次圖片）
+        // 隨機選擇一張照片並更新畫面
+        function setRandomPhoto() {
+            const randomIndex = Math.floor(Math.random() * weatherPhotos.length);
+            const selected = weatherPhotos[randomIndex];
+            const timestamp = new Date().getTime();
+
+            document.getElementById('photo-title').innerText = selected.name;
+            document.getElementById('photo-link').href = selected.link;
+            document.getElementById('hko-photo').src = `${selected.img}?t=${timestamp}`;
+        }
+
+        // 網頁載入時隨機顯示一張
+        setRandomPhoto();
+
+        // 每 10 分鐘自動切換另一張隨機照片並更新時間
         setInterval(() => {
-            const img = document.getElementById('hko-photo');
-            const currentSrc = img.src.split('?')[0];
-            img.src = `${currentSrc}?t=${new Date().getTime()}`; // 加上時間戳避免瀏覽器快取
+            setRandomPhoto();
             updateTimestamp();
-        }, 600000); // 600,000 毫秒 = 10 分鐘
-
-        // 2. 整頁自動刷新（可選：如果希望每 30 分鐘重新整理一次整個網頁確保資料最新）
-        setTimeout(() => {
-            location.reload();
-        }, 1800000); // 1,800,000 毫秒 = 30 分鐘
+        }, 600000);
     </script>
-
 </body>
 </html>
