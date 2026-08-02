@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>香港天文台 - 即時天氣照片監控</title>
+    <style>
+        :root {
+            --primary-color: #0284c7;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: rgba(30, 41, 59, 0.9);
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+
+        header a {
+            color: #38bdf8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: bold;
+            background: #0284c720;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+
+        header a:hover {
+            background: #0284c740;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        /* 網格佈局：每列固定 3 欄 */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+            border: 1px solid #334155;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card h2 {
+            font-size: 1rem;
+            margin: 0;
+            padding: 12px 15px;
+            background: #334155;
+            color: #e2e8f0;
+            border-bottom: 1px solid #475569;
+        }
+
+        /* 嚴格對應原圖尺寸 720x405 px (16:9 比例) */
+        .img-container {
+            width: 100%;
+            aspect-ratio: 720 / 405;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .img-container a {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* 確保 720x405 圖片完整呈現不變形 */
+            transition: transform 0.2s ease;
+        }
+
+        .img-container img:hover {
+            transform: scale(1.02);
+        }
+
+        /* 響應式設計：平板或手機螢幕小於 1024px 時自動變為單欄 */
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html">← 返回主面板</a>
+        <h1>香港天文台天氣照片監控</h1>
+        <div style="width: 80px;"></div>
+    </header>
+
+    <div class="dashboard">
+
+        <!-- 1. 太平山（東） -->
+        <div class="card">
+            <h2>1. 太平山（東）</h2>
+            <div class="img-container">
+                <a href="https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPA_photo.htm" target="_blank">
+                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg" alt="太平山（東）">
+                </a>
+            </div>
+        </div>
+
+        <!-- 2. 太平山（東北偏北） -->
+        <div class="card">
+            <h2>2. 太平山（東北偏北）</h2>
+            <div class="img-container">
+                <a href="https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPB_photo.htm" target="_blank">
+                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg" alt="太平山（東北偏北）">
+                </a>
+            </div>
+        </div>
+
+        <!-- 3. 環球貿易中心（東南） -->
+        <div class="card">
+            <h2>3. 環球貿易中心（東南）</h2>
+            <div class="img-container">
+                <a href="https://www.hko.gov.hk/en/wxinfo/ts/webcam/ICC1_photo.htm" target="_blank">
+                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/icc1/latest_ICC1.jpg" alt="環球貿易中心（東南）">
+                </a>
+            </div>
+        </div>
+
+        <!-- 4. 環球貿易廣場（西南） -->
+        <div class="card">
+            <h2>4. 環球貿易廣場（西南）</h2>
+            <div class="img-container">
+                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC2_photo.htm" target="_blank">
+                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic2/latest_IC2.jpg" alt="環球貿易廣場（西南）">
+                </a>
+            </div>
+        </div>
+
+        <!-- 5. 清水灣（向東） -->
+        <div class="card">
+            <h2>5. 清水灣（向東）</h2>
+            <div class="img-container">
+                <a href="https://www.hko.gov.hk/en/wxinfo/ts/webcam/CWB_photo.htm" target="_blank">
+                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwb/latest_CWB.jpg" alt="清水灣（向東）">
+                </a>
+            </div>
+        </div>
+
+        <!-- 6. 中環碼頭（向東） -->
+        <div class="card">
+            <h2>6. 中環碼頭（向東）</h2>
+            <div class="img-container">
+                <a href="https://www.hko.gov.hk/en/wxinfo/ts/webcam/CPF_photo.htm" target="_blank">
+                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/cpf/latest_CPF.jpg" alt="中環碼頭（向東）">
+                </a>
+            </div>
+        </div>
+
+        <!-- 7. 流浮山（向西） -->
+        <div class="card">
+            <h2>7. 流浮山（向西）</h2>
+            <div class="img-container">
+                <a href="https://www.hko.gov.hk/en/wxinfo/ts/webcam/LFS_photo.htm" target="_blank">
+                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/lfs/latest_LFS.jpg" alt="流浮山（向西）">
+                </a>
+            </div>
+        </div>
+
+        <!-- 8. 大帽山（東北） -->
+        <div class="card">
+            <h2>8. 大帽山（東北）</h2>
+            <div class="img-container">
+                <a href="https://www.hko.gov.hk/en/wxinfo/ts/webcam/TM2_photo.htm" target="_blank">
+                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm2/latest_TM2.jpg" alt="大帽山（東北）">
+                </a>
+            </div>
+        </div>
+
+        <!-- 9. 大帽山（西北） -->
+        <div class="card">
+            <h2>9. 大帽山（西北）</h2>
+            <div class="img-container">
+                <a href="https://www.hko.gov.hk/en/wxinfo/ts/webcam/TM3_photo.htm" target="_blank">
+                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm3/latest_TM3.jpg" alt="大帽山（西北）">
+                </a>
+            </div>
+        </div>
+
+        <!-- 10. 坪洲（維港） -->
+        <div class="card">
+            <h2>10. 坪洲（維港）</h2>
+            <div class="img-container">
+                <a href="https://www.hko.gov.hk/en/wxinfo/ts/webcam/PI2_photo.htm" target="_blank">
+                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/pi2/latest_PI2.jpg" alt="坪洲（維港）">
+                </a>
+            </div>
+        </div>
+
+        <!-- 11. 滘西洲（西北偏北） -->
+        <div class="card">
+            <h2>11. 滘西洲（西北偏北）</h2>
+            <div class="img-container">
+                <a href="https://www.hko.gov.hk/en/wxinfo/ts/webcam/KP2_photo.htm" target="_blank">
+                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/kp2/latest_KP2.jpg" alt="滘西洲（西北偏北）">
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        setInterval(() => {
+            const timestamp = new Date().getTime();
+            const imgs = document.querySelectorAll('.hko-img');
+            imgs.forEach(img => {
+                const currentSrc = img.src.split('?')[0];
+                img.src = `${currentSrc}?t=${timestamp}`;
+            });
+        }, 600000);
+    </script>
+
+</body>
+</html>
