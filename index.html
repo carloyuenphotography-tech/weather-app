@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的香港天氣即時監控面板</title>
+    <style>
+        :root {
+            --primary-color: #0284c7;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            margin: 0 0 5px 0;
+            color: var(--primary-color);
+        }
+
+        header p {
+            margin: 0;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            color: #334155;
+        }
+
+        .media-container {
+            position: relative;
+            width: 100%;
+            flex-grow: 1;
+            min-height: 300px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .media-container img, 
+        .media-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            object-fit: cover;
+        }
+
+        .text-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        /* 調整天文台嵌入內容的外觀 */
+        .hko-forecast {
+            width: 100%;
+            height: 350px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>香港天氣即時監控面板</h1>
+        <p id="update-time">頁面載入中...</p>
+    </header>
+
+    <div class="dashboard">
+
+        <!-- 第一項：天文台天氣照片 (以京士柏/尖沙咀等定點快照或天文台網頁圖片為例) -->
+        <div class="card">
+            <h2>1. 天文台天氣照片</h2>
+            <div class="media-container">
+                <!-- 這裡使用香港天文台公開的天氣照片連結（例如尖沙咀天文台總部方向） -->
+                <img id="hko-photo" src="https://www.hko.gov.hk/wxinfo/aws/hko_met/ka/latest_KA.JPG" alt="天文台天氣照片">
+            </div>
+            <p style="font-size: 0.8rem; color: #64748b; margin-top: 8px; text-align: right;">來源：香港天文台 (圖片每 10 分鐘自動更新)</p>
+        </div>
+
+        <!-- 第二項：Windy 衛星雲圖 -->
+        <div class="card">
+            <h2>2. Windy 衛星雲圖</h2>
+            <div class="media-container">
+                <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=6&level=surface&overlay=satellite&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1" title="Windy Satellite"></iframe>
+            </div>
+        </div>
+
+        <!-- 第三項：Windy 雷達圖 -->
+        <div class="card">
+            <h2>3. Windy 雷達圖</h2>
+            <div class="media-container">
+                <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=8&level=surface&overlay=radar&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1" title="Windy Radar"></iframe>
+            </div>
+        </div>
+
+        <!-- 第四項：天文台本港天氣預測 -->
+        <div class="card">
+            <h2>4. 天文台本港天氣預測</h2>
+            <div class="text-content">
+                <!-- 使用 iframe 嵌入香港天文台的本港地區天氣預報頁面局部，或使用文字框 -->
+                <iframe class="hko-forecast" src="https://www.hko.gov.hk/textonly/forecast/english/localfl.htm" title="本港地區天氣預報"></iframe>
+            </div>
+            <p style="font-size: 0.8rem; color: #64748b; margin-top: 8px; text-align: right;">來源：香港天文台文字版天氣預報</p>
+        </div>
+
+        <!-- 第五項：天文台九天天氣預報 -->
+        <div class="card" style="grid-column: 1 / -1;">
+            <h2>5. 天文台九天天氣預報</h2>
+            <div class="text-content">
+                <iframe class="hko-forecast" style="height: 400px;" src="https://www.hko.gov.hk/textonly/forecast/english/flatc.htm" title="九天天氣預報"></iframe>
+            </div>
+            <p style="font-size: 0.8rem; color: #64748b; margin-top: 8px; text-align: right;">來源：香港天文台九天氣象預報</p>
+        </div>
+
+    </div>
+
+    <script>
+        // 顯示最後更新時間
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('update-time').innerText = `最後更新時間：${now.toLocaleString('zh-HK')}`;
+        }
+        updateTimestamp();
+
+        // 1. 天文台圖片自動防快取重新載入（每 10 分鐘更新一次圖片）
+        setInterval(() => {
+            const img = document.getElementById('hko-photo');
+            const currentSrc = img.src.split('?')[0];
+            img.src = `${currentSrc}?t=${new Date().getTime()}`; // 加上時間戳避免瀏覽器快取
+            updateTimestamp();
+        }, 600000); // 600,000 毫秒 = 10 分鐘
+
+        // 2. 整頁自動刷新（可選：如果希望每 30 分鐘重新整理一次整個網頁確保資料最新）
+        setTimeout(() => {
+            location.reload();
+        }, 1800000); // 1,800,000 毫秒 = 30 分鐘
+    </script>
+
+</body>
+</html>
