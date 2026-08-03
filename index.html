@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
 <head>
-	<!-- 📱 iPhone / PWA Home Screen Icon -->
-	<link rel="apple-touch-icon" sizes="180x180" href="mybusapplogo_en.png">
-
-	<!-- 🌐 Browser Favicon -->
-	<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的香港天氣即時監控面板</title>
+    
+    <!-- 內置您的自訂桌面捷徑圖示 -->
+    <link rel="icon" type="image/png" href="myweatherapp.png">
+    <link rel="apple-touch-icon" href="myweatherapp.png">
+
     <style>
         :root {
             --primary-color: #0284c7;
@@ -21,7 +21,6 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            /* 針對手機螢幕將左右邊距稍微收窄，避免超出畫面 */
             padding: 12px;
             box-sizing: border-box;
         }
@@ -115,11 +114,11 @@
     </header>
 
     <div class="dashboard">
-        <!-- 第一項：隨機天文台天氣照片 -->
+        <!-- 第一項：隨機天文台天氣照片 (每 2 秒自動更新) -->
         <div class="card">
             <div class="card-header">
                 <h2><span id="photo-title">1. 天文台天氣照片</span></h2>
-                <a href="photo.html" class="btn-link" target="_blank">查看 19 定點 ↗</a>
+                <a href="photo.html" class="btn-link" target="_blank">查看照片 ↗</a>
             </div>
             <div class="media-container">
                 <a id="photo-link" href="https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPA_photo.htm" target="_blank">
@@ -175,25 +174,25 @@
 
     <script>
         const weatherPhotos = [
-            { name: "1. 太平山 (東面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPA_photo.htm" },
-            { name: "2. 太平山 (東北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPB_photo.htm" },
-            { name: "3. 環球貿易廣場 (東南)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/icc1/latest_ICC1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/ICC1_photo.htm" },
-            { name: "4. 環球貿易廣場 (西南)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic2/latest_IC2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC2_photo.htm" },
-            { name: "5. 清水灣 (向東)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwb/latest_CWB.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CWB_photo.htm" },
-            { name: "6. 中環 (維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CP1_photo.htm" },
-            { name: "7. 流浮山 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lfs/latest_LFS.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/LFS_photo.htm" },
-            { name: "8. 大帽山 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm2/latest_TM2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TM2_photo.htm" },
-            { name: "9. 大帽山 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm3/latest_TM3.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TM3_photo.htm" },
-            { name: "10. 坪洲 (遠眺維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/PE2_photo.htm" },
-            { name: "11. 滘西洲 (西北偏西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ks2/latest_KS2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/KS2_photo.htm" },
-            { name: "12. 橫瀾島 (西北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wag1/latest_WAG1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/WAG1_photo.htm" },
-            { name: "13. 橫瀾島 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wag2/latest_WAG2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/WAG2_photo.htm" },
-            { name: "14. 南丫島 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lki/latest_LKI.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/LKI_photo.htm" },
-            { name: "15. 長洲 (向北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cc1/latest_CC1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CC1_photo.htm" },
-            { name: "16. 德瑞國際學校 (海洋公園)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/gsis/latest_GSIS.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/GSIS_photo.htm" },
-            { name: "17. 尖沙咀 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tst/latest_TST.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TST_photo.htm" },
-            { name: "18. 大欖涌 (大嶼山北部)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tlc/latest_TLC.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TLC_photo.htm" },
-            { name: "19. 西貢水警東 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/skg/latest_SKG.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/SKG_photo.htm" }
+            { name: "太平山 (東面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPA_photo.htm" },
+            { name: "太平山 (東北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPB_photo.htm" },
+            { name: "環球貿易廣場 (東南)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic1/latest_IC1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/IC1_photo.htm" },
+            { name: "環球貿易廣場 (西南)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic2/latest_IC2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC2_photo.htm" },
+            { name: "清水灣 (向東)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwb/latest_CWB.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CWB_photo.htm" },
+            { name: "中環 (維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CP1_photo.htm" },
+            { name: "流浮山 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lfs/latest_LFS.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/LFS_photo.htm" },
+            { name: "大帽山 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm2/latest_TM2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TM2_photo.htm" },
+            { name: "大帽山 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm3/latest_TM3.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TM3_photo.htm" },
+            { name: "坪洲 (遠眺維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/PE2_photo.htm" },
+            { name: "滘西洲 (西北偏西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ks2/latest_KS2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/KS2_photo.htm" },
+            { name: "橫瀾島 (西北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wag1/latest_WAG1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/WAG1_photo.htm" },
+            { name: "橫瀾島 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wag1/latest_WAG2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/WAG2_photo.htm" },
+            { name: "南丫島 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lam/latest_LAM.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/LAM_photo.htm" },
+            { name: "長洲 (向北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cs2/latest_CS2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CS2_photo.htm" },
+            { name: "德瑞國際學校 (海洋公園)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/gsi/latest_GSI.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/GSI_photo.htm" },
+            { name: "尖沙咀 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/hk2/latest_HK2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/HK2_photo.htm" },
+            { name: "大欖涌 (大嶼山北部)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tlc/latest_TLC.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TLC_photo.htm" },
+            { name: "西貢水警東 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/skg/latest_SKG.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/SKG_photo.htm" }
         ];
 
         function updateTimestamp() {
@@ -237,10 +236,11 @@
         loadRSS('https://rss.weather.gov.hk/rss/LocalWeatherForecast_uc.xml', 'rss-local-forecast');
         loadRSS('https://rss.weather.gov.hk/rss/SeveralDaysWeatherForecast_uc.xml', 'rss-9day-forecast');
 
+        // 將天氣照片更新頻率改為每 2 秒 (2000 毫秒) 執行一次
         setInterval(() => {
             setRandomPhoto();
             updateTimestamp();
-        }, 600000);
+        }, 2000);
     </script>
 </body>
 </html>
