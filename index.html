@@ -9,7 +9,7 @@
     <link rel="icon" type="image/png" href="myweatherapp.png">
     <link rel="apple-touch-icon" href="myweatherapp.png">
 
-    <!-- 引入專業的 SunCalc 庫 -->
+    <!-- 重新引入專業的 SunCalc 庫 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
 
     <style>
@@ -324,8 +324,8 @@
         
         <!-- 快速功能導覽 Menu 鍵 -->
         <div class="menu-container">
-            <a href="photo.html" class="menu-btn" target="_blank">📷 天氣相片專頁</a>
-            <a href="satellite.html" class="menu-btn" target="_blank">🛰️ 衛星與雷達專頁</a>
+            <a href="photo.html" class="menu-btn" target="_blank">📷 天氣相片</a>
+            <a href="satellite.html" class="menu-btn" target="_blank">🛰️ 衛星與雷達</a>
         </div>
 
         <div style="margin-top: 15px;">
@@ -350,10 +350,10 @@
             </div>
         </div>
 
-        <!-- 2. 今日日出日落方位 -->
+        <!-- 2. 日出日落方位 -->
         <div class="card">
             <div class="card-header">
-                <h2>今日日出日落方位</h2>
+                <h2>日出日落方位</h2>
                 <a href="https://suncalc.org/#/22.3193,114.1694,12" class="btn-link" target="_blank">地圖檢視 ↗</a>
             </div>
             
@@ -361,44 +361,44 @@
             
             <div class="sun-info-grid">
                 <div class="sun-box">
-                    <h3>🌅 日出 (Sunrise)</h3>
+                    <h3>🌅 日出</h3>
                     <div class="time" id="sunrise-time">計算中...</div>
                     <div class="angle" id="sunrise-angle">方位: --°</div>
                 </div>
                 <div class="sun-box" style="background: #fff7ed; border-color: #fed7aa;">
-                    <h3 style="color: #c2410c;">🌇 日落 (Sunset)</h3>
+                    <h3 style="color: #c2410c;">🌇 日落</h3>
                     <div class="time" id="sunset-time" style="color: #7c2d12;">計算中...</div>
                     <div class="angle" id="sunset-angle">方位: --°</div>
                 </div>
             </div>
             <div class="solar-term-info" id="solar-term-text">
-                正在計算距離重要節氣天數...
+                正在計算節氣資訊...
             </div>
         </div>
 
-        <!-- 3. 今日月相與月出月落方位 -->
+        <!-- 3. 月相與月出月落方位 -->
         <div class="card">
             <div class="card-header">
-                <h2>今日月相與月出月落方位</h2>
+                <h2>月相與月出月落方位</h2>
                 <a href="https://www.hko.gov.hk/tc/gts/astron/moonpos.htm" class="btn-link" target="_blank">天文台數據 ↗</a>
             </div>
 
             <div class="moon-header-flex">
                 <div class="moon-svg-box" id="moon-svg-container"></div>
                 <div class="moon-details-text">
-                    <div>農曆日期：<strong id="lunar-date-text">計算中...</strong></div>
-                    <div>月相名稱：<span id="moon-phase-name">計算中...</span> (亮光: <strong id="moon-illumination-pct">--%</strong>)</div>
+                    <div><strong id="lunar-date-text">計算中...</strong></div>
+                    <div><span id="moon-phase-name">計算中...</span> (亮光: <strong id="moon-illumination-pct">--%</strong>)</div>
                 </div>
             </div>
 
             <div class="sun-info-grid">
                 <div class="sun-box" style="background: #f8fafc; border-color: #cbd5e1;">
-                    <h3 style="color: #475569;">🌙 月出 (Moonrise)</h3>
+                    <h3 style="color: #475569;">🌙 月出</h3>
                     <div class="time" id="moonrise-time" style="color: #334155;">計算中...</div>
                     <div class="angle" id="moonrise-angle">方位: --°</div>
                 </div>
                 <div class="sun-box" style="background: #f8fafc; border-color: #cbd5e1;">
-                    <h3 style="color: #475569;">🌘 月落 (Moonset)</h3>
+                    <h3 style="color: #475569;">🌘 月落</h3>
                     <div class="time" id="moonset-time" style="color: #334155;">計算中...</div>
                     <div class="angle" id="moonset-angle">方位: --°</div>
                 </div>
@@ -409,7 +409,7 @@
         <div class="card large-map-card">
             <div class="card-header">
                 <h2>衛星雲圖</h2>
-                <a href="satellite.html" class="btn-link" target="_blank">全螢幕 ↗</a>
+                <a href="https://www.windy.com/?22.300,114.170,6,i:satellite" class="btn-link" target="_blank">全螢幕 ↗</a>
             </div>
             <div class="large-map-container">
                 <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=6&level=surface&overlay=satellite&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"></iframe>
@@ -420,7 +420,7 @@
         <div class="card large-map-card">
             <div class="card-header">
                 <h2>雷達圖</h2>
-                <a href="satellite.html" class="btn-link" target="_blank">全螢幕 ↗</a>
+                <a href="https://www.windy.com/?22.300,114.170,8,i:radar" class="btn-link" target="_blank">全螢幕 ↗</a>
             </div>
             <div class="large-map-container">
                 <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=8&level=surface&overlay=radar&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"></iframe>
@@ -464,6 +464,7 @@
             const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
             document.getElementById('current-date-display').innerText = now.toLocaleDateString('zh-HK', dateOptions);
 
+            // 使用 SunCalc 計算日出日落
             const sunTimes = SunCalc.getTimes(now, lat, lon);
             if (sunTimes.sunrise && sunTimes.sunset) {
                 const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Hong_Kong' };
@@ -480,6 +481,7 @@
                 document.getElementById('sunset-angle').innerText = `方位: ${Math.round(sunsetAzimuthDeg)}°`;
             }
 
+            // 節氣計算
             const year = now.getFullYear();
             const terms = [
                 { name: "春分", date: new Date(year, 2, 21) },
@@ -502,6 +504,7 @@
             const diffDays = Math.ceil((nextTerm.date - now) / (1000 * 60 * 60 * 24));
             document.getElementById('solar-term-text').innerHTML = `🌱 距離下一個重要節氣 <strong>${nextTerm.name}</strong> 還有 <strong>${diffDays}</strong> 天`;
 
+            // 使用 SunCalc 計算月相與月出月落
             const moonIllumination = SunCalc.getMoonIllumination(now);
             const moonTimes = SunCalc.getMoonTimes(now, lat, lon);
 
@@ -563,7 +566,7 @@
             { name: "太平山 (東北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPB_photo.htm" },
             { name: "環球貿易廣場 (東南)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic1/latest_IC1.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC1_photo.htm" },
             { name: "環球貿易廣場 (西南)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic2/latest_IC2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC2_photo.htm" },
-            { name: "清水灣 (向東)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwb/latest_CWA.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CWA_photo.htm" },
+            { name: "清水灣 (向東)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwa/latest_CWA.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CWA_photo.htm" },
             { name: "中環 (維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CP1_photo.htm" },
             { name: "流浮山 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lfs/latest_LFS.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/LFS_photo.htm" },
             { name: "大帽山 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm2/latest_TM2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TM2_photo.htm" },
