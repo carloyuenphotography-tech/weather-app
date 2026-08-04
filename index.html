@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的香港天氣即時監控面板</title>
+    <title>觀天之道．賞天之雲---即時天氣資訊</title>
     
     <!-- 內置您的自訂桌面捷徑圖示 -->
     <link rel="icon" type="image/png" href="myweatherapp.png">
@@ -15,7 +15,7 @@
     <style>
         :root {
             --primary-color: #0284c7;
-            --bg-color: #f8fafc;
+            --bg-color: #e2e8f0;      
             --card-bg: #ffffff;
             --text-color: #1e293b;
         }
@@ -24,26 +24,54 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 12px;
+            padding: 15px;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
-        header { text-align: center; margin-bottom: 15px; }
-        header h1 { margin: 0 0 5px 0; color: var(--primary-color); font-size: 1.4rem; }
-        header p { margin: 0; color: #64748b; font-size: 0.85rem; }
+        header { 
+            text-align: center; 
+            margin-bottom: 20px; 
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+        }
+        header h1 { margin: 0 0 10px 0; color: var(--primary-color); font-size: 1.4rem; }
         
+        /* 重新整理按鈕樣式 */
+        .refresh-btn {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background-color 0.2s;
+        }
+        .refresh-btn:hover {
+            background-color: #0369a1;
+        }
+
         .dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 15px;
+            gap: 20px;
             max-width: 1400px;
             margin: 0 auto;
             box-sizing: border-box;
             width: 100%;
+            flex-grow: 1;
         }
         .card {
             background-color: var(--card-bg);
             border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            border: 1px solid #cbd5e1;
             padding: 15px;
             display: flex;
             flex-direction: column;
@@ -160,7 +188,7 @@
             text-align: center;
         }
 
-        /* 月相專屬樣式 (取代 Emoji) */
+        /* 月相專屬樣式 */
         .moon-header-flex {
             display: flex;
             align-items: center;
@@ -189,13 +217,36 @@
         .moon-details-text strong {
             color: #0284c7;
         }
+
+        /* 底部資訊樣式 */
+        footer {
+            text-align: center;
+            margin-top: 25px;
+            padding: 15px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.05);
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        footer a {
+            color: #0284c7;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+        footer div {
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>香港天氣即時監控面板</h1>
-        <p id="update-time">頁面載入中...</p>
+        <h1>觀天之道．賞天之雲---即時天氣資訊</h1>
+        <button class="refresh-btn" onclick="location.reload();">🔄 重新整理頁面</button>
     </header>
 
     <div class="dashboard">
@@ -260,7 +311,7 @@
             </div>
         </div>
 
-        <!-- 5. 今日月相與月出月落方位 (使用向量 SVG 月相圖標與百分比) -->
+        <!-- 5. 今日月相與月出月落方位 -->
         <div class="card">
             <div class="card-header">
                 <h2>今日月相與月出月落方位</h2>
@@ -268,9 +319,7 @@
             </div>
 
             <div class="moon-header-flex">
-                <div class="moon-svg-box" id="moon-svg-container">
-                    <!-- 動態載入 SVG 月相圖標 -->
-                </div>
+                <div class="moon-svg-box" id="moon-svg-container"></div>
                 <div class="moon-details-text">
                     <div>農曆日期：<strong id="lunar-date-text">計算中...</strong></div>
                     <div>月相名稱：<span id="moon-phase-name">計算中...</span> (亮光: <strong id="moon-illumination-pct">--%</strong>)</div>
@@ -307,24 +356,26 @@
                 <h2>5. 天文台九天天氣預報</h2>
                 <a href="https://www.hko.gov.hk/tc/wxinfo/currwx/fnd.htm" class="btn-link" target="_blank">原網頁 ↗</a>
             </div>
-            <div class="text-content" style="max-height: 350px;" id="rss-9day-forecast">
+            <div class="text-content" id="rss-9day-forecast" style="overflow-y: auto; max-height: 350px; padding: 10px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; box-sizing: border-box; word-break: break-word;">
                 正在載入九天天氣預報...
             </div>
         </div>
     </div>
 
+    <footer>
+        <div id="update-time">最後更新時間：載入中...</div>
+        <div>版本號碼：v1.0.0 | 作者：<a href="https://www.instagram.com/_852.carlo" target="_blank">@_852.carlo</a></div>
+    </footer>
+
     <script>
-        // --- 運用 SunCalc 計算與呈現 ---
         function updateAstronomicalData() {
-            const lat = 22.3193; // 香港緯度
-            const lon = 114.1694; // 香港經度
+            const lat = 22.3193;
+            const lon = 114.1694;
             const now = new Date();
 
-            // 1. 顯示今日日期
             const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
             document.getElementById('current-date-display').innerText = now.toLocaleDateString('zh-HK', dateOptions);
 
-            // 2. 日出日落計算
             const sunTimes = SunCalc.getTimes(now, lat, lon);
             if (sunTimes.sunrise && sunTimes.sunset) {
                 const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Hong_Kong' };
@@ -341,7 +392,6 @@
                 document.getElementById('sunset-angle').innerText = `方位: ${Math.round(sunsetAzimuthDeg)}°`;
             }
 
-            // 3. 節氣倒數
             const year = now.getFullYear();
             const terms = [
                 { name: "春分", date: new Date(year, 2, 21) },
@@ -364,11 +414,10 @@
             const diffDays = Math.ceil((nextTerm.date - now) / (1000 * 60 * 60 * 24));
             document.getElementById('solar-term-text').innerHTML = `🌱 距離下一個重要節氣 <strong>${nextTerm.name}</strong> 還有 <strong>${diffDays}</strong> 天`;
 
-            // 4. 月相、百分比與月出月落計算
             const moonIllumination = SunCalc.getMoonIllumination(now);
             const moonTimes = SunCalc.getMoonTimes(now, lat, lon);
 
-            const p = moonIllumination.phase; // 0 到 1
+            const p = moonIllumination.phase;
             const illumPct = Math.round(moonIllumination.fraction * 100);
             document.getElementById('moon-illumination-pct').innerText = `${illumPct}%`;
 
@@ -384,7 +433,6 @@
 
             document.getElementById('moon-phase-name').innerText = phaseName;
 
-            // 產生精美向量月相 SVG 圖標代替 Emoji
             const svgMoon = `
                 <svg viewBox="0 0 36 36" width="100%" height="100%">
                     <circle cx="18" cy="18" r="16" fill="#1e293b" />
@@ -393,7 +441,6 @@
             `;
             document.getElementById('moon-svg-container').innerHTML = svgMoon;
 
-            // 概算農曆日
             const lunarDayApprox = Math.floor(p * 29.53) + 1;
             document.getElementById('lunar-date-text').innerText = `農曆約初/廿 ${lunarDayApprox} 日`;
 
@@ -422,7 +469,6 @@
 
         updateAstronomicalData();
 
-        // --- 天氣照片陣列與隨機切換 ---
         const weatherPhotos = [
             { name: "太平山 (東面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPA_photo.htm" },
             { name: "太平山 (東北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPB_photo.htm" },
@@ -447,7 +493,8 @@
 
         function updateTimestamp() {
             const now = new Date();
-            document.getElementById('update-time').innerText = `最後更新時間：${now.toLocaleString('zh-HK')}`;
+            const timeOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Hong_Kong' };
+            document.getElementById('update-time').innerText = `最後更新時間：${now.toLocaleString('zh-HK', timeOptions).replace(/\//g, '-')}`;
         }
         updateTimestamp();
 
@@ -462,7 +509,6 @@
         }
         setRandomPhoto();
 
-        // 載入九天天氣預報 RSS
         async function loadRSS(url, elementId) {
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
             try {
@@ -486,7 +532,6 @@
 
         loadRSS('https://rss.weather.gov.hk/rss/SeveralDaysWeatherForecast_uc.xml', 'rss-9day-forecast');
 
-        // 天氣照片每 2 秒 (2000 毫秒) 隨機切換一次
         setInterval(() => {
             setRandomPhoto();
             updateTimestamp();
