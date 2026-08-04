@@ -9,7 +9,7 @@
     <link rel="icon" type="image/png" href="myweatherapp.png">
     <link rel="apple-touch-icon" href="myweatherapp.png">
 
-    <!-- 重新引入專業的 SunCalc 庫 -->
+    <!-- 引入專業的 SunCalc 庫 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
 
     <style>
@@ -59,6 +59,7 @@
             border-radius: 6px;
             text-decoration: none;
             transition: all 0.2s;
+            box-sizing: border-box;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         .menu-btn:hover {
@@ -243,13 +244,19 @@
             color: #0369a1;
         }
         .sun-box .time {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: bold;
             color: #0c4a6e;
+            margin-bottom: 2px;
+        }
+        .sun-box .countdown {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #0284c7;
             margin-bottom: 4px;
         }
         .sun-box .angle {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #475569;
         }
         .solar-term-info {
@@ -291,6 +298,58 @@
         }
         .moon-details-text strong {
             color: #0284c7;
+        }
+
+        /* 分區天氣嵌入卡片專屬容器 */
+        .regional-portal-container {
+            position: relative;
+            width: 100%;
+            height: 520px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+        .regional-portal-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* CSDI 風速數據專屬網格卡片樣式 */
+        .csdi-wind-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            max-height: 380px;
+            overflow-y: auto;
+            padding: 4px;
+            box-sizing: border-box;
+        }
+        .csdi-wind-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 10px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .csdi-station-name {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #0369a1;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .csdi-station-data {
+            font-size: 0.8rem;
+            color: #475569;
+            line-height: 1.4;
         }
 
         /* 底部資訊樣式 */
@@ -363,11 +422,13 @@
                 <div class="sun-box">
                     <h3>🌅 日出</h3>
                     <div class="time" id="sunrise-time">計算中...</div>
+                    <div class="countdown" id="sunrise-countdown">--</div>
                     <div class="angle" id="sunrise-angle">方位: --°</div>
                 </div>
                 <div class="sun-box" style="background: #fff7ed; border-color: #fed7aa;">
                     <h3 style="color: #c2410c;">🌇 日落</h3>
                     <div class="time" id="sunset-time" style="color: #7c2d12;">計算中...</div>
+                    <div class="countdown" id="sunset-countdown" style="color: #c2410c;">--</div>
                     <div class="angle" id="sunset-angle">方位: --°</div>
                 </div>
             </div>
@@ -395,17 +456,41 @@
                 <div class="sun-box" style="background: #f8fafc; border-color: #cbd5e1;">
                     <h3 style="color: #475569;">🌙 月出</h3>
                     <div class="time" id="moonrise-time" style="color: #334155;">計算中...</div>
+                    <div class="countdown" id="moonrise-countdown" style="color: #475569;">--</div>
                     <div class="angle" id="moonrise-angle">方位: --°</div>
                 </div>
                 <div class="sun-box" style="background: #f8fafc; border-color: #cbd5e1;">
                     <h3 style="color: #475569;">🌘 月落</h3>
                     <div class="time" id="moonset-time" style="color: #334155;">計算中...</div>
+                    <div class="countdown" id="moonset-countdown" style="color: #475569;">--</div>
                     <div class="angle" id="moonset-angle">方位: --°</div>
                 </div>
             </div>
         </div>
 
-        <!-- 4. 天氣預測地圖 (衛星雲圖 - 加大版獨佔一行) -->
+        <!-- 4. CSDI 實時風速與風向數據卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <h2>分區風速與風向</h2>
+                <a href="https://static.csdi.gov.hk/csdi-webpage/download/9ec8faca33f750339941f5f01689f654/geojson" class="btn-link" target="_blank">原始數據 ↗</a>
+            </div>
+            <div class="csdi-wind-grid" id="csdi-wind-container">
+                正在載入 CSDI 風速與風向數據...
+            </div>
+        </div>
+
+        <!-- 5. 香港分區天氣資訊平台（官方網頁直接嵌入） -->
+        <div class="card large-map-card">
+            <div class="card-header">
+                <h2>香港分區天氣資訊</h2>
+                <a href="https://www.hko.gov.hk/tc/wxinfo/awsgis/regional_portal.html" class="btn-link" target="_blank">全螢幕 ↗</a>
+            </div>
+            <div class="regional-portal-container">
+                <iframe src="https://www.hko.gov.hk/tc/wxinfo/awsgis/regional_portal.html"></iframe>
+            </div>
+        </div>
+
+        <!-- 6. 天氣預測地圖 (衛星雲圖 - 加大版獨佔一行) -->
         <div class="card large-map-card">
             <div class="card-header">
                 <h2>衛星雲圖</h2>
@@ -416,7 +501,7 @@
             </div>
         </div>
 
-        <!-- 5. Windy 雷達圖 (加大版獨佔一行) -->
+        <!-- 7. Windy 雷達圖 (加大版獨佔一行) -->
         <div class="card large-map-card">
             <div class="card-header">
                 <h2>雷達圖</h2>
@@ -437,10 +522,21 @@
             </div>
         </div>
 
-        <!-- 6. 天文台九天天氣預報 -->
+        <!-- 8. 本港地區天氣預報 -->
         <div class="card" style="grid-column: 1 / -1;">
             <div class="card-header">
-                <h2>5. 天文台九天天氣預報</h2>
+                <h2>本港地區天氣預報</h2>
+                <a href="https://www.hko.gov.hk/tc/wxinfo/currwx/fnd.htm" class="btn-link" target="_blank">原網頁 ↗</a>
+            </div>
+            <div class="text-content" id="api-local-forecast" style="overflow-y: auto; max-height: 300px; padding: 10px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; box-sizing: border-box; word-break: break-word; line-height: 1.6;">
+                正在載入本港地區天氣預報...
+            </div>
+        </div>
+
+        <!-- 9. 天文台九天天氣預報 -->
+        <div class="card" style="grid-column: 1 / -1;">
+            <div class="card-header">
+                <h2>天文台九天天氣預報</h2>
                 <a href="https://www.hko.gov.hk/tc/wxinfo/currwx/fnd.htm" class="btn-link" target="_blank">原網頁 ↗</a>
             </div>
             <div class="text-content" id="rss-9day-forecast" style="overflow-y: auto; max-height: 350px; padding: 10px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; box-sizing: border-box; word-break: break-word;">
@@ -456,6 +552,26 @@
     </footer>
 
     <script>
+        function formatCountdown(diffMs) {
+            const absMs = Math.abs(diffMs);
+            const totalMins = Math.floor(absMs / (1000 * 60));
+            const hours = Math.floor(totalMins / 60);
+            const mins = totalMins % 60;
+            
+            let timeStr = '';
+            if (hours > 0) {
+                timeStr = `${hours}小時${mins}分`;
+            } else {
+                timeStr = `${mins}分鐘`;
+            }
+
+            if (diffMs > 0) {
+                return `還有 ${timeStr}`;
+            } else {
+                return `已過 ${timeStr}`;
+            }
+        }
+
         function updateAstronomicalData() {
             const lat = 22.3193;
             const lon = 114.1694;
@@ -466,10 +582,17 @@
 
             // 使用 SunCalc 計算日出日落
             const sunTimes = SunCalc.getTimes(now, lat, lon);
+            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Hong_Kong' };
+
             if (sunTimes.sunrise && sunTimes.sunset) {
-                const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Hong_Kong' };
                 document.getElementById('sunrise-time').innerText = sunTimes.sunrise.toLocaleTimeString('zh-HK', timeOptions);
                 document.getElementById('sunset-time').innerText = sunTimes.sunset.toLocaleTimeString('zh-HK', timeOptions);
+
+                const sunriseDiff = sunTimes.sunrise - now;
+                document.getElementById('sunrise-countdown').innerText = formatCountdown(sunriseDiff);
+
+                const sunsetDiff = sunTimes.sunset - now;
+                document.getElementById('sunset-countdown').innerText = formatCountdown(sunsetDiff);
 
                 const sunrisePos = SunCalc.getPosition(sunTimes.sunrise, lat, lon);
                 let sunriseAzimuthDeg = (sunrisePos.azimuth * (180 / Math.PI) + 180) % 360;
@@ -535,30 +658,120 @@
             const lunarDayApprox = Math.floor(p * 29.53) + 1;
             document.getElementById('lunar-date-text').innerText = `農曆約初/廿 ${lunarDayApprox} 日`;
 
-            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Hong_Kong' };
-
             if (moonTimes.rise) {
                 document.getElementById('moonrise-time').innerText = moonTimes.rise.toLocaleTimeString('zh-HK', timeOptions);
+                const moonriseDiff = moonTimes.rise - now;
+                document.getElementById('moonrise-countdown').innerText = formatCountdown(moonriseDiff);
+                
                 const moonrisePos = SunCalc.getMoonPosition(moonTimes.rise, lat, lon);
                 let moonriseAzimuth = (moonrisePos.azimuth * (180 / Math.PI) + 180) % 360;
                 document.getElementById('moonrise-angle').innerText = `方位: ${Math.round(moonriseAzimuth)}°`;
             } else {
                 document.getElementById('moonrise-time').innerText = "今日無月出";
+                document.getElementById('moonrise-countdown').innerText = "--";
                 document.getElementById('moonrise-angle').innerText = "方位: --°";
             }
 
             if (moonTimes.set) {
                 document.getElementById('moonset-time').innerText = moonTimes.set.toLocaleTimeString('zh-HK', timeOptions);
+                const moonsetDiff = moonTimes.set - now;
+                document.getElementById('moonset-countdown').innerText = formatCountdown(moonsetDiff);
+
                 const moonsetPos = SunCalc.getMoonPosition(moonTimes.set, lat, lon);
                 let moonsetAzimuth = (moonsetPos.azimuth * (180 / Math.PI) + 180) % 360;
                 document.getElementById('moonset-angle').innerText = `方位: ${Math.round(moonsetAzimuth)}°`;
             } else {
                 document.getElementById('moonset-time').innerText = "今日無月落";
+                document.getElementById('moonset-countdown').innerText = "--";
                 document.getElementById('moonset-angle').innerText = "方位: --°";
             }
         }
 
         updateAstronomicalData();
+
+        // --- 從 CSDI GeoJSON 擷取十分鐘平均風速、平均風向與最高陣風 ---
+        async function loadCsdiWindData() {
+            const container = document.getElementById('csdi-wind-container');
+            const targetUrl = 'https://static.csdi.gov.hk/csdi-webpage/download/9ec8faca33f750339941f5f01689f654/geojson';
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+            
+            try {
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                if (data.contents) {
+                    const geojson = JSON.parse(data.contents);
+                    let html = '';
+
+                    if (geojson.features && geojson.features.length > 0) {
+                        geojson.features.forEach(feature => {
+                            const p = feature.properties;
+                            const stationName = p.EN_NAME || p.SC_NAME || p.STATION_NAME || p.name || "未知氣象站";
+                            const windSpeed = p.WIND_SPEED !== undefined ? p.WIND_SPEED : (p.windSpeed !== undefined ? p.windSpeed : '--');
+                            const windDir = p.WIND_DIR || p.windDir || p.DIRECTION || '--';
+                            const maxGust = p.MAX_GUST || p.gust || p.MAX_GUST_SPEED || '--';
+
+                            html += `
+                                <div class="csdi-wind-item">
+                                    <div class="csdi-station-name" title="${stationName}">${stationName}</div>
+                                    <div class="csdi-station-data">平均風速: <strong>${windSpeed} km/h</strong></div>
+                                    <div class="csdi-station-data">風向: <strong>${windDir}</strong></div>
+                                    <div class="csdi-station-data">陣風: <strong>${maxGust} km/h</strong></div>
+                                </div>
+                            `;
+                        });
+                        container.innerHTML = html;
+                    } else {
+                        container.innerText = '找不到任何氣象站點資料。';
+                    }
+                } else {
+                    container.innerText = '暫時無法取得 CSDI 數據。';
+                }
+            } catch (error) {
+                console.error('載入 CSDI 風速 GeoJSON 失敗:', error);
+                container.innerHTML = '載入失敗，請稍後再試。';
+            }
+        }
+
+        loadCsdiWindData();
+
+        // --- 從天文台 JSON API (flw) 載入本港地區天氣預報 ---
+        async function loadLocalWeatherJSON() {
+            const container = document.getElementById('api-local-forecast');
+            const targetUrl = 'https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=flw&lang=tc';
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+            
+            try {
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                if (data.contents) {
+                    const jsonData = JSON.parse(data.contents);
+                    let content = '';
+                    
+                    if (jsonData.generalSituation) {
+                        content += `<p><strong>一般情況：</strong><br>${jsonData.generalSituation}</p>`;
+                    }
+                    if (jsonData.forecastDesc) {
+                        content += `<p><strong>天氣預報：</strong><br>${jsonData.forecastDesc}</p>`;
+                    }
+                    if (jsonData.outlook) {
+                        content += `<p><strong>展望：</strong><br>${jsonData.outlook}</p>`;
+                    }
+
+                    if (content) {
+                        container.innerHTML = content;
+                    } else {
+                        container.innerText = '暫時無法取得預報內容。';
+                    }
+                } else {
+                    container.innerText = '暫時無法取得預報內容。';
+                }
+            } catch (error) {
+                console.error('載入天氣預報 JSON 失敗:', error);
+                container.innerHTML = '載入失敗，請點擊上方按鈕前往原網頁查看。';
+            }
+        }
+
+        loadLocalWeatherJSON();
 
         // --- 天文台照片陣列與隨機自動切換 ---
         const weatherPhotos = [
@@ -619,6 +832,9 @@
             const now = new Date();
             const timeOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Hong_Kong' };
             document.getElementById('update-time').innerText = `最後更新時間：${now.toLocaleString('zh-HK', timeOptions).replace(/\//g, '-')}`;
+            
+            // 每秒同步更新天文台日出日落及月出月落的即時倒數/已過時間
+            updateAstronomicalData();
         }
         updateTimestamp();
 
@@ -643,13 +859,17 @@
             }
         }
 
+        // 載入九天天氣預報 RSS
         loadRSS('https://rss.weather.gov.hk/rss/SeveralDaysWeatherForecast_uc.xml', 'rss-9day-forecast');
 
-        // 每兩秒自動隨機轉下一張照片及更新底部時間
+        // 每兩秒自動隨機轉下一張照片，每秒更新時間與倒數
         setInterval(() => {
             setRandomPhoto();
-            updateTimestamp();
         }, 2000);
+
+        setInterval(() => {
+            updateTimestamp();
+        }, 1000);
     </script>
 </body>
 </html>
