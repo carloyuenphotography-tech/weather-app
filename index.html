@@ -106,7 +106,7 @@
         }
         .btn-link:hover { background-color: #bae6fd; }
         
-        /* 天氣照片容器 (恢複原本預設的彈性與高度) */
+        /* 天氣照片容器 */
         .media-container {
             position: relative;
             width: 100%;
@@ -130,7 +130,7 @@
             box-sizing: border-box;
         }
 
-        /* 大地圖/雲圖容器 (高度放大到 500px，讓畫面更震撼清晰) */
+        /* 大地圖/雲圖容器 (高度放大到 500px) */
         .large-map-container {
             position: relative;
             width: 100%;
@@ -294,13 +294,12 @@
 <body>
 
     <header>
-        <h4>【觀天之道．賞天之雲】</h4>
-        <h3>即時天氣資訊面板</h3>
+        <h1>觀天之道．賞天之雲---即時天氣資訊</h1>
         <button class="refresh-btn" onclick="location.reload();">🔄 重新整理頁面</button>
     </header>
 
     <div class="dashboard">
-        <!-- 1. 隨機天文台天氣照片 -->
+        <!-- 1. 隨機天文台天氣照片 (每 2 秒自動隨機轉下一張) -->
         <div class="card">
             <div class="card-header">
                 <h2><span id="photo-title">天文台天氣照片</span></h2>
@@ -415,9 +414,10 @@
         </div>
     </div>
 
+    <!-- 底部資訊、更新時間、版本與 IG 連結 -->
     <footer>
-        <div id="update-time">最後更新時間：載入中...</div>
         <div>版本號碼：v1.0.0 | 作者：<a href="https://www.instagram.com/_852.carlo" target="_blank">@_852.carlo</a></div>
+        <div id="update-time" style="margin-top: 6px;">最後更新時間：載入中...</div>
     </footer>
 
     <script>
@@ -522,7 +522,7 @@
 
         updateAstronomicalData();
 
-        // --- 天文台照片陣列與手動切換控制 ---
+        // --- 天文台照片陣列與隨機自動切換 ---
         const weatherPhotos = [
             { name: "太平山 (東面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPA_photo.htm" },
             { name: "太平山 (東北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPB_photo.htm" },
@@ -570,7 +570,12 @@
             displayPhoto(currentPhotoIndex);
         }
 
-        displayPhoto(currentPhotoIndex);
+        function setRandomPhoto() {
+            currentPhotoIndex = Math.floor(Math.random() * weatherPhotos.length);
+            displayPhoto(currentPhotoIndex);
+        }
+
+        setRandomPhoto();
 
         function updateTimestamp() {
             const now = new Date();
@@ -601,6 +606,12 @@
         }
 
         loadRSS('https://rss.weather.gov.hk/rss/SeveralDaysWeatherForecast_uc.xml', 'rss-9day-forecast');
+
+        // 每兩秒自動隨機轉下一張照片及更新底部時間
+        setInterval(() => {
+            setRandomPhoto();
+            updateTimestamp();
+        }, 2000);
     </script>
 </body>
 </html>
