@@ -37,9 +37,35 @@
             padding: 15px;
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+            position: relative;
         }
         header h1 { margin: 0 0 10px 0; color: var(--primary-color); font-size: 1.4rem; }
         
+        /* 導覽列 / Menu 按鈕樣式 */
+        .menu-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .menu-btn {
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #0284c7;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .menu-btn:hover {
+            background-color: #e0f2fe;
+            border-color: #0284c7;
+        }
+
         /* 重新整理按鈕樣式 */
         .refresh-btn {
             background-color: #0284c7;
@@ -295,7 +321,16 @@
 
     <header>
         <h1>觀天之道．賞天之雲---即時天氣資訊</h1>
-        <button class="refresh-btn" onclick="location.reload();">🔄 重新整理頁面</button>
+        
+        <!-- 快速功能導覽 Menu 鍵 -->
+        <div class="menu-container">
+            <a href="photo.html" class="menu-btn" target="_blank">📷 天氣相片專頁</a>
+            <a href="satellite.html" class="menu-btn" target="_blank">🛰️ 衛星與雷達專頁</a>
+        </div>
+
+        <div style="margin-top: 15px;">
+            <button class="refresh-btn" onclick="location.reload();">🔄 重新整理頁面</button>
+        </div>
     </header>
 
     <div class="dashboard">
