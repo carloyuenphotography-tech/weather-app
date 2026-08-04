@@ -121,7 +121,7 @@
                 <a href="photo.html" class="btn-link" target="_blank">查看照片 ↗</a>
             </div>
             <div class="media-container">
-                <a id="photo-link" href="https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPA_photo.htm" target="_blank">
+                <a id="photo-link" href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPA_photo.htm" target="_blank">
                     <img id="hko-photo" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg" alt="隨機天氣照片">
                 </a>
             </div>
@@ -174,25 +174,25 @@
 
     <script>
         const weatherPhotos = [
-            { name: "太平山 (東面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPA_photo.htm" },
-            { name: "太平山 (東北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/VPB_photo.htm" },
-            { name: "環球貿易廣場 (東南)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic1/latest_IC1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/IC1_photo.htm" },
+            { name: "太平山 (東面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPA_photo.htm" },
+            { name: "太平山 (東北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPB_photo.htm" },
+            { name: "環球貿易廣場 (東南)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic1/latest_IC1.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC1_photo.htm" },
             { name: "環球貿易廣場 (西南)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic2/latest_IC2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC2_photo.htm" },
-            { name: "清水灣 (向東)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwb/latest_CWB.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CWB_photo.htm" },
-            { name: "中環 (維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CP1_photo.htm" },
-            { name: "流浮山 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lfs/latest_LFS.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/LFS_photo.htm" },
-            { name: "大帽山 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm2/latest_TM2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TM2_photo.htm" },
-            { name: "大帽山 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm3/latest_TM3.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TM3_photo.htm" },
-            { name: "坪洲 (遠眺維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/PE2_photo.htm" },
-            { name: "滘西洲 (西北偏西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ks2/latest_KS2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/KS2_photo.htm" },
-            { name: "橫瀾島 (西北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wag1/latest_WGL.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/WGL_photo.htm" },
-            { name: "橫瀾島 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wag1/latest_WL2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/WL2_photo.htm" },
-            { name: "南丫島 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lam/latest_LAM.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/LAM_photo.htm" },
-            { name: "長洲 (向北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cs2/latest_CS2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CS2_photo.htm" },
-            { name: "德瑞國際學校 (海洋公園)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/gsi/latest_GSI.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/GSI_photo.htm" },
-            { name: "尖沙咀 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/hk2/latest_HK2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/HK2_photo.htm" },
-            { name: "大欖涌 (大嶼山北部)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tlc/latest_TLC.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/TLC_photo.htm" },
-            { name: "西貢水警東 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/skg/latest_SKG.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/SKG_photo.htm" }
+            { name: "清水灣 (向東)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwb/latest_CWB.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CWB_photo.htm" },
+            { name: "中環 (維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CP1_photo.htm" },
+            { name: "流浮山 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lfs/latest_LFS.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/LFS_photo.htm" },
+            { name: "大帽山 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm2/latest_TM2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TM2_photo.htm" },
+            { name: "大帽山 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm3/latest_TM3.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TM3_photo.htm" },
+            { name: "坪洲 (遠眺維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/PE2_photo.htm" },
+            { name: "滘西洲 (西北偏西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ks2/latest_KS2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/KS2_photo.htm" },
+            { name: "橫瀾島 (西北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wag1/latest_WGL.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WGL_photo.htm" },
+            { name: "橫瀾島 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wag1/latest_WL2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WL2_photo.htm" },
+            { name: "南丫島 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lam/latest_LAM.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/LAM_photo.htm" },
+            { name: "長洲 (向北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cs2/latest_CS2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CS2_photo.htm" },
+            { name: "德瑞國際學校 (海洋公園)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/gsi/latest_GSI.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/GSI_photo.htm" },
+            { name: "尖沙咀 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/hk2/latest_HK2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/HK2_photo.htm" },
+            { name: "大欖涌 (大嶼山北部)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tlc/latest_TLC.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TLC_photo.htm" },
+            { name: "西貢水警東 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/skg/latest_SKG.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/SKG_photo.htm" }
         ];
 
         function updateTimestamp() {
