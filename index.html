@@ -9,6 +9,9 @@
     <link rel="icon" type="image/png" href="myweatherapp.png">
     <link rel="apple-touch-icon" href="myweatherapp.png">
 
+    <!-- 引入專業的 SunCalc 庫 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
+
     <style>
         :root {
             --primary-color: #0284c7;
@@ -92,19 +95,6 @@
             box-sizing: border-box;
         }
         
-        .text-content { 
-            font-size: 0.9rem; 
-            line-height: 1.5; 
-            overflow-y: auto; 
-            max-height: 300px; 
-            padding: 10px;
-            background: #f8fafc;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            box-sizing: border-box;
-            word-break: break-word;
-        }
-
         .windy-forecast-container {
             width: 100%;
             min-height: 187px;
@@ -120,7 +110,17 @@
             display: block;
         }
 
-        /* 日出日落卡片樣式 */
+        /* 日出日落 / 月相共用卡片樣式 */
+        .sun-date {
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 10px;
+            background: #f1f5f9;
+            padding: 6px;
+            border-radius: 6px;
+        }
         .sun-info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -131,26 +131,26 @@
             background: #f0f9ff;
             border: 1px solid #bae6fd;
             border-radius: 8px;
-            padding: 12px;
+            padding: 10px;
             text-align: center;
         }
         .sun-box h3 {
-            margin: 0 0 8px 0;
-            font-size: 1rem;
+            margin: 0 0 6px 0;
+            font-size: 0.95rem;
             color: #0369a1;
         }
         .sun-box .time {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: #0c4a6e;
             margin-bottom: 4px;
         }
         .sun-box .angle {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #475569;
         }
         .solar-term-info {
-            margin-top: 12px;
+            margin-top: 10px;
             padding: 8px 10px;
             background: #f8fafc;
             border: 1px solid #e2e8f0;
@@ -158,6 +158,36 @@
             font-size: 0.85rem;
             color: #334155;
             text-align: center;
+        }
+
+        /* 月相專屬樣式 (取代 Emoji) */
+        .moon-header-flex {
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            gap: 15px;
+        }
+        .moon-svg-box {
+            width: 42px;
+            height: 42px;
+            flex-shrink: 0;
+        }
+        .moon-svg-box svg {
+            width: 100%;
+            height: 100%;
+        }
+        .moon-details-text {
+            flex-grow: 1;
+            font-size: 0.9rem;
+            color: #334155;
+            line-height: 1.4;
+        }
+        .moon-details-text strong {
+            color: #0284c7;
         }
     </style>
 </head>
@@ -204,12 +234,15 @@
             </div>
         </div>
 
-        <!-- 4. 日出日落時間與節氣倒數提示 -->
+        <!-- 4. 今日日出日落方位 -->
         <div class="card">
             <div class="card-header">
-                <h2>今日日出日落時間與方位</h2>
-                <a href="https://www.hko.gov.hk/tc/gts/astron/sunpos.htm" class="btn-link" target="_blank">天文台數據 ↗</a>
+                <h2>今日日出日落方位</h2>
+                <a href="https://suncalc.org/#/22.3193,114.1694,12" class="btn-link" target="_blank">地圖檢視 ↗</a>
             </div>
+            
+            <div class="sun-date" id="current-date-display">載入日期中...</div>
+            
             <div class="sun-info-grid">
                 <div class="sun-box">
                     <h3>🌅 日出 (Sunrise)</h3>
@@ -227,14 +260,34 @@
             </div>
         </div>
 
-        <!-- 5. 天文台本港天氣預測 -->
+        <!-- 5. 今日月相與月出月落方位 (使用向量 SVG 月相圖標與百分比) -->
         <div class="card">
             <div class="card-header">
-                <h2>4. 本港天氣預測</h2>
-                <a href="https://www.hko.gov.hk/tc/wxinfo/currwx/flw.htm" class="btn-link" target="_blank">原網頁 ↗</a>
+                <h2>今日月相與月出月落方位</h2>
+                <a href="https://www.hko.gov.hk/tc/gts/astron/moonpos.htm" class="btn-link" target="_blank">天文台數據 ↗</a>
             </div>
-            <div class="text-content" id="rss-local-forecast">
-                正在從天文台載入最新天氣預測...
+
+            <div class="moon-header-flex">
+                <div class="moon-svg-box" id="moon-svg-container">
+                    <!-- 動態載入 SVG 月相圖標 -->
+                </div>
+                <div class="moon-details-text">
+                    <div>農曆日期：<strong id="lunar-date-text">計算中...</strong></div>
+                    <div>月相名稱：<span id="moon-phase-name">計算中...</span> (亮光: <strong id="moon-illumination-pct">--%</strong>)</div>
+                </div>
+            </div>
+
+            <div class="sun-info-grid">
+                <div class="sun-box" style="background: #f8fafc; border-color: #cbd5e1;">
+                    <h3 style="color: #475569;">🌙 月出 (Moonrise)</h3>
+                    <div class="time" id="moonrise-time" style="color: #334155;">計算中...</div>
+                    <div class="angle" id="moonrise-angle">方位: --°</div>
+                </div>
+                <div class="sun-box" style="background: #f8fafc; border-color: #cbd5e1;">
+                    <h3 style="color: #475569;">🌘 月落 (Moonset)</h3>
+                    <div class="time" id="moonset-time" style="color: #334155;">計算中...</div>
+                    <div class="angle" id="moonset-angle">方位: --°</div>
+                </div>
             </div>
         </div>
 
@@ -261,46 +314,35 @@
     </div>
 
     <script>
-        // --- 計算日出日落與節氣倒數 ---
-        function calculateSunAndTerms() {
+        // --- 運用 SunCalc 計算與呈現 ---
+        function updateAstronomicalData() {
+            const lat = 22.3193; // 香港緯度
+            const lon = 114.1694; // 香港經度
             const now = new Date();
+
+            // 1. 顯示今日日期
+            const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('current-date-display').innerText = now.toLocaleDateString('zh-HK', dateOptions);
+
+            // 2. 日出日落計算
+            const sunTimes = SunCalc.getTimes(now, lat, lon);
+            if (sunTimes.sunrise && sunTimes.sunset) {
+                const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Hong_Kong' };
+                document.getElementById('sunrise-time').innerText = sunTimes.sunrise.toLocaleTimeString('zh-HK', timeOptions);
+                document.getElementById('sunset-time').innerText = sunTimes.sunset.toLocaleTimeString('zh-HK', timeOptions);
+
+                const sunrisePos = SunCalc.getPosition(sunTimes.sunrise, lat, lon);
+                let sunriseAzimuthDeg = (sunrisePos.azimuth * (180 / Math.PI) + 180) % 360;
+
+                const sunsetPos = SunCalc.getPosition(sunTimes.sunset, lat, lon);
+                let sunsetAzimuthDeg = (sunsetPos.azimuth * (180 / Math.PI) + 180) % 360;
+
+                document.getElementById('sunrise-angle').innerText = `方位: ${Math.round(sunriseAzimuthDeg)}°`;
+                document.getElementById('sunset-angle').innerText = `方位: ${Math.round(sunsetAzimuthDeg)}°`;
+            }
+
+            // 3. 節氣倒數
             const year = now.getFullYear();
-            const lat = 22.3193;
-            const lon = 114.1694;
-            const tz = 8;
-
-            const startOfYear = new Date(year, 0, 1);
-            const dayOfYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
-
-            // 1. 日出日落計算
-            const declination = 0.409 * Math.sin(2 * Math.PI * (dayOfYear + 284) / 365);
-            const latRad = lat * (Math.PI / 180);
-            const cosHourAngle = -Math.tan(latRad) * Math.tan(declination);
-            
-            let hourAngle = 0;
-            if (cosHourAngle >= -1 && cosHourAngle <= 1) {
-                hourAngle = Math.acos(cosHourAngle) * (180 / Math.PI);
-            }
-
-            const solarNoon = 12 + tz - (lon / 15);
-            const sunriseHourDecimal = solarNoon - (hourAngle / 15);
-            const sunsetHourDecimal = solarNoon + (hourAngle / 15);
-
-            function formatTime(decimal) {
-                const h = Math.floor(decimal);
-                const m = Math.round((decimal - h) * 60);
-                return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-            }
-
-            const sunriseAzimuth = Math.round(90 - (declination * (180 / Math.PI)) * 1.5);
-            const sunsetAzimuth = Math.round(270 + (declination * (180 / Math.PI)) * 1.5);
-
-            document.getElementById('sunrise-time').innerText = formatTime(sunriseHourDecimal);
-            document.getElementById('sunrise-angle').innerText = `方位: 約 ${sunriseAzimuth}°`;
-            document.getElementById('sunset-time').innerText = formatTime(sunsetHourDecimal);
-            document.getElementById('sunset-angle').innerText = `方位: 約 ${sunsetAzimuth}°`;
-
-            // 2. 四個重要節氣日期計算 (春分 3/21, 夏至 6/21, 秋分 9/23, 冬至 12/22)
             const terms = [
                 { name: "春分", date: new Date(year, 2, 21) },
                 { name: "夏至", date: new Date(year, 5, 21) },
@@ -308,7 +350,6 @@
                 { name: "冬至", date: new Date(year, 11, 22) }
             ];
 
-            // 找出下一個即將到來的節氣
             let nextTerm = null;
             for (let term of terms) {
                 if (now < term.date) {
@@ -316,18 +357,70 @@
                     break;
                 }
             }
-            // 如果今年的四個節氣都過了，則是明年的春分
             if (!nextTerm) {
                 nextTerm = { name: "春分", date: new Date(year + 1, 2, 21) };
             }
 
-            const diffTime = nextTerm.date - now;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
+            const diffDays = Math.ceil((nextTerm.date - now) / (1000 * 60 * 60 * 24));
             document.getElementById('solar-term-text').innerHTML = `🌱 距離下一個重要節氣 <strong>${nextTerm.name}</strong> 還有 <strong>${diffDays}</strong> 天`;
+
+            // 4. 月相、百分比與月出月落計算
+            const moonIllumination = SunCalc.getMoonIllumination(now);
+            const moonTimes = SunCalc.getMoonTimes(now, lat, lon);
+
+            const p = moonIllumination.phase; // 0 到 1
+            const illumPct = Math.round(moonIllumination.fraction * 100);
+            document.getElementById('moon-illumination-pct').innerText = `${illumPct}%`;
+
+            let phaseName = "新月";
+            if (p < 0.03 || p > 0.97) phaseName = "新月 (朔)";
+            else if (p < 0.22) phaseName = "娥眉月";
+            else if (p < 0.28) phaseName = "上弦月";
+            else if (p < 0.47) phaseName = "盈凸月";
+            else if (p < 0.53) phaseName = "滿月 (望)";
+            else if (p < 0.72) phaseName = "虧凸月";
+            else if (p < 0.78) phaseName = "下弦月";
+            else phaseName = "殘月";
+
+            document.getElementById('moon-phase-name').innerText = phaseName;
+
+            // 產生精美向量月相 SVG 圖標代替 Emoji
+            const svgMoon = `
+                <svg viewBox="0 0 36 36" width="100%" height="100%">
+                    <circle cx="18" cy="18" r="16" fill="#1e293b" />
+                    <path d="M18 2 A16 16 0 0 1 18 34 A${Math.abs(16 * (1 - 2 * p))} 16 0 0 ${p < 0.5 ? 1 : 0} 18 2" fill="#f8fafc" />
+                </svg>
+            `;
+            document.getElementById('moon-svg-container').innerHTML = svgMoon;
+
+            // 概算農曆日
+            const lunarDayApprox = Math.floor(p * 29.53) + 1;
+            document.getElementById('lunar-date-text').innerText = `農曆約初/廿 ${lunarDayApprox} 日`;
+
+            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Hong_Kong' };
+
+            if (moonTimes.rise) {
+                document.getElementById('moonrise-time').innerText = moonTimes.rise.toLocaleTimeString('zh-HK', timeOptions);
+                const moonrisePos = SunCalc.getMoonPosition(moonTimes.rise, lat, lon);
+                let moonriseAzimuth = (moonrisePos.azimuth * (180 / Math.PI) + 180) % 360;
+                document.getElementById('moonrise-angle').innerText = `方位: ${Math.round(moonriseAzimuth)}°`;
+            } else {
+                document.getElementById('moonrise-time').innerText = "今日無月出";
+                document.getElementById('moonrise-angle').innerText = "方位: --°";
+            }
+
+            if (moonTimes.set) {
+                document.getElementById('moonset-time').innerText = moonTimes.set.toLocaleTimeString('zh-HK', timeOptions);
+                const moonsetPos = SunCalc.getMoonPosition(moonTimes.set, lat, lon);
+                let moonsetAzimuth = (moonsetPos.azimuth * (180 / Math.PI) + 180) % 360;
+                document.getElementById('moonset-angle').innerText = `方位: ${Math.round(moonsetAzimuth)}°`;
+            } else {
+                document.getElementById('moonset-time').innerText = "今日無月落";
+                document.getElementById('moonset-angle').innerText = "方位: --°";
+            }
         }
 
-        calculateSunAndTerms();
+        updateAstronomicalData();
 
         // --- 天氣照片陣列與隨機切換 ---
         const weatherPhotos = [
@@ -335,13 +428,13 @@
             { name: "太平山 (東北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPB_photo.htm" },
             { name: "環球貿易廣場 (東南)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic1/latest_IC1.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC1_photo.htm" },
             { name: "環球貿易廣場 (西南)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic2/latest_IC2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC2_photo.htm" },
-            { name: "清水灣 (向東)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwb/latest_CWB.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CWB_photo.htm" },
-            { name: "中環 (維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CP1_photo.htm" },
-            { name: "流浮山 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lfs/latest_LFS.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/LFS_photo.htm" },
+            { name: "清水灣 (向東)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwb/latest_CWB.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CWB_photo.htm" },
+            { name: "中環 (維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CP1_photo.htm" },
+            { name: "流浮山 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lfs/latest_LFS.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/LFS_photo.htm" },
             { name: "大帽山 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm2/latest_TM2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TM2_photo.htm" },
             { name: "大帽山 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm3/latest_TM3.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TM3_photo.htm" },
-            { name: "坪洲 (遠眺維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/PE2_photo.htm" },
-            { name: "滘西洲 (西北偏西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ks2/latest_KS2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/KS2_photo.htm" },
+            { name: "坪洲 (遠眺維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/PE2_photo.htm" },
+            { name: "滘西洲 (西北偏西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ks2/latest_KS2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/KS2_photo.htm" },
             { name: "橫瀾島 (西北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wgl/latest_WGL.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WGL_photo.htm" },
             { name: "橫瀾島 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wl2/latest_WL2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WL2_photo.htm" },
             { name: "南丫島 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lam/latest_LAM.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/LAM_photo.htm" },
@@ -369,6 +462,7 @@
         }
         setRandomPhoto();
 
+        // 載入九天天氣預報 RSS
         async function loadRSS(url, elementId) {
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
             try {
@@ -390,7 +484,6 @@
             }
         }
 
-        loadRSS('https://rss.weather.gov.hk/rss/LocalWeatherForecast_uc.xml', 'rss-local-forecast');
         loadRSS('https://rss.weather.gov.hk/rss/SeveralDaysWeatherForecast_uc.xml', 'rss-9day-forecast');
 
         // 天氣照片每 2 秒 (2000 毫秒) 隨機切換一次
