@@ -59,7 +59,7 @@
 
         .dashboard {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 20px;
             max-width: 1400px;
             margin: 0 auto;
@@ -79,6 +79,12 @@
             width: 100%;
             overflow: hidden;
         }
+
+        /* 衛星雲圖與雷達圖專屬的大卡片：佔滿整行，高度放大 */
+        .large-map-card {
+            grid-column: 1 / -1;
+        }
+
         .card-header {
             display: flex;
             justify-content: space-between;
@@ -100,6 +106,7 @@
         }
         .btn-link:hover { background-color: #bae6fd; }
         
+        /* 天氣照片容器 (恢複原本預設的彈性與高度) */
         .media-container {
             position: relative;
             width: 100%;
@@ -121,6 +128,48 @@
         .media-container img, .media-container iframe {
             width: 100%; height: 100%; border: none; object-fit: contain;
             box-sizing: border-box;
+        }
+
+        /* 大地圖/雲圖容器 (高度放大到 500px，讓畫面更震撼清晰) */
+        .large-map-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+        .large-map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* 照片控制工具列 (左右切換與單張重新整理) */
+        .photo-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            gap: 8px;
+        }
+        .photo-nav-btn {
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+            flex-grow: 1;
+        }
+        .photo-nav-btn:hover {
+            background-color: #e2e8f0;
         }
         
         .windy-forecast-container {
@@ -251,42 +300,23 @@
     </header>
 
     <div class="dashboard">
-        <!-- 1. 隨機天文台天氣照片 (每 2 秒自動更新) -->
+        <!-- 1. 隨機天文台天氣照片 -->
         <div class="card">
             <div class="card-header">
-                <h2><span id="photo-title">1. 天文台天氣照片</span></h2>
-                <a href="photo.html" class="btn-link" target="_blank">查看照片 ↗</a>
+                <h2><span id="photo-title">天文台天氣照片</span></h2>
+                <a id="photo-link" href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPA_photo.htm" class="btn-link" target="_blank">查看原網 ↗</a>
             </div>
             <div class="media-container">
-                <a id="photo-link" href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPA_photo.htm" target="_blank">
-                    <img id="hko-photo" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg" alt="隨機天氣照片">
-                </a>
+                <img id="hko-photo" src="" alt="即時天氣照片">
+            </div>
+            <div class="photo-controls">
+                <button class="photo-nav-btn" onclick="prevPhoto()">◀ 上一張</button>
+                <button class="photo-nav-btn" onclick="refreshCurrentPhoto()" style="background-color: #e0f2fe; color: #0284c7;">🔄 刷新照片</button>
+                <button class="photo-nav-btn" onclick="nextPhoto()">下一張 ▶</button>
             </div>
         </div>
 
-        <!-- 2. 天氣預測地圖 (衛星) -->
-        <div class="card">
-            <div class="card-header">
-                <h2>衛星雲圖</h2>
-                <a href="satellite.html" class="btn-link" target="_blank">全螢幕 ↗</a>
-            </div>
-            <div class="media-container" style="background: #f1f5f9;">
-                <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=6&level=surface&overlay=satellite&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"></iframe>
-            </div>
-        </div>
-
-        <!-- 3. Windy 雷達圖 -->
-        <div class="card">
-            <div class="card-header">
-                <h2>雷達圖</h2>
-                <a href="satellite.html" class="btn-link" target="_blank">全螢幕 ↗</a>
-            </div>
-            <div class="media-container" style="background: #f1f5f9;">
-                <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=8&level=surface&overlay=radar&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"></iframe>
-            </div>
-        </div>
-
-        <!-- 4. 今日日出日落方位 -->
+        <!-- 2. 今日日出日落方位 -->
         <div class="card">
             <div class="card-header">
                 <h2>今日日出日落方位</h2>
@@ -312,7 +342,7 @@
             </div>
         </div>
 
-        <!-- 5. 今日月相與月出月落方位 -->
+        <!-- 3. 今日月相與月出月落方位 -->
         <div class="card">
             <div class="card-header">
                 <h2>今日月相與月出月落方位</h2>
@@ -338,6 +368,28 @@
                     <div class="time" id="moonset-time" style="color: #334155;">計算中...</div>
                     <div class="angle" id="moonset-angle">方位: --°</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- 4. 天氣預測地圖 (衛星雲圖 - 加大版獨佔一行) -->
+        <div class="card large-map-card">
+            <div class="card-header">
+                <h2>衛星雲圖</h2>
+                <a href="satellite.html" class="btn-link" target="_blank">全螢幕 ↗</a>
+            </div>
+            <div class="large-map-container">
+                <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=6&level=surface&overlay=satellite&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"></iframe>
+            </div>
+        </div>
+
+        <!-- 5. Windy 雷達圖 (加大版獨佔一行) -->
+        <div class="card large-map-card">
+            <div class="card-header">
+                <h2>雷達圖</h2>
+                <a href="satellite.html" class="btn-link" target="_blank">全螢幕 ↗</a>
+            </div>
+            <div class="large-map-container">
+                <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=8&level=surface&overlay=radar&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"></iframe>
             </div>
         </div>
 
@@ -470,6 +522,7 @@
 
         updateAstronomicalData();
 
+        // --- 天文台照片陣列與手動切換控制 ---
         const weatherPhotos = [
             { name: "太平山 (東面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPA_photo.htm" },
             { name: "太平山 (東北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPB_photo.htm" },
@@ -483,14 +536,41 @@
             { name: "坪洲 (遠眺維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/PE2_photo.htm" },
             { name: "滘西洲 (西北偏西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ks2/latest_KS2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/KS2_photo.htm" },
             { name: "橫瀾島 (西北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wgl/latest_WGL.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WGL_photo.htm" },
-            { name: "橫瀾島 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wl2/latest_WL2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WL2_photo.htm" },
+            { name: "橫瀾島 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wl2/latest_WL2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/wl2_photo.htm" },
             { name: "南丫島 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lam/latest_LAM.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/LAM_photo.htm" },
             { name: "長洲 (向北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cs2/latest_CS2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CS2_photo.htm" },
-            { name: "德瑞國際學校 (海洋公園)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/gsi/latest_GSI.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/GSI_photo.htm" },
-            { name: "尖沙咀 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/hk2/latest_HK2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/HK2_photo.htm" },
-            { name: "大欖涌 (大嶼山北部)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tlc/latest_TLC.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TLC_photo.htm" },
-            { name: "西貢水警東 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/skg/latest_SKG.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/SKG_photo.htm" }
+            { name: "德瑞國際學校 (海洋公園)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/gsi/latest_GSI.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/GSI_photo.htm" },
+            { name: "尖沙咀 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/hk2/latest_HK2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/hk2_photo.htm" },
+            { name: "大欖涌 (大嶼山北部)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tlc/latest_TLC.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/tlc_photo.htm" },
+            { name: "西貢水警東 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/skg/latest_SKG.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/skg_photo.htm" }
         ];
+
+        let currentPhotoIndex = 0;
+
+        function displayPhoto(index) {
+            const selected = weatherPhotos[index];
+            const timestamp = new Date().getTime();
+
+            document.getElementById('photo-title').innerText = selected.name;
+            document.getElementById('photo-link').href = selected.link;
+            document.getElementById('hko-photo').src = `${selected.img}?t=${timestamp}`;
+        }
+
+        function nextPhoto() {
+            currentPhotoIndex = (currentPhotoIndex + 1) % weatherPhotos.length;
+            displayPhoto(currentPhotoIndex);
+        }
+
+        function prevPhoto() {
+            currentPhotoIndex = (currentPhotoIndex - 1 + weatherPhotos.length) % weatherPhotos.length;
+            displayPhoto(currentPhotoIndex);
+        }
+
+        function refreshCurrentPhoto() {
+            displayPhoto(currentPhotoIndex);
+        }
+
+        displayPhoto(currentPhotoIndex);
 
         function updateTimestamp() {
             const now = new Date();
@@ -498,17 +578,6 @@
             document.getElementById('update-time').innerText = `最後更新時間：${now.toLocaleString('zh-HK', timeOptions).replace(/\//g, '-')}`;
         }
         updateTimestamp();
-
-        function setRandomPhoto() {
-            const randomIndex = Math.floor(Math.random() * weatherPhotos.length);
-            const selected = weatherPhotos[randomIndex];
-            const timestamp = new Date().getTime();
-
-            document.getElementById('photo-title').innerText = selected.name;
-            document.getElementById('photo-link').href = selected.link;
-            document.getElementById('hko-photo').src = `${selected.img}?t=${timestamp}`;
-        }
-        setRandomPhoto();
 
         async function loadRSS(url, elementId) {
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
@@ -532,11 +601,6 @@
         }
 
         loadRSS('https://rss.weather.gov.hk/rss/SeveralDaysWeatherForecast_uc.xml', 'rss-9day-forecast');
-
-        setInterval(() => {
-            setRandomPhoto();
-            updateTimestamp();
-        }, 2000);
     </script>
 </body>
 </html>
