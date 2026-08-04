@@ -104,6 +104,22 @@
             box-sizing: border-box;
             word-break: break-word;
         }
+
+        /* 專門給 Windy 預測卡片內的 iframe 使用，確保手機不超出螢幕 */
+        .windy-forecast-container {
+            width: 100%;
+            min-height: 187px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        .windy-forecast-container iframe {
+            width: 100%;
+            height: 187px;
+            border: none;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -127,10 +143,10 @@
             </div>
         </div>
 
-        <!-- 第二項：天氣預測地圖 (衛星/雷達/風速) -->
+        <!-- 第二項：天氣預測地圖 (衛星) -->
         <div class="card">
             <div class="card-header">
-                <h2>2. 天氣預測地圖</h2>
+                <h2>衛星雲圖</h2>
                 <a href="satellite.html" class="btn-link" target="_blank">全螢幕 ↗</a>
             </div>
             <div class="media-container" style="background: #f1f5f9;">
@@ -141,7 +157,7 @@
         <!-- 第三項：Windy 雷達圖 -->
         <div class="card">
             <div class="card-header">
-                <h2>3. Windy 雷達圖</h2>
+                <h2>雷達圖</h2>
                 <a href="satellite.html" class="btn-link" target="_blank">全螢幕 ↗</a>
             </div>
             <div class="media-container" style="background: #f1f5f9;">
@@ -157,6 +173,16 @@
             </div>
             <div class="text-content" id="rss-local-forecast">
                 正在從天文台載入最新天氣預測...
+            </div>
+        </div>
+
+        <!-- 新增：Windy 詳細天氣預測卡片 (完美適應手機尺寸) -->
+        <div class="card" style="grid-column: 1 / -1;">
+            <div class="card-header">
+                <h2>維多利亞港天氣預測</h2>
+            </div>
+            <div class="windy-forecast-container">
+                <iframe src="https://embed.windy.com/embed.html?type=forecast&location=coordinates&detail=true&detailLat=22.289084419494117&detailLon=114.17325709226043&metricTemp=default&metricRain=default&metricWind=default" frameborder="0"></iframe>
             </div>
         </div>
 
@@ -186,7 +212,7 @@
             { name: "坪洲 (遠眺維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/PE2_photo.htm" },
             { name: "滘西洲 (西北偏西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ks2/latest_KS2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/KS2_photo.htm" },
             { name: "橫瀾島 (西北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wag1/latest_WGL.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WGL_photo.htm" },
-            { name: "橫瀾島 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wag1/latest_WL2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WL2_photo.htm" },
+            { name: "橫瀾島 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wl2/latest_WL2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WL2_photo.htm" },
             { name: "南丫島 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lam/latest_LAM.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/LAM_photo.htm" },
             { name: "長洲 (向北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cs2/latest_CS2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CS2_photo.htm" },
             { name: "德瑞國際學校 (海洋公園)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/gsi/latest_GSI.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/GSI_photo.htm" },
@@ -236,7 +262,7 @@
         loadRSS('https://rss.weather.gov.hk/rss/LocalWeatherForecast_uc.xml', 'rss-local-forecast');
         loadRSS('https://rss.weather.gov.hk/rss/SeveralDaysWeatherForecast_uc.xml', 'rss-9day-forecast');
 
-        // 將天氣照片更新頻率改為每 2 秒 (2000 毫秒) 執行一次
+        // 天氣照片每 2 秒 (2000 毫秒) 隨機切換一次
         setInterval(() => {
             setRandomPhoto();
             updateTimestamp();
