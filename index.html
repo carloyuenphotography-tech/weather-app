@@ -105,7 +105,6 @@
             word-break: break-word;
         }
 
-        /* 專門給 Windy 預測卡片內的 iframe 使用，確保手機不超出螢幕 */
         .windy-forecast-container {
             width: 100%;
             min-height: 187px;
@@ -120,6 +119,46 @@
             border: none;
             display: block;
         }
+
+        /* 日出日落卡片樣式 */
+        .sun-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            box-sizing: border-box;
+        }
+        .sun-box {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        .sun-box h3 {
+            margin: 0 0 8px 0;
+            font-size: 1rem;
+            color: #0369a1;
+        }
+        .sun-box .time {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #0c4a6e;
+            margin-bottom: 4px;
+        }
+        .sun-box .angle {
+            font-size: 0.85rem;
+            color: #475569;
+        }
+        .solar-term-info {
+            margin-top: 12px;
+            padding: 8px 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #334155;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -130,7 +169,7 @@
     </header>
 
     <div class="dashboard">
-        <!-- 第一項：隨機天文台天氣照片 (每 2 秒自動更新) -->
+        <!-- 1. 隨機天文台天氣照片 (每 2 秒自動更新) -->
         <div class="card">
             <div class="card-header">
                 <h2><span id="photo-title">1. 天文台天氣照片</span></h2>
@@ -143,7 +182,7 @@
             </div>
         </div>
 
-        <!-- 第二項：天氣預測地圖 (衛星) -->
+        <!-- 2. 天氣預測地圖 (衛星) -->
         <div class="card">
             <div class="card-header">
                 <h2>衛星雲圖</h2>
@@ -154,7 +193,7 @@
             </div>
         </div>
 
-        <!-- 第三項：Windy 雷達圖 -->
+        <!-- 3. Windy 雷達圖 -->
         <div class="card">
             <div class="card-header">
                 <h2>雷達圖</h2>
@@ -165,7 +204,30 @@
             </div>
         </div>
 
-        <!-- 第四項：天文台本港天氣預測 -->
+        <!-- 4. 日出日落時間與節氣倒數提示 -->
+        <div class="card">
+            <div class="card-header">
+                <h2>今日日出日落時間與方位</h2>
+                <a href="https://www.hko.gov.hk/tc/gts/astron/sunpos.htm" class="btn-link" target="_blank">天文台數據 ↗</a>
+            </div>
+            <div class="sun-info-grid">
+                <div class="sun-box">
+                    <h3>🌅 日出 (Sunrise)</h3>
+                    <div class="time" id="sunrise-time">計算中...</div>
+                    <div class="angle" id="sunrise-angle">方位: --°</div>
+                </div>
+                <div class="sun-box" style="background: #fff7ed; border-color: #fed7aa;">
+                    <h3 style="color: #c2410c;">🌇 日落 (Sunset)</h3>
+                    <div class="time" id="sunset-time" style="color: #7c2d12;">計算中...</div>
+                    <div class="angle" id="sunset-angle">方位: --°</div>
+                </div>
+            </div>
+            <div class="solar-term-info" id="solar-term-text">
+                正在計算距離重要節氣天數...
+            </div>
+        </div>
+
+        <!-- 5. 天文台本港天氣預測 -->
         <div class="card">
             <div class="card-header">
                 <h2>4. 本港天氣預測</h2>
@@ -176,17 +238,17 @@
             </div>
         </div>
 
-        <!-- 新增：Windy 詳細天氣預測卡片 (完美適應手機尺寸) -->
+        <!-- Windy 詳細天氣預測數據 -->
         <div class="card" style="grid-column: 1 / -1;">
             <div class="card-header">
-                <h2>維多利亞港天氣預測</h2>
+                <h2>Windy 詳細天氣預測數據</h2>
             </div>
             <div class="windy-forecast-container">
                 <iframe src="https://embed.windy.com/embed.html?type=forecast&location=coordinates&detail=true&detailLat=22.289084419494117&detailLon=114.17325709226043&metricTemp=default&metricRain=default&metricWind=default" frameborder="0"></iframe>
             </div>
         </div>
 
-        <!-- 第五項：天文台九天天氣預報 -->
+        <!-- 6. 天文台九天天氣預報 -->
         <div class="card" style="grid-column: 1 / -1;">
             <div class="card-header">
                 <h2>5. 天文台九天天氣預報</h2>
@@ -199,6 +261,75 @@
     </div>
 
     <script>
+        // --- 計算日出日落與節氣倒數 ---
+        function calculateSunAndTerms() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const lat = 22.3193;
+            const lon = 114.1694;
+            const tz = 8;
+
+            const startOfYear = new Date(year, 0, 1);
+            const dayOfYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
+
+            // 1. 日出日落計算
+            const declination = 0.409 * Math.sin(2 * Math.PI * (dayOfYear + 284) / 365);
+            const latRad = lat * (Math.PI / 180);
+            const cosHourAngle = -Math.tan(latRad) * Math.tan(declination);
+            
+            let hourAngle = 0;
+            if (cosHourAngle >= -1 && cosHourAngle <= 1) {
+                hourAngle = Math.acos(cosHourAngle) * (180 / Math.PI);
+            }
+
+            const solarNoon = 12 + tz - (lon / 15);
+            const sunriseHourDecimal = solarNoon - (hourAngle / 15);
+            const sunsetHourDecimal = solarNoon + (hourAngle / 15);
+
+            function formatTime(decimal) {
+                const h = Math.floor(decimal);
+                const m = Math.round((decimal - h) * 60);
+                return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+            }
+
+            const sunriseAzimuth = Math.round(90 - (declination * (180 / Math.PI)) * 1.5);
+            const sunsetAzimuth = Math.round(270 + (declination * (180 / Math.PI)) * 1.5);
+
+            document.getElementById('sunrise-time').innerText = formatTime(sunriseHourDecimal);
+            document.getElementById('sunrise-angle').innerText = `方位: 約 ${sunriseAzimuth}°`;
+            document.getElementById('sunset-time').innerText = formatTime(sunsetHourDecimal);
+            document.getElementById('sunset-angle').innerText = `方位: 約 ${sunsetAzimuth}°`;
+
+            // 2. 四個重要節氣日期計算 (春分 3/21, 夏至 6/21, 秋分 9/23, 冬至 12/22)
+            const terms = [
+                { name: "春分", date: new Date(year, 2, 21) },
+                { name: "夏至", date: new Date(year, 5, 21) },
+                { name: "秋分", date: new Date(year, 8, 23) },
+                { name: "冬至", date: new Date(year, 11, 22) }
+            ];
+
+            // 找出下一個即將到來的節氣
+            let nextTerm = null;
+            for (let term of terms) {
+                if (now < term.date) {
+                    nextTerm = term;
+                    break;
+                }
+            }
+            // 如果今年的四個節氣都過了，則是明年的春分
+            if (!nextTerm) {
+                nextTerm = { name: "春分", date: new Date(year + 1, 2, 21) };
+            }
+
+            const diffTime = nextTerm.date - now;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            document.getElementById('solar-term-text').innerHTML = `🌱 距離下一個重要節氣 <strong>${nextTerm.name}</strong> 還有 <strong>${diffDays}</strong> 天`;
+        }
+
+        calculateSunAndTerms();
+
+        // --- 天氣照片陣列與隨機切換 ---
         const weatherPhotos = [
             { name: "太平山 (東面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPA_photo.htm" },
             { name: "太平山 (東北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPB_photo.htm" },
@@ -211,7 +342,7 @@
             { name: "大帽山 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm3/latest_TM3.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TM3_photo.htm" },
             { name: "坪洲 (遠眺維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/PE2_photo.htm" },
             { name: "滘西洲 (西北偏西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ks2/latest_KS2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/KS2_photo.htm" },
-            { name: "橫瀾島 (西北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wag1/latest_WGL.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WGL_photo.htm" },
+            { name: "橫瀾島 (西北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wgl/latest_WGL.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WGL_photo.htm" },
             { name: "橫瀾島 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wl2/latest_WL2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WL2_photo.htm" },
             { name: "南丫島 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lam/latest_LAM.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/LAM_photo.htm" },
             { name: "長洲 (向北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cs2/latest_CS2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CS2_photo.htm" },
