@@ -753,7 +753,7 @@
     </div>
 
     <footer>
-        <div>版本號碼：v2.1.1 | 作者：<a href="https://www.instagram.com/_852.carlo" target="_blank">@_852.carlo</a></div>
+        <div>版本號碼：v2.1.2 | 作者：<a href="https://www.instagram.com/_852.carlo" target="_blank">@_852.carlo</a></div>
         <div id="update-time" style="margin-top: 6px;">最後更新時間：載入中...</div>
     </footer>
 
@@ -842,7 +842,7 @@
             return "北";
         }
 
-        // 非同步調用香港天文台開放數據 API
+        // 非同步調用香港天文台開放數據 API（失敗時顯示 --，不提供假數據）
         async function fetchHKOWeatherData() {
             const nowTimeStr = new Date().toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', hour12: false });
 
@@ -871,57 +871,59 @@
                     }
                 }
             } catch (err) {
-                document.getElementById('temp-update-time').innerHTML = `💡 氣溫數據讀取時間：${nowTimeStr}`;
+                document.getElementById('temp-hko').innerText = "-- °C";
+                document.getElementById('temp-ssp').innerText = "-- °C";
+                document.getElementById('temp-tms').innerText = "-- °C";
+                document.getElementById('temp-tls').innerText = "-- °C";
+                document.getElementById('temp-update-time').innerHTML = `💡 氣溫數據讀取失敗 (${nowTimeStr})`;
             }
 
             // 2. 抓取能見度 (ltmv)
             try {
-                const visRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/opendata.php?dataType=ltmv&rformat=json&lang=tc');
+                const visRes = await fetch('https://data.weather.gov.hk/weatherAPI/hko/opendata/opendata.php?dataType=ltmv&rformat=json&lang=tc');
                 if (visRes.ok) {
                     const visData = await visRes.json();
                     if (visData && visData.data) {
-                        let hkoVal = 50.0, airportVal = 50.0, centralVal = 45.0, wglVal = 50.0;
-                        
                         visData.data.forEach(item => {
-                            if (item.place.includes('香港天文台')) hkoVal = parseFloat(item.value);
-                            if (item.place.includes('赤鱲角') || item.place.includes('機場')) airportVal = parseFloat(item.value);
-                            if (item.place.includes('中環')) centralVal = parseFloat(item.value);
-                            if (item.place.includes('橫瀾島')) wglVal = parseFloat(item.value);
-                        });
-
-                        function setVisBox(valId, statId, km) {
-                            document.getElementById(valId).innerText = `${km.toFixed(1)} 公里`;
-                            const statEl = document.getElementById(statId);
-                            if (km >= 10) {
-                                statEl.innerText = "極佳";
-                                statEl.className = "vis-status status-good";
-                            } else if (km >= 6) {
-                                statEl.innerText = "良好";
-                                statEl.className = "vis-status status-normal";
-                            } else if (km >= 3) {
-                                statEl.innerText = "薄霧";
-                                statEl.className = "vis-status status-fair";
-                            } else {
-                                statEl.innerText = "低能見度";
-                                statEl.className = "vis-status status-poor";
+                            let km = parseFloat(item.value);
+                            function setVisBox(valId, statId, kmVal) {
+                                document.getElementById(valId).innerText = `${kmVal.toFixed(1)} 公里`;
+                                const statEl = document.getElementById(statId);
+                                if (kmVal >= 10) {
+                                    statEl.innerText = "極佳";
+                                    statEl.className = "vis-status status-good";
+                                } else if (kmVal >= 6) {
+                                    statEl.innerText = "良好";
+                                    statEl.className = "vis-status status-normal";
+                                } else if (kmVal >= 3) {
+                                    statEl.innerText = "薄霧";
+                                    statEl.className = "vis-status status-fair";
+                                } else {
+                                    statEl.innerText = "低能見度";
+                                    statEl.className = "vis-status status-poor";
+                                }
                             }
-                        }
 
-                        setVisBox('vis-hko', 'status-hko', hkoVal);
-                        setVisBox('vis-airport', 'status-airport', airportVal);
-                        setVisBox('vis-central', 'status-central', centralVal);
-                        setVisBox('vis-wgl', 'status-wgl', wglVal);
+                            if (item.place.includes('香港天文台')) setVisBox('vis-hko', 'status-hko', km);
+                            if (item.place.includes('赤鱲角') || item.place.includes('機場')) setVisBox('vis-airport', 'status-airport', km);
+                            if (item.place.includes('中環')) setVisBox('vis-central', 'status-central', km);
+                            if (item.place.includes('橫瀾島')) setVisBox('vis-wgl', 'status-wgl', km);
+                        });
 
                         let recordTime = visData.recordTime ? visData.recordTime.substring(11, 16) : nowTimeStr;
                         document.getElementById('vis-update-time').innerHTML = `💡 能見度數據更新時間：<strong>${recordTime}</strong> (香港天文台)`;
                     }
                 }
             } catch (err) {
-                document.getElementById('vis-hko').innerText = "50.0 公里";
-                document.getElementById('vis-airport').innerText = "45.0 公里";
-                document.getElementById('vis-central').innerText = "40.0 公里";
-                document.getElementById('vis-wgl').innerText = "50.0 公里";
-                document.getElementById('vis-update-time').innerHTML = `💡 能見度讀取時間：${nowTimeStr}`;
+                document.getElementById('vis-hko').innerText = "-- 公里";
+                document.getElementById('vis-airport').innerText = "-- 公里";
+                document.getElementById('vis-central').innerText = "-- 公里";
+                document.getElementById('vis-wgl').innerText = "-- 公里";
+                document.getElementById('status-hko').innerText = "--";
+                document.getElementById('status-airport').innerText = "--";
+                document.getElementById('status-central').innerText = "--";
+                document.getElementById('status-wgl').innerText = "--";
+                document.getElementById('vis-update-time').innerHTML = `💡 能見度讀取失敗 (${nowTimeStr})`;
             }
 
             // 3. 抓取風速 (wind)
@@ -957,15 +959,15 @@
                     }
                 }
             } catch (err) {
-                document.getElementById('wind-star').innerText = "12 km/h";
-                document.getElementById('dir-star').innerText = "風向: 東";
-                document.getElementById('wind-cc').innerText = "22 km/h";
-                document.getElementById('dir-cc').innerText = "風向: 東北";
-                document.getElementById('wind-hkia').innerText = "15 km/h";
-                document.getElementById('dir-hkia').innerText = "風向: 東";
-                document.getElementById('wind-tmt').innerText = "10 km/h";
-                document.getElementById('dir-tmt').innerText = "風向: 東北";
-                document.getElementById('wind-update-time').innerHTML = `💡 風速讀取時間：${nowTimeStr}`;
+                document.getElementById('wind-star').innerText = "-- km/h";
+                document.getElementById('dir-star').innerText = "方向: --";
+                document.getElementById('wind-cc').innerText = "-- km/h";
+                document.getElementById('dir-cc').innerText = "方向: --";
+                document.getElementById('wind-hkia').innerText = "-- km/h";
+                document.getElementById('dir-hkia').innerText = "方向: --";
+                document.getElementById('wind-tmt').innerText = "-- km/h";
+                document.getElementById('dir-tmt').innerText = "方向: --";
+                document.getElementById('wind-update-time').innerHTML = `💡 風速讀取失敗 (${nowTimeStr})`;
             }
         }
 
