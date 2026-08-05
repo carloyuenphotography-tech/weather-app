@@ -264,6 +264,13 @@
             color: #475569;
             line-height: 1.3;
         }
+        .sun-box .altitude {
+            font-size: 0.85rem;
+            color: #0369a1;
+            font-weight: bold;
+            margin-top: 3px;
+            line-height: 1.3;
+        }
         .solar-term-info {
             margin-top: 10px;
             padding: 8px 10px;
@@ -494,12 +501,14 @@
                     <div class="time" id="sunrise-time">計算中...</div>
                     <div class="countdown" id="sunrise-countdown">--</div>
                     <div class="angle" id="sunrise-azimuth-text" style="color: #0369a1;">方位: --°</div>
+                    <div class="altitude" id="sunrise-altitude-text">即時仰角: --°</div>
                 </div>
                 <div class="sun-box" style="background: #fff7ed; border-color: #fed7aa;" onclick="setSunDisplayMode('sunset')">
                     <h3 style="color: #c2410c;">🌇 日落</h3>
                     <div class="time" id="sunset-time" style="color: #7c2d12;">計算中...</div>
                     <div class="countdown" id="sunset-countdown" style="color: #c2410c;">--</div>
                     <div class="angle" id="sunset-azimuth-text" style="color: #9a3412;">方位: --°</div>
+                    <div class="altitude" id="sunset-altitude-text" style="color: #c2410c;">即時仰角: --°</div>
                 </div>
             </div>
 
@@ -556,7 +565,7 @@
                 </div>
             </div>
 
-            <!-- 月球方位視覺化條 (月出以東北偏東 60°~120° 為基準，月落以西北/西南 240°~300° 為基準) -->
+            <!-- 月球方位視覺化條 -->
             <div class="sunrise-viz-container">
                 <div class="sunrise-viz-title" id="moon-viz-title">🌕 月出方位動態基準 (左: 60° ⇄ 右: 120°)</div>
                 <div class="sunrise-track">
@@ -725,6 +734,21 @@
                 document.getElementById('sunset-azimuth-text').innerHTML = `方位: ${Math.round(sunsetAzimuthDeg)}°`;
             }
 
+            // --- 太陽即時仰角計算 (直到仰角 -6° 航海曙暮光消失為止) ---
+            const currentSunPos = SunCalc.getPosition(now, lat, lon);
+            const currentSunAltDeg = currentSunPos.altitude * (180 / Math.PI);
+
+            const sunriseAltEl = document.getElementById('sunrise-altitude-text');
+            const sunsetAltEl = document.getElementById('sunset-altitude-text');
+
+            if (currentSunAltDeg >= -6.0) {
+                sunriseAltEl.innerHTML = `即時仰角: ${currentSunAltDeg.toFixed(1)}°`;
+                sunsetAltEl.innerHTML = `即時仰角: ${currentSunAltDeg.toFixed(1)}°`;
+            } else {
+                sunriseAltEl.innerHTML = `即時仰角: 小於 -6.0° (曙暮光已完結)`;
+                sunsetAltEl.innerHTML = `即時仰角: 小於 -6.0° (曙暮光已完結)`;
+            }
+
             // --- 太陽方位視覺化條 ---
             let isAfterSunriseBeforeSunset = sunTimes.sunrise && sunTimes.sunset && now >= sunTimes.sunrise && now < sunTimes.sunset;
             let activeSunMode = userSunMode === 'auto' ? (isAfterSunriseBeforeSunset ? 'sunset' : 'sunrise') : userSunMode;
@@ -745,10 +769,10 @@
                 sLabel.style.left = `${sunPct}%`;
                 sLabel.innerText = `今日日落 ${Math.round(sunsetAzimuthDeg)}°`;
             } else {
-                document.getElementById('sun-viz-title').innerText = "🧭 全年日出方位軌跡 (左: 夏至 62° ⇄ 右: 冬至 118°)";
-                document.getElementById('sun-label-left').innerText = "夏至(62°)";
-                document.getElementById('sun-label-mid').innerText = "春秋分(90°)";
-                document.getElementById('sun-label-right').innerText = "冬至(118°)";
+                document.getElementById('sun-viz-title').innerText = "🧭 全年日出方位軌跡 (左: 夏至 ⇄ 右: 冬至)";
+                document.getElementById('sun-label-left').innerText = "夏至";
+                document.getElementById('sun-label-mid').innerText = "春秋分";
+                document.getElementById('sun-label-right').innerText = "冬至";
 
                 const minSunriseAz = 62.0;  
                 const maxSunriseAz = 118.0; 
@@ -846,7 +870,7 @@
                 document.getElementById('moonset-azimuth-text').innerHTML = `方位: --°`;
             }
 
-            // --- 月球方位視覺化條：月出維持 60°~120°；月落改為 240°~300° 基準 ---
+            // --- 月球方位視覺化條 ---
             let isAfterMoonriseBeforeMoonset = moonTimes.rise && moonTimes.set && moonTimes.rise < moonTimes.set && now >= moonTimes.rise && now < moonTimes.set;
             let activeMoonMode = userMoonMode === 'auto' ? (isAfterMoonriseBeforeMoonset ? 'moonset' : 'moonrise') : userMoonMode;
 
@@ -985,8 +1009,8 @@
             { name: "坪洲 (遠眺維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/PE2_photo.htm" },
             { name: "滘西洲 (西北偏西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ks2/latest_KS2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/KS2_photo.htm" },
             { name: "橫瀾島 (西北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wgl/latest_WGL.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WGL_photo.htm" },
-            { name: "橫瀾島 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wl2/latest_WL2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/wl2_photo.htm" },
-            { name: "南丫島 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lam/latest_LAM.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/LAM_photo.htm" },
+            { name: "橫瀾島 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wl2/latest_WL2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/wl2_photo.htm" },
+            { name: "南丫島 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lam/latest_LAM.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/lam_photo.htm" },
             { name: "長洲 (向北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cs2/latest_CS2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/cs2_photo.htm" },
             { name: "德瑞國際學校 (海洋公園)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/gsi/latest_GSI.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/GSI_photo.htm" },
             { name: "尖沙咀 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/hk2/latest_HK2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/hk2_photo.htm" },
@@ -1047,7 +1071,7 @@
                     if (description) {
                         document.getElementById(elementId).innerHTML = description.textContent;
                     } else {
-                        document.getElementById(elementId).innerText = '暫時無法取得預報內容。';
+                        document.getElementById(elementId).innerText = 'displayText 無法取得預報內容。';
                     }
                 }
             } catch (error) {
