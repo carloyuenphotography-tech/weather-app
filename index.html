@@ -497,7 +497,7 @@
                 </div>
             </div>
 
-            <!-- 動態視覺化條 (會根據時間自動轉換為「日出軌跡」或「日落軌跡」) -->
+            <!-- 動態視覺化條 (自動切換日出/日落軌跡) -->
             <div class="sunrise-viz-container">
                 <div class="sunrise-viz-title" id="sun-viz-title">🧭 全年日出方位軌跡 (左: 夏至 ⇄ 右: 冬至)</div>
                 <div class="sunrise-track">
@@ -520,7 +520,7 @@
             </div>
         </div>
 
-        <!-- 3. 月相與月出月落卡片 (自動切換視覺化條，以東北偏東/角度為基準) -->
+        <!-- 3. 月相與月出月落卡片 -->
         <div class="card">
             <div class="card-header">
                 <h2 id="moon-card-title">月相與月出月落方位視覺化</h2>
@@ -550,7 +550,7 @@
                 </div>
             </div>
 
-            <!-- 月球方位視覺化條 (以東北偏東 60° 至 120° 為基準) -->
+            <!-- 月球方位視覺化條 -->
             <div class="sunrise-viz-container">
                 <div class="sunrise-viz-title" id="moon-viz-title">🌕 月出方位動態基準 (左: 60° ⇄ 右: 120°)</div>
                 <div class="sunrise-track">
@@ -708,20 +708,18 @@
             }
 
             // --- 判斷日出後/日落前：自動切換日出或日落的視覺化條 ---
-            // 邏輯：如果當前時間介於今日日出與日落之間（即日出後、日落前），則顯示「日落方位」；否則顯示「日出方位」
-            let targetSunAzimuth = sunriseAzimuthDeg;
             let isAfterSunriseBeforeSunset = sunTimes.sunrise && sunTimes.sunset && now >= sunTimes.sunrise && now < sunTimes.sunset;
 
             if (isAfterSunriseBeforeSunset) {
-                document.getElementById('sun-viz-title').innerText = "🧭 全年日落方位軌跡 (左: 夏至 ⇄ 右: 冬至)";
-                document.getElementById('sun-label-left').innerText = "夏至(西北)";
-                document.getElementById('sun-label-mid').innerText = "春秋分(正西)";
-                document.getElementById('sun-label-right').innerText = "冬至(西南)";
+                document.getElementById('sun-viz-title').innerText = "🧭 全年日落方位軌跡 (左: 夏至 298° ⇄ 右: 冬至 242°)";
+                document.getElementById('sun-label-left').innerText = "夏至(298°)";
+                document.getElementById('sun-label-mid').innerText = "春秋分(270°)";
+                document.getElementById('sun-label-right').innerText = "冬至(242°)";
                 
-                // 日落極端方位大約介乎夏至 ~298° 至冬至 ~242°，對應 0% ~ 100%
-                const minSunsetAz = 242.0; 
-                const maxSunsetAz = 298.0;
-                let sunPct = ((sunsetAzimuthDeg - minSunsetAz) / (maxSunsetAz - minSunsetAz)) * 100;
+                // 日落軌跡修正：左端為夏至高角度(298°)，右端為冬至低角度(242°)
+                const maxSunsetAz = 298.0; 
+                const minSunsetAz = 242.0;
+                let sunPct = ((maxSunsetAz - sunsetAzimuthDeg) / (maxSunsetAz - minSunsetAz)) * 100;
                 sunPct = Math.max(0, Math.min(100, sunPct));
                 
                 document.getElementById('today-sun-marker').style.left = `${sunPct}%`;
@@ -729,10 +727,10 @@
                 sLabel.style.left = `${sunPct}%`;
                 sLabel.innerText = `今日日落 ${Math.round(sunsetAzimuthDeg)}°`;
             } else {
-                document.getElementById('sun-viz-title').innerText = "🧭 全年日出方位軌跡 (左: 夏至 ⇄ 右: 冬至)";
-                document.getElementById('sun-label-left').innerText = "夏至(東北)";
-                document.getElementById('sun-label-mid').innerText = "春秋分(正東)";
-                document.getElementById('sun-label-right').innerText = "冬至(東南)";
+                document.getElementById('sun-viz-title').innerText = "🧭 全年日出方位軌跡 (左: 夏至 62° ⇄ 右: 冬至 118°)";
+                document.getElementById('sun-label-left').innerText = "夏至(62°)";
+                document.getElementById('sun-label-mid').innerText = "春秋分(90°)";
+                document.getElementById('sun-label-right').innerText = "冬至(118°)";
 
                 const minSunriseAz = 62.0;  
                 const maxSunriseAz = 118.0; 
@@ -830,13 +828,12 @@
                 document.getElementById('moonset-azimuth-text').innerHTML = `方位: --°`;
             }
 
-            // --- 判斷月出後/月落前：自動切換月出或月落的視覺化條 (以角度/方位基準) ---
+            // --- 判斷月出後/月落前：自動切換月出或月落的視覺化條 ---
             let isAfterMoonriseBeforeMoonset = moonTimes.rise && moonTimes.set && moonTimes.rise < moonTimes.set && now >= moonTimes.rise && now < moonTimes.set;
 
             if (isAfterMoonriseBeforeMoonset) {
                 document.getElementById('moon-viz-title').innerText = "🌘 月落方位動態基準 (左: 240° ⇄ 右: 300°)";
                 
-                // 以 240° ~ 300° 為基準區間
                 let moonSetPct = ((moonsetAzimuthDeg - 240.0) / (300.0 - 240.0)) * 100;
                 moonSetPct = Math.max(0, Math.min(100, moonSetPct));
 
@@ -847,7 +844,6 @@
             } else {
                 document.getElementById('moon-viz-title').innerText = "🌕 月出方位動態基準 (左: 60° ⇄ 右: 120°)";
 
-                // 以東北偏東 60° ~ 120° 為基準區間
                 let moonRisePct = ((moonriseAzimuthDeg - 60.0) / (120.0 - 60.0)) * 100;
                 moonRisePct = Math.max(0, Math.min(100, moonRisePct));
 
@@ -1025,7 +1021,7 @@
                 }
             } catch (error) {
                 console.error('載入 RSS 失敗:', error);
-                document.getElementById(elementId).innerHTML = '載入失敗,請點擊上方按鈕前往天文台原網頁查看。';
+                document.getElementById(elementId).innerHTML = '載入失敗，請點擊上方按鈕前往天文台原網頁查看。';
             }
         }
 
