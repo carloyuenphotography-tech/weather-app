@@ -381,24 +381,6 @@
             color: #0284c7;
         }
 
-        .regional-portal-container {
-            position: relative;
-            width: 100%;
-            height: 520px;
-            background: #f1f5f9;
-            border-radius: 8px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-sizing: border-box;
-        }
-        .regional-portal-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
         .csdi-wind-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); 
@@ -595,18 +577,7 @@
             </div>
         </div>
 
-        <!-- 5. 香港分區天氣資訊平台 -->
-        <div class="card large-map-card">
-            <div class="card-header">
-                <h2>香港分區天氣資訊</h2>
-                <a href="https://www.hko.gov.hk/tc/wxinfo/awsgis/regional_portal.html" class="btn-link" target="_blank">全螢幕 ↗</a>
-            </div>
-            <div class="regional-portal-container">
-                <iframe src="https://www.hko.gov.hk/tc/wxinfo/awsgis/regional_portal.html"></iframe>
-            </div>
-        </div>
-
-        <!-- 6. 天氣預測地圖 (衛星雲圖) -->
+        <!-- 5. 天氣預測地圖 (衛星雲圖) -->
         <div class="card large-map-card">
             <div class="card-header">
                 <h2>衛星雲圖</h2>
@@ -617,7 +588,7 @@
             </div>
         </div>
 
-        <!-- 7. Windy 雷達圖 -->
+        <!-- 6. Windy 雷達圖 -->
         <div class="card large-map-card">
             <div class="card-header">
                 <h2>雷達圖</h2>
@@ -637,33 +608,11 @@
                 <iframe src="https://embed.windy.com/embed.html?type=forecast&location=coordinates&detail=true&detailLat=22.289084419494117&detailLon=114.17325709226043&metricTemp=default&metricRain=default&metricWind=default" frameborder="0"></iframe>
             </div>
         </div>
-
-        <!-- 8. 本港地區天氣預報 -->
-        <div class="card" style="grid-column: 1 / -1;">
-            <div class="card-header">
-                <h2>本港地區天氣預報</h2>
-                <a href="https://www.hko.gov.hk/tc/wxinfo/currwx/fnd.htm" class="btn-link" target="_blank">原網頁 ↗</a>
-            </div>
-            <div class="text-content" id="api-local-forecast" style="overflow-y: auto; max-height: 300px; padding: 10px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; box-sizing: border-box; word-break: break-word; line-height: 1.6;">
-                正在載入本港地區天氣預報...
-            </div>
-        </div>
-
-        <!-- 9. 天文台九天天氣預報 -->
-        <div class="card" style="grid-column: 1 / -1;">
-            <div class="card-header">
-                <h2>天文台九天天氣預報</h2>
-                <a href="https://www.hko.gov.hk/tc/wxinfo/currwx/fnd.htm" class="btn-link" target="_blank">原網頁 ↗</a>
-            </div>
-            <div class="text-content" id="rss-9day-forecast" style="overflow-y: auto; max-height: 350px; padding: 10px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; box-sizing: border-box; word-break: break-word;">
-                正在載入九天天氣預報...
-            </div>
-        </div>
     </div>
 
     <!-- 底部資訊、更新時間、版本與 IG 連結 -->
     <footer>
-        <div>版本號碼：v1.0.0 | 作者：<a href="https://www.instagram.com/_852.carlo" target="_blank">@_852.carlo</a></div>
+        <div>版本號碼：v1.1.0 | 作者：<a href="https://www.instagram.com/_852.carlo" target="_blank">@_852.carlo</a></div>
         <div id="update-time" style="margin-top: 6px;">最後更新時間：載入中...</div>
     </footer>
 
@@ -956,45 +905,6 @@
 
         loadCsdiWindData();
 
-        // --- 從天文台 JSON API (flw) 載入本港地區天氣預報 ---
-        async function loadLocalWeatherJSON() {
-            const container = document.getElementById('api-local-forecast');
-            const targetUrl = 'https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=flw&lang=tc';
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-            
-            try {
-                const response = await fetch(proxyUrl);
-                const data = await response.json();
-                if (data.contents) {
-                    const jsonData = JSON.parse(data.contents);
-                    let content = '';
-                    
-                    if (jsonData.generalSituation) {
-                        content += `<p><strong>一般情況：</strong><br>${jsonData.generalSituation}</p>`;
-                    }
-                    if (jsonData.forecastDesc) {
-                        content += `<p><strong>天氣預報：</strong><br>${jsonData.forecastDesc}</p>`;
-                    }
-                    if (jsonData.outlook) {
-                        content += `<p><strong>展望：</strong><br>${jsonData.outlook}</p>`;
-                    }
-
-                    if (content) {
-                        container.innerHTML = content;
-                    } else {
-                        container.innerText = '暫時無法取得預報內容。';
-                    }
-                } else {
-                    container.innerText = '暫時無法取得預報內容。';
-                }
-            } catch (error) {
-                console.error('載入天氣預報 JSON 失敗:', error);
-                container.innerHTML = '載入失敗，請點擊上方按鈕前往原網頁查看。';
-            }
-        }
-
-        loadLocalWeatherJSON();
-
         // --- 天文台照片陣列與隨機自動切換 ---
         const weatherPhotos = [
             { name: "太平山 (東面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPA_photo.htm" },
@@ -1005,7 +915,7 @@
             { name: "中環 (維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CP1_photo.htm" },
             { name: "流浮山 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lfs/latest_LFS.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/LFS_photo.htm" },
             { name: "大帽山 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm2/latest_TM2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TM2_photo.htm" },
-            { name: "大帽山 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm3/latest_TM3.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TM3_photo.htm" },
+            { name: "大帽山 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm3/latest_TM3.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/tm3_photo.htm" },
             { name: "坪洲 (遠眺維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/PE2_photo.htm" },
             { name: "滘西洲 (西北偏西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ks2/latest_KS2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/KS2_photo.htm" },
             { name: "橫瀾島 (西北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wgl/latest_WGL.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WGL_photo.htm" },
@@ -1058,30 +968,6 @@
             updateAstronomicalData();
         }
         updateTimestamp();
-
-        async function loadRSS(url, elementId) {
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-            try {
-                const response = await fetch(proxyUrl);
-                const data = await response.json();
-                if (data.contents) {
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(data.contents, 'text/xml');
-                    const description = xmlDoc.querySelector('item description');
-                    if (description) {
-                        document.getElementById(elementId).innerHTML = description.textContent;
-                    } else {
-                        document.getElementById(elementId).innerText = '暫時無法取得預報內容。';
-                    }
-                }
-            } catch (error) {
-                console.error('載入 RSS 失敗:', error);
-                document.getElementById(elementId).innerHTML = '載入失敗，請點擊上方按鈕前往天文台原網頁查看。';
-            }
-        }
-
-        // 載入九天天氣預報 RSS
-        loadRSS('https://rss.weather.gov.hk/rss/SeveralDaysWeatherForecast_uc.xml', 'rss-9day-forecast');
 
         setInterval(() => {
             setRandomPhoto();
