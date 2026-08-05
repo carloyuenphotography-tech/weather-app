@@ -556,18 +556,18 @@
                 </div>
             </div>
 
-            <!-- 月球方位視覺化條 -->
+            <!-- 月球方位視覺化條 (月出以東北偏東 60°~120° 為基準，月落以西北/西南 240°~300° 為基準) -->
             <div class="sunrise-viz-container">
                 <div class="sunrise-viz-title" id="moon-viz-title">🌕 月出方位動態基準 (左: 60° ⇄ 右: 120°)</div>
                 <div class="sunrise-track">
-                    <div class="track-marker" style="left: 0%;"></div>
-                    <div class="track-label" style="left: 0%;">60°</div>
+                    <div class="track-marker" id="moon-mark-left" style="left: 0%;"></div>
+                    <div class="track-label" id="moon-label-left" style="left: 0%;">60°</div>
 
-                    <div class="track-marker" style="left: 50%;"></div>
-                    <div class="track-label" style="left: 50%;">90° (正東)</div>
+                    <div class="track-marker" id="moon-mark-mid" style="left: 50%;"></div>
+                    <div class="track-label" id="moon-label-mid" style="left: 50%;">90°</div>
 
-                    <div class="track-marker" style="left: 100%;"></div>
-                    <div class="track-label" style="left: 100%;">120°</div>
+                    <div class="track-marker" id="moon-mark-right" style="left: 100%;"></div>
+                    <div class="track-label" id="moon-label-right" style="left: 100%;">120°</div>
 
                     <div class="today-marker" id="today-moon-marker" style="left: 50%;"></div>
                     <div class="today-label" id="today-moon-label" style="left: 50%;">今日 --°</div>
@@ -725,7 +725,7 @@
                 document.getElementById('sunset-azimuth-text').innerHTML = `方位: ${Math.round(sunsetAzimuthDeg)}°`;
             }
 
-            // --- 太陽方位視覺化條：日出固定為左夏至、右冬至；日落則獨立依據自動/手動切換（右夏至、左冬至） ---
+            // --- 太陽方位視覺化條 ---
             let isAfterSunriseBeforeSunset = sunTimes.sunrise && sunTimes.sunset && now >= sunTimes.sunrise && now < sunTimes.sunset;
             let activeSunMode = userSunMode === 'auto' ? (isAfterSunriseBeforeSunset ? 'sunset' : 'sunrise') : userSunMode;
 
@@ -735,7 +735,6 @@
                 document.getElementById('sun-label-mid').innerText = "春秋分(270°)";
                 document.getElementById('sun-label-right').innerText = "夏至(298°)";
                 
-                // 日落：左端冬至(242°) ~ 右端夏至(298°)
                 const minSunsetAz = 242.0; 
                 const maxSunsetAz = 298.0;
                 let sunPct = ((sunsetAzimuthDeg - minSunsetAz) / (maxSunsetAz - minSunsetAz)) * 100;
@@ -751,7 +750,6 @@
                 document.getElementById('sun-label-mid').innerText = "春秋分(90°)";
                 document.getElementById('sun-label-right').innerText = "冬至(118°)";
 
-                // 日出：左端夏至(62°) ~ 右端冬至(118°)
                 const minSunriseAz = 62.0;  
                 const maxSunriseAz = 118.0; 
                 let sunPct = ((sunriseAzimuthDeg - minSunriseAz) / (maxSunriseAz - minSunriseAz)) * 100;
@@ -848,12 +846,18 @@
                 document.getElementById('moonset-azimuth-text').innerHTML = `方位: --°`;
             }
 
-            // --- 月球方位視覺化條 ---
+            // --- 月球方位視覺化條：月出維持 60°~120°；月落改為 240°~300° 基準 ---
             let isAfterMoonriseBeforeMoonset = moonTimes.rise && moonTimes.set && moonTimes.rise < moonTimes.set && now >= moonTimes.rise && now < moonTimes.set;
             let activeMoonMode = userMoonMode === 'auto' ? (isAfterMoonriseBeforeMoonset ? 'moonset' : 'moonrise') : userMoonMode;
 
             if (activeMoonMode === 'moonset') {
                 document.getElementById('moon-viz-title').innerText = "🌘 月落方位動態基準 (左: 240° ⇄ 右: 300°)";
+                document.getElementById('moon-mark-left').style.left = '0%';
+                document.getElementById('moon-label-left').innerText = "240° (西南)";
+                document.getElementById('moon-mark-mid').style.left = '50%';
+                document.getElementById('moon-label-mid').innerText = "270° (正西)";
+                document.getElementById('moon-mark-right').style.left = '100%';
+                document.getElementById('moon-label-right').innerText = "300° (西北)";
                 
                 let moonSetPct = ((moonsetAzimuthDeg - 240.0) / (300.0 - 240.0)) * 100;
                 moonSetPct = Math.max(0, Math.min(100, moonSetPct));
@@ -864,6 +868,12 @@
                 mLabel.innerText = `今日月落 ${Math.round(moonsetAzimuthDeg)}°`;
             } else {
                 document.getElementById('moon-viz-title').innerText = "🌕 月出方位動態基準 (左: 60° ⇄ 右: 120°)";
+                document.getElementById('moon-mark-left').style.left = '0%';
+                document.getElementById('moon-label-left').innerText = "60° (東北)";
+                document.getElementById('moon-mark-mid').style.left = '50%';
+                document.getElementById('moon-label-mid').innerText = "90° (正東)";
+                document.getElementById('moon-mark-right').style.left = '100%';
+                document.getElementById('moon-label-right').innerText = "120° (東南)";
 
                 let moonRisePct = ((moonriseAzimuthDeg - 60.0) / (120.0 - 60.0)) * 100;
                 moonRisePct = Math.max(0, Math.min(100, moonRisePct));
