@@ -259,20 +259,28 @@
             color: #0284c7;
             margin-bottom: 4px;
         }
-        .sun-box .angle {
-            font-size: 0.85rem; 
-            color: #475569;
-            line-height: 1.3;
+        .sub-lunar-tag {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: normal;
+            margin-top: 2px;
         }
-        .sun-box .altitude {
-            font-size: 0.85rem;
+        
+        /* 太陽即時仰角獨立資訊列樣式 */
+        .sun-altitude-banner {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: #e0f2fe;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            font-size: 0.95rem;
             color: #0369a1;
             font-weight: bold;
-            margin-top: 3px;
-            line-height: 1.3;
+            text-align: center;
         }
+
         .solar-term-info {
-            margin-top: 10px;
+            margin-top: 8px;
             padding: 8px 10px;
             background: #f8fafc;
             border: 1px solid #e2e8f0;
@@ -282,131 +290,82 @@
             text-align: center;
         }
 
-        /* --- 圓形 360 度羅盤方位視覺化樣式 --- */
-        .compass-viz-container {
+        /* --- 視覺化動態直線條樣式 --- */
+        .sunrise-viz-container {
             margin-top: 12px;
             padding: 10px;
             background: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
-        .compass-viz-title {
+        .sunrise-viz-title {
             font-size: 0.85rem;
             font-weight: bold;
             color: #0369a1;
             margin-bottom: 8px;
             text-align: center;
         }
-        .compass-circle {
+        .sunrise-track {
             position: relative;
-            width: 220px;
-            height: 220px;
-            border: 2px solid #cbd5e1;
-            border-radius: 50%;
-            background: #ffffff;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
-            margin: 10px 0;
+            height: 8px;
+            background: linear-gradient(to right, #fb923c, #38bdf8, #fb923c);
+            border-radius: 4px;
+            margin: 20px 25px 32px 25px;
         }
-        /* 羅盤方位文字標籤 */
-        .compass-label {
+        .track-marker {
             position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+        }
+        /* 極限點用灰色 */
+        .marker-gray { background: #64748b; }
+        .label-gray { color: #475569; }
+
+        /* 東南西主方位用主色調藍色 */
+        .marker-blue { background: #0284c7; }
+        .label-blue { color: #0284c7; font-weight: bold; }
+
+        .track-label {
+            position: absolute;
+            top: 14px;
+            transform: translateX(-50%);
+            font-size: 0.68rem;
+            white-space: nowrap;
+            text-align: center;
+            line-height: 1.2;
+        }
+        .today-marker {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 14px;
+            height: 14px;
+            background: #e11d48;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 6px rgba(225, 29, 72, 0.6);
+            z-index: 2;
+            transition: left 0.5s ease;
+        }
+        .today-label {
+            position: absolute;
+            bottom: 18px;
+            transform: translateX(-50%);
             font-size: 0.75rem;
             font-weight: bold;
-            color: #475569;
-            transform: translate(-50%, -50%);
-        }
-        .c-north { top: 12px; left: 50%; }
-        .c-east { top: 50%; left: 91%; }
-        .c-south { top: 91%; left: 50%; }
-        .c-west { top: 50%; left: 9%; }
-
-        /* 節氣方位指示點 */
-        .term-dot {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: #94a3b8;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-        }
-        .term-text {
-            position: absolute;
-            font-size: 0.65rem;
-            color: #64748b;
-            transform: translate(-50%, -50%);
+            color: #e11d48;
             white-space: nowrap;
-        }
-
-        /* 日出/日落動態指針線 */
-        .sun-pointer {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 2px;
-            height: 50%;
-            transform-origin: top center;
-            z-index: 2;
-            transition: transform 0.5s ease;
-        }
-        /* 日出指針：亮藍色/青色 */
-        .sunrise-pointer {
-            background: #0284c7;
-        }
-        .sunrise-pointer::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: -3px;
-            width: 8px;
-            height: 8px;
-            background: #0284c7;
-            border-radius: 50%;
-            box-shadow: 0 0 4px rgba(2, 132, 199, 0.6);
-        }
-        /* 日落指針：橙紅色 */
-        .sunset-pointer {
-            background: #c2410c;
-        }
-        .sunset-pointer::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: -3px;
-            width: 8px;
-            height: 8px;
-            background: #c2410c;
-            border-radius: 50%;
-            box-shadow: 0 0 4px rgba(194, 65, 12, 0.6);
-        }
-        .compass-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 8px;
-            height: 8px;
-            background: #334155;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
+            background: #fff1f2;
+            padding: 1px 4px;
+            border-radius: 4px;
+            border: 1px solid #fecdd3;
             z-index: 3;
-        }
-        .compass-legend {
-            font-size: 0.75rem;
-            color: #475569;
-            margin-top: 5px;
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-        .legend-item span {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 4px;
+            transition: left 0.5s ease;
         }
 
         .moon-header-flex {
@@ -436,6 +395,19 @@
         }
         .moon-details-text strong {
             color: #0284c7;
+        }
+
+        /* 滿月提示面板樣式 */
+        .next-fullmoon-banner {
+            margin-top: 10px;
+            padding: 8px 10px;
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #0369a1;
+            text-align: center;
+            line-height: 1.4;
         }
 
         footer {
@@ -496,70 +468,68 @@
         <!-- 2. 日出日落卡片 -->
         <div class="card">
             <div class="card-header">
-                <h2 id="sun-card-title">日出日落與 360° 羅盤方位</h2>
+                <h2>日出/日落</h2>
                 <a href="https://suncalc.org/#/22.3193,114.1694,12" class="btn-link" target="_blank">地圖檢視 ↗</a>
             </div>
             
             <div class="sun-date" id="current-date-display">載入日期中...</div>
             
             <div class="sun-info-grid">
-                <div class="sun-box">
+                <div class="sun-box" onclick="setSunDisplayMode('sunrise')">
                     <h3>🌅 日出</h3>
                     <div class="time" id="sunrise-time">計算中...</div>
                     <div class="countdown" id="sunrise-countdown">--</div>
-                    <div class="angle" id="sunrise-azimuth-text" style="color: #0369a1;">方位: --°</div>
-                    <div class="altitude" id="sunrise-altitude-text">即時仰角: --°</div>
                 </div>
-                <div class="sun-box" style="background: #fff7ed; border-color: #fed7aa;">
+                <div class="sun-box" style="background: #fff7ed; border-color: #fed7aa;" onclick="setSunDisplayMode('sunset')">
                     <h3 style="color: #c2410c;">🌇 日落</h3>
                     <div class="time" id="sunset-time" style="color: #7c2d12;">計算中...</div>
                     <div class="countdown" id="sunset-countdown" style="color: #c2410c;">--</div>
-                    <div class="angle" id="sunset-azimuth-text" style="color: #9a3412;">方位: --°</div>
-                    <div class="altitude" id="sunset-altitude-text" style="color: #c2410c;">即時仰角: --°</div>
                 </div>
             </div>
 
-            <!-- 360度圓形羅盤方位展示 -->
-            <div class="compass-viz-container">
-                <div class="compass-viz-title">🧭 360° 太陽日出/日落方位與節氣羅盤</div>
-                <div class="compass-circle">
-                    <!-- 基本方位標籤 -->
-                    <div class="compass-label c-north">北 (0°)</div>
-                    <div class="compass-label c-east">東 (90°)</div>
-                    <div class="compass-label c-south">南 (180°)</div>
-                    <div class="compass-label c-west">西 (270°)</div>
+            <!-- 太陽即時仰角獨立資訊列 -->
+            <div class="sun-altitude-banner" id="sun-altitude-banner-text">
+                ☀️ 太陽即時仰角: 計算中...
+            </div>
 
-                    <!-- 節氣標記點 (根據香港約 22.3°N 緯度之極端日出/日落方位精算) -->
-                    <!-- 夏至日出 (~62°) -->
-                    <div class="term-dot" style="top: 25%; left: 85%;"></div>
-                    <div class="term-text" style="top: 18%; left: 88%;">夏至出</div>
+            <!-- 太陽動態直線圖 (主方位藍色，極限灰色) -->
+            <div class="sunrise-viz-container">
+                <div class="sunrise-viz-title" id="sun-viz-title">🧭 太陽方位軌跡</div>
+                <div class="sunrise-track">
+                    <!-- 0%: 左方夏至 (64.2°) - 灰色 -->
+                    <div class="track-marker marker-gray" style="left: 0%;"></div>
+                    <div class="track-label label-gray" style="left: 0%;">夏至<br>64.2°</div>
 
-                    <!-- 冬至日出 (~118°) -->
-                    <div class="term-text" style="top: 75%; left: 90%;">冬至出</div>
-                    <div class="term-dot" style="top: 75%; left: 85%;"></div>
+                    <!-- 16.7%: 東 (90°) - 藍色 -->
+                    <div class="track-marker marker-blue" style="left: 16.7%;"></div>
+                    <div class="track-label label-blue" style="left: 16.7%;">東<br>90°</div>
 
-                    <!-- 冬至日落 (~242°) -->
-                    <div class="term-dot" style="top: 75%; left: 15%;"></div>
-                    <div class="term-text" style="top: 75%; left: 10%;">冬至落</div>
+                    <!-- 33.3%: 左方冬至 (115.1°) - 灰色 -->
+                    <div class="track-marker marker-gray" style="left: 33.3%;"></div>
+                    <div class="track-label label-gray" style="left: 33.3%;">冬至<br>115.1°</div>
 
-                    <!-- 夏至日落 (~298°) -->
-                    <div class="term-dot" style="top: 25%; left: 15%;"></div>
-                    <div class="term-text" style="top: 18%; left: 12%;">夏至落</div>
+                    <!-- 50%: 南 (180°) - 藍色 -->
+                    <div class="track-marker marker-blue" style="left: 50%;"></div>
+                    <div class="track-label label-blue" style="left: 50%;">南<br>180°</div>
 
-                    <!-- 動態日出指針 (CSS transform 會由 JS 動態修改 rotate) -->
-                    <div class="sun-pointer sunrise-pointer" id="sunrise-pointer-line" style="transform: rotate(90deg);"></div>
-                    <!-- 動態日落指針 -->
-                    <div class="sun-pointer sunset-pointer" id="sunset-pointer-line" style="transform: rotate(270deg);"></div>
+                    <!-- 66.7%: 右方冬至 (244.9°) - 灰色 -->
+                    <div class="track-marker marker-gray" style="left: 66.7%;"></div>
+                    <div class="track-label label-gray" style="left: 66.7%;">冬至<br>244.9°</div>
 
-                    <div class="compass-center"></div>
-                </div>
-                <div class="compass-legend">
-                    <div class="legend-item"><span style="background: #0284c7;"></span>今日日出</div>
-                    <div class="legend-item"><span style="background: #c2410c;"></span>今日日落</div>
+                    <!-- 83.3%: 西 (270°) - 藍色 -->
+                    <div class="track-marker marker-blue" style="left: 83.3%;"></div>
+                    <div class="track-label label-blue" style="left: 83.3%;">西<br>270°</div>
+
+                    <!-- 100%: 右方夏至 (295.8°) - 灰色 -->
+                    <div class="track-marker marker-gray" style="left: 100%;"></div>
+                    <div class="track-label label-gray" style="left: 100%;">夏至<br>295.8°</div>
+
+                    <div class="today-marker" id="today-sun-marker" style="left: 50%;"></div>
+                    <div class="today-label" id="today-sun-label" style="left: 50%;">今日 --°</div>
                 </div>
             </div>
 
-            <div class="solar-term-info" id="solar-term-text" style="margin-top: 6px;">
+            <div class="solar-term-info" id="solar-term-text">
                 正在計算節氣資訊...
             </div>
         </div>
@@ -567,7 +537,7 @@
         <!-- 3. 月相與月出月落卡片 -->
         <div class="card">
             <div class="card-header">
-                <h2 id="moon-card-title">月相與月出月落方位視覺化</h2>
+                <h2>月出/月落/月相</h2>
                 <a href="https://www.hko.gov.hk/tc/gts/astron/moonpos.htm" class="btn-link" target="_blank">天文台數據 ↗</a>
             </div>
 
@@ -575,7 +545,7 @@
                 <div class="moon-svg-box" id="moon-svg-container"></div>
                 <div class="moon-details-text">
                     <div><strong id="lunar-date-text">計算中...</strong></div>
-                    <div><span id="moon-phase-name">計算中...</span> (亮光: <strong id="moon-illumination-pct">--%</strong>)</div>
+                    <div><span id="moon-phase-name">計算中...</span> (月相: <strong id="moon-illumination-pct">--%</strong>)</div>
                 </div>
             </div>
 
@@ -584,43 +554,54 @@
                     <h3 style="color: #475569;">🌙 月出</h3>
                     <div class="time" id="moonrise-time" style="color: #334155;">計算中...</div>
                     <div class="countdown" id="moonrise-countdown" style="color: #475569;">--</div>
-                    <div class="angle" id="moonrise-azimuth-text" style="color: #475569;">方位: --°</div>
+                    <div class="sub-lunar-tag" id="moonrise-lunar">--</div>
                 </div>
                 <div class="sun-box" style="background: #f8fafc; border-color: #cbd5e1;" onclick="setMoonDisplayMode('moonset')">
                     <h3 style="color: #475569;">🌘 月落</h3>
                     <div class="time" id="moonset-time" style="color: #334155;">計算中...</div>
-                    <div class="countdown" id="moonset-countdown" style="color: #475569;">--</div>
-                    <div class="angle" id="moonset-azimuth-text" style="color: #475569;">方位: --°</div>
+                    <div class="countdown" id="moonset-countdown" style="color: #334155;">--</div>
+                    <div class="sub-lunar-tag" id="moonset-lunar">--</div>
                 </div>
             </div>
 
-            <!-- 月球方位視覺化條 -->
-            <div class="compass-viz-container" style="margin-top: 12px; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
-                <div class="compass-viz-title" id="moon-viz-title">🌕 月出方位動態基準 (左: 60° ⇄ 右: 120°)</div>
-                <div style="position: relative; width: 100%; height: 8px; background: linear-gradient(to right, #38bdf8, #cbd5e1, #fb923c); border-radius: 4px; margin: 20px 0 25px 0;">
-                    <div style="position: absolute; top: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background: #64748b; border-radius: 50%; border: 2px solid #ffffff; left: 0%;"></div>
-                    <div style="position: absolute; top: 14px; transform: translateX(-50%); font-size: 0.75rem; color: #475569; left: 0%;">60°</div>
+            <!-- 月出/月落方位共用動態直線圖 (0°~360° 全方位) -->
+            <div class="sunrise-viz-container">
+                <div class="sunrise-viz-title" id="moon-viz-title">🌕 月出方位動態基準 (0° ~ 360°)</div>
+                <div class="sunrise-track" style="background: linear-gradient(to right, #38bdf8, #cbd5e1, #fb923c); margin: 20px 25px 25px 25px;">
+                    <div class="track-marker" style="left: 0%;"></div>
+                    <div class="track-label" style="left: 0%;">北</div>
 
-                    <div style="position: absolute; top: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background: #64748b; border-radius: 50%; border: 2px solid #ffffff; left: 50%;"></div>
-                    <div style="position: absolute; top: 14px; transform: translateX(-50%); font-size: 0.75rem; color: #475569; left: 50%;">90°</div>
+                    <div class="track-marker" style="left: 25%;"></div>
+                    <div class="track-label" style="left: 25%;">東</div>
 
-                    <div style="position: absolute; top: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background: #64748b; border-radius: 50%; border: 2px solid #ffffff; left: 100%;"></div>
-                    <div style="position: absolute; top: 14px; transform: translateX(-50%); font-size: 0.75rem; color: #475569; left: 100%;">120°</div>
+                    <div class="track-marker" style="left: 50%;"></div>
+                    <div class="track-label" style="left: 50%;">南</div>
+
+                    <div class="track-marker" style="left: 75%;"></div>
+                    <div class="track-label" style="left: 75%;">西</div>
+
+                    <div class="track-marker" style="left: 100%;"></div>
+                    <div class="track-label" style="left: 100%;">北</div>
 
                     <div class="today-marker" id="today-moon-marker" style="left: 50%;"></div>
                     <div class="today-label" id="today-moon-label" style="left: 50%;">今日 --°</div>
                 </div>
             </div>
+
+            <!-- 下一次滿月與當日出落時間提示 -->
+            <div class="next-fullmoon-banner" id="next-fullmoon-text">
+                🌕 下一次滿月預測計算中...
+            </div>
         </div>
 
-        <!-- 4. 天氣預測地圖 (衛星雲圖 - visible 預設) -->
+        <!-- 4. 天氣預測地圖 (衛星雲圖 - visible 可見光預設) -->
         <div class="card large-map-card">
             <div class="card-header">
                 <h2>衛星雲圖</h2>
                 <a href="https://www.windy.com/?22.300,114.170,6,i:satellite" class="btn-link" target="_blank">全螢幕 ↗</a>
             </div>
             <div class="large-map-container">
-                <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=6&level=surface&overlay=visible&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"></iframe>
+                <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=6&level=surface&overlay=satellite&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"></iframe>
             </div>
         </div>
 
@@ -648,12 +629,18 @@
 
     <!-- 底部資訊、更新時間、版本與 IG 連結 -->
     <footer>
-        <div>版本號碼：v1.3.0 | 作者：<a href="https://www.instagram.com/_852.carlo" target="_blank">@_852.carlo</a></div>
+        <div>版本號碼：v1.9.6 | 作者：<a href="https://www.instagram.com/_852.carlo" target="_blank">@_852.carlo</a></div>
         <div id="update-time" style="margin-top: 6px;">最後更新時間：載入中...</div>
     </footer>
 
     <script>
+        let userSunMode = 'auto';
         let userMoonMode = 'auto';
+
+        function setSunDisplayMode(mode) {
+            userSunMode = mode;
+            updateAstronomicalData();
+        }
 
         function setMoonDisplayMode(mode) {
             userMoonMode = mode;
@@ -680,10 +667,64 @@
             }
         }
 
+        // 高精準農曆干支與日期計算函數（支援任意 Date 物件，跨日自動準確對應）
+        function getLunarDateString(date) {
+            if (!date || isNaN(date)) return "--";
+            const baseDate = new Date(2026, 1, 17); // 2026年正月初一
+            const diffDays = Math.floor((date - baseDate) / (1000 * 60 * 60 * 24));
+            const synodicMonth = 29.53059;
+            
+            let lunarDayVal = (diffDays % synodicMonth + synodicMonth) % synodicMonth;
+            let monthIndex = Math.floor(diffDays / synodicMonth);
+            
+            let lunarMonth = 1 + (monthIndex % 12);
+            if (lunarMonth <= 0) lunarMonth += 12;
+            
+            let lunarDay = Math.floor(lunarDayVal) + 1;
+            if (lunarDay > 30) lunarDay = 30;
+
+            const monthNames = ["正", "二", "三", "四", "五", "六", "七", "八", "九", "十", "冬", "臘"];
+            const dayNames = ["初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
+                              "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
+                              "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"];
+
+            const mStr = monthNames[lunarMonth - 1] || "六";
+            const dStr = dayNames[lunarDay - 1] || "廿三";
+
+            const year = date.getFullYear();
+            const stems = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
+            const branches = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+            const yearGanZhi = stems[(year - 4) % 10] + branches[(year - 4) % 12] + "年";
+
+            return `${yearGanZhi}${mStr}月${dStr}`;
+        }
+
+        function getLunarMonthDayString(date) {
+            if (!date || isNaN(date)) return "--";
+            const fullStr = getLunarDateString(date);
+            const match = fullStr.match(/.+年(.+)/);
+            return match ? match[1] : fullStr;
+        }
+
+        // 轉換方位角度為文字方向
+        function getAzimuthDirection(deg) {
+            const val = (deg + 360) % 360;
+            if (val >= 337.5 || val < 22.5) return "北";
+            if (val >= 22.5 && val < 67.5) return "東北";
+            if (val >= 67.5 && val < 112.5) return "東";
+            if (val >= 112.5 && val < 157.5) return "東南";
+            if (val >= 157.5 && val < 202.5) return "南";
+            if (val >= 202.5 && val < 247.5) return "西南";
+            if (val >= 247.5 && val < 292.5) return "西";
+            if (val >= 292.5 && val < 337.5) return "西北";
+            return "北";
+        }
+
         function updateAstronomicalData() {
             const lat = 22.3193;
             const lon = 114.1694;
             const now = new Date();
+            const year = now.getFullYear();
 
             const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
             document.getElementById('current-date-display').innerText = now.toLocaleDateString('zh-HK', dateOptions);
@@ -706,36 +747,50 @@
 
                 const sunrisePos = SunCalc.getPosition(sunTimes.sunrise, lat, lon);
                 sunriseAzimuthDeg = (sunrisePos.azimuth * (180 / Math.PI) + 180) % 360;
-                document.getElementById('sunrise-azimuth-text').innerHTML = `方位: ${Math.round(sunriseAzimuthDeg)}°`;
 
                 const sunsetPos = SunCalc.getPosition(sunTimes.sunset, lat, lon);
                 sunsetAzimuthDeg = (sunsetPos.azimuth * (180 / Math.PI) + 180) % 360;
-                document.getElementById('sunset-azimuth-text').innerHTML = `方位: ${Math.round(sunsetAzimuthDeg)}°`;
+            }
+
+            let isAfterSunriseBeforeSunset = sunTimes.sunrise && sunTimes.sunset && now >= sunTimes.sunrise && now < sunTimes.sunset;
+            let activeSunMode = userSunMode === 'auto' ? (isAfterSunriseBeforeSunset ? 'sunset' : 'sunrise') : userSunMode;
+
+            let sunPct = 50;
+
+            if (activeSunMode === 'sunset') {
+                document.getElementById('sun-viz-title').innerText = "🧭 日落方位軌跡 (夏至 - 東 - 冬至 - 南 - 冬至 - 西 - 夏至)";
+                let sunsetNorm = (sunsetAzimuthDeg - 244.9) / (295.8 - 244.9);
+                sunsetNorm = Math.max(0, Math.min(1, sunsetNorm));
+                sunPct = 66.7 + (sunsetNorm * 33.3);
+
+                document.getElementById('today-sun-marker').style.left = `${sunPct}%`;
+                const sLabel = document.getElementById('today-sun-label');
+                sLabel.style.left = `${sunPct}%`;
+                sLabel.innerText = `今日日落 ${Math.round(sunsetAzimuthDeg)}° (${getAzimuthDirection(sunsetAzimuthDeg)})`;
+            } else {
+                document.getElementById('sun-viz-title').innerText = "🧭 日出方位軌跡 (夏至 - 東 - 冬至 - 南 - 冬至 - 西 - 夏至)";
+                let sunriseNorm = (sunriseAzimuthDeg - 64.2) / (115.1 - 64.2);
+                sunriseNorm = Math.max(0, Math.min(1, sunriseNorm));
+                sunPct = sunriseNorm * 33.3;
+
+                document.getElementById('today-sun-marker').style.left = `${sunPct}%`;
+                const sLabel = document.getElementById('today-sun-label');
+                sLabel.style.left = `${sunPct}%`;
+                sLabel.innerText = `今日日出 ${Math.round(sunriseAzimuthDeg)}° (${getAzimuthDirection(sunriseAzimuthDeg)})`;
             }
 
             // --- 太陽即時仰角計算 ---
             const currentSunPos = SunCalc.getPosition(now, lat, lon);
             const currentSunAltDeg = currentSunPos.altitude * (180 / Math.PI);
+            const altitudeBanner = document.getElementById('sun-altitude-banner-text');
 
-            const sunriseAltEl = document.getElementById('sunrise-altitude-text');
-            const sunsetAltEl = document.getElementById('sunset-altitude-text');
-
-            if (currentSunAltDeg >= -6.0) {
-                sunriseAltEl.innerHTML = `即時仰角: ${currentSunAltDeg.toFixed(1)}°`;
-                sunsetAltEl.innerHTML = `即時仰角: ${currentSunAltDeg.toFixed(1)}°`;
+            if (currentSunAltDeg >= -18.0) {
+                altitudeBanner.innerHTML = `☀️ 太陽即時仰角: ${currentSunAltDeg.toFixed(1)}°`;
             } else {
-                sunriseAltEl.innerHTML = `即時仰角: 小於 -6.0° (曙暮光已完結)`;
-                sunsetAltEl.innerHTML = `即時仰角: 小於 -6.0° (曙暮光已完結)`;
+                altitudeBanner.innerHTML = `☀️ 太陽即時仰角: 小於 -18.0° (黑夜/天文暮光已完結)`;
             }
 
-            // --- 更新 360° 羅盤指針角度 ---
-            const sunrisePointer = document.getElementById('sunrise-pointer-line');
-            const sunsetPointer = document.getElementById('sunset-pointer-line');
-            if (sunrisePointer) sunrisePointer.style.transform = `rotate(${sunriseAzimuthDeg}deg)`;
-            if (sunsetPointer) sunsetPointer.style.transform = `rotate(${sunsetAzimuthDeg}deg)`;
-
-            // 2. 節氣計算
-            const year = now.getFullYear();
+            // 節氣計算
             const terms = [
                 { name: "春分", date: new Date(year, 2, 21) },
                 { name: "夏至", date: new Date(year, 5, 21) },
@@ -757,7 +812,7 @@
             const diffDays = Math.ceil((nextTerm.date - now) / (1000 * 60 * 60 * 24));
             document.getElementById('solar-term-text').innerHTML = `🌱 距離下一個重要節氣 <strong>${nextTerm.name}</strong> 還有 <strong>${diffDays}</strong> 天`;
 
-            // 3. 月相與月出月落計算
+            // 月相與月出月落計算
             const moonIllumination = SunCalc.getMoonIllumination(now);
             const moonTimes = SunCalc.getMoonTimes(now, lat, lon);
 
@@ -785,62 +840,107 @@
             `;
             document.getElementById('moon-svg-container').innerHTML = svgMoon;
 
-            const lunarDayApprox = Math.floor(p * 29.53) + 1;
-            document.getElementById('lunar-date-text').innerText = `農曆約初/廿 ${lunarDayApprox} 日`;
+            // 顯示完整農曆
+            document.getElementById('lunar-date-text').innerText = getLunarDateString(now);
 
             let moonriseAzimuthDeg = 90;
             let moonsetAzimuthDeg = 270;
 
             if (moonTimes.rise) {
                 document.getElementById('moonrise-time').innerText = moonTimes.rise.toLocaleTimeString('zh-HK', timeOptions);
+                document.getElementById('moonrise-lunar').innerText = getLunarMonthDayString(moonTimes.rise);
                 const moonriseDiff = moonTimes.rise - now;
                 document.getElementById('moonrise-countdown').innerText = formatCountdown(moonriseDiff);
                 
                 const moonrisePos = SunCalc.getMoonPosition(moonTimes.rise, lat, lon);
                 moonriseAzimuthDeg = (moonrisePos.azimuth * (180 / Math.PI) + 180) % 360;
-                document.getElementById('moonrise-azimuth-text').innerHTML = `方位: ${Math.round(moonriseAzimuthDeg)}°`;
             } else {
                 document.getElementById('moonrise-time').innerText = "今日無月出";
+                document.getElementById('moonrise-lunar').innerText = "--";
                 document.getElementById('moonrise-countdown').innerText = "--";
-                document.getElementById('moonrise-azimuth-text').innerHTML = `方位: --°`;
             }
 
             if (moonTimes.set) {
                 document.getElementById('moonset-time').innerText = moonTimes.set.toLocaleTimeString('zh-HK', timeOptions);
+                document.getElementById('moonset-lunar').innerText = getLunarMonthDayString(moonTimes.set);
                 const moonsetDiff = moonTimes.set - now;
                 document.getElementById('moonset-countdown').innerText = formatCountdown(moonsetDiff);
 
                 const moonsetPos = SunCalc.getMoonPosition(moonTimes.set, lat, lon);
                 moonsetAzimuthDeg = (moonsetPos.azimuth * (180 / Math.PI) + 180) % 360;
-                document.getElementById('moonset-azimuth-text').innerHTML = `方位: ${Math.round(moonsetAzimuthDeg)}°`;
             } else {
                 document.getElementById('moonset-time').innerText = "今日無月落";
+                document.getElementById('moonset-lunar').innerText = "--";
                 document.getElementById('moonset-countdown').innerText = "--";
-                document.getElementById('moonset-azimuth-text').innerHTML = `方位: --°`;
             }
 
-            // --- 月球方位視覺化條 ---
+            // --- 尋找下一次滿月 ---
+            let searchDate = new Date(now.getTime());
+            let nextFullMoonDate = null;
+            for (let i = 0; i < 30; i++) {
+                searchDate.setDate(searchDate.getDate() + 1);
+                let info = SunCalc.getMoonIllumination(searchDate);
+                if (info.phase >= 0.48 && info.phase <= 0.52) {
+                    nextFullMoonDate = new Date(searchDate);
+                    break;
+                }
+            }
+            if (!nextFullMoonDate) {
+                nextFullMoonDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+            }
+            
+            const fmRise = SunCalc.getMoonTimes(nextFullMoonDate, lat, lon);
+            const fmDateStr = nextFullMoonDate.toLocaleDateString('zh-HK', { month: 'long', day: 'numeric' });
+            const fmLunarStr = getLunarDateString(nextFullMoonDate);
+            
+            let fmRiseStr = "--:--";
+            let fmRiseAzStr = "--°";
+            let fmRiseDir = "--";
+            if (fmRise.rise) {
+                fmRiseStr = fmRise.rise.toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', hour12: false });
+                const fmRisePos = SunCalc.getMoonPosition(fmRise.rise, lat, lon);
+                const fmRiseAz = (fmRisePos.azimuth * (180 / Math.PI) + 180) % 360;
+                fmRiseAzStr = `${Math.round(fmRiseAz)}°`;
+                fmRiseDir = getAzimuthDirection(fmRiseAz);
+            }
+
+            let fmSetStr = "--:--";
+            let fmSetAzStr = "--°";
+            let fmSetDir = "--";
+            if (fmRise.set) {
+                fmSetStr = fmRise.set.toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', hour12: false });
+                const fmSetPos = SunCalc.getMoonPosition(fmRise.set, lat, lon);
+                const fmSetAz = (fmSetPos.azimuth * (180 / Math.PI) + 180) % 360;
+                fmSetAzStr = `${Math.round(fmSetAz)}°`;
+                fmSetDir = getAzimuthDirection(fmSetAz);
+            }
+
+            document.getElementById('next-fullmoon-text').innerHTML = 
+                `🌕 <strong>下一次滿月</strong>：${fmDateStr} (${fmLunarStr})<br>` +
+                `月出: ${fmRiseStr} (${fmRiseAzStr} ${fmRiseDir}) | 月落: ${fmSetStr} (${fmSetAzStr} ${fmSetDir})`;
+
+            // --- 月球方位視覺化條 (0° ~ 360°) ---
             let isAfterMoonriseBeforeMoonset = moonTimes.rise && moonTimes.set && moonTimes.rise < moonTimes.set && now >= moonTimes.rise && now < moonTimes.set;
             let activeMoonMode = userMoonMode === 'auto' ? (isAfterMoonriseBeforeMoonset ? 'moonset' : 'moonrise') : userMoonMode;
 
             if (activeMoonMode === 'moonset') {
-                document.getElementById('moon-viz-title').innerText = "🌘 月落方位動態基準 (左: 240° ⇄ 右: 300°)";
-                let moonSetPct = ((moonsetAzimuthDeg - 240.0) / (300.0 - 240.0)) * 100;
+                document.getElementById('moon-viz-title').innerText = "🌘 月落方位動態基準 (0° ~ 360°)";
+                let moonSetPct = (moonsetAzimuthDeg / 360.0) * 100;
                 moonSetPct = Math.max(0, Math.min(100, moonSetPct));
 
                 document.getElementById('today-moon-marker').style.left = `${moonSetPct}%`;
                 const mLabel = document.getElementById('today-moon-label');
                 mLabel.style.left = `${moonSetPct}%`;
-                mLabel.innerText = `今日月落 ${Math.round(moonsetAzimuthDeg)}°`;
+                mLabel.innerText = `今日月落 ${Math.round(moonsetAzimuthDeg)}° (${getAzimuthDirection(moonsetAzimuthDeg)})`;
             } else {
-                document.getElementById('moon-viz-title').innerText = "🌕 月出方位動態基準 (左: 60° ⇄ 右: 120°)";
-                let moonRisePct = ((moonriseAzimuthDeg - 60.0) / (120.0 - 60.0)) * 100;
+                document.getElementById('moon-viz-title').innerText = "🌕 月出方位動態基準 (0° ~ 360°)";
+                let moonRisePct = (moonriseAzimuthDeg / 360.0) * 100;
                 moonRisePct = Math.max(0, Math.min(100, moonRisePct));
 
                 document.getElementById('today-moon-marker').style.left = `${moonRisePct}%`;
                 const mLabel = document.getElementById('today-moon-label');
                 mLabel.style.left = `${moonRisePct}%`;
-                mLabel.innerText = `今日月出 ${Math.round(moonriseAzimuthDeg)}°`;
+                mLabel.innerText = `今日月出 ${Math.round(moonriseAzimuthDeg)}° (${getAzimuthDirection(moonriseAzimuthDeg)})`;
             }
         }
 
@@ -853,7 +953,7 @@
             { name: "環球貿易廣場 (東南)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic1/latest_IC1.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC1_photo.htm" },
             { name: "環球貿易廣場 (西南)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic2/latest_IC2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC2_photo.htm" },
             { name: "清水灣 (向東)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwa/latest_CWA.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CWA_photo.htm" },
-            { name: "中環 (維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CP1_photo.htm" },
+            { name: "中環 (維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CP1_photo.htm" },
             { name: "流浮山 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lfs/latest_LFS.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/LFS_photo.htm" },
             { name: "大帽山 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm2/latest_TM2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TM2_photo.htm" },
             { name: "大帽山 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm3/latest_TM3.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/tm3_photo.htm" },
