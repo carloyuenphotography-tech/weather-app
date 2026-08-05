@@ -269,6 +269,78 @@
             text-align: center;
         }
 
+        /* --- 日出方位視覺化動態條專屬樣式 --- */
+        .sunrise-viz-container {
+            margin-top: 12px;
+            padding: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        .sunrise-viz-title {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #0369a1;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .sunrise-track {
+            position: relative;
+            height: 8px;
+            background: linear-gradient(to right, #38bdf8, #cbd5e1, #fb923c);
+            border-radius: 4px;
+            margin: 20px 15px 25px 15px;
+        }
+        /* 基準定位點 (夏至、春秋分、冬至) */
+        .track-marker {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: #64748b;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+        }
+        .track-label {
+            position: absolute;
+            top: 14px;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: #475569;
+            white-space: nowrap;
+        }
+        /* 今日日出方位標記點 */
+        .today-marker {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 14px;
+            height: 14px;
+            background: #e11d48;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 6px rgba(225, 29, 72, 0.6);
+            z-index: 2;
+            transition: left 0.5s ease;
+        }
+        .today-label {
+            position: absolute;
+            bottom: 14px;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #e11d48;
+            white-space: nowrap;
+            background: #fff1f2;
+            padding: 1px 4px;
+            border-radius: 4px;
+            border: 1px solid #fecdd3;
+            z-index: 3;
+            transition: left 0.5s ease;
+        }
+
         .moon-header-flex {
             display: flex;
             align-items: center;
@@ -403,10 +475,10 @@
             </div>
         </div>
 
-        <!-- 2. 日出日落卡片 (左邊純日出時間/倒數，右邊日落+太陽即時仰角) -->
+        <!-- 2. 日出日落卡片連同日出方位視覺化條 -->
         <div class="card">
             <div class="card-header">
-                <h2>日出日落與太陽即時仰角</h2>
+                <h2>日出日落與方位視覺化</h2>
                 <a href="https://suncalc.org/#/22.3193,114.1694,12" class="btn-link" target="_blank">地圖檢視 ↗</a>
             </div>
             
@@ -417,7 +489,7 @@
                     <h3>🌅 日出</h3>
                     <div class="time" id="sunrise-time">計算中...</div>
                     <div class="countdown" id="sunrise-countdown">--</div>
-                    <div class="angle" style="margin-top: 15px; color: #0369a1;">早安，迎接晨光</div>
+                    <div class="angle" id="sunrise-azimuth-text" style="color: #0369a1;">方位: --°</div>
                 </div>
                 <div class="sun-box" style="background: #fff7ed; border-color: #fed7aa;">
                     <h3 style="color: #c2410c;">🌇 日落</h3>
@@ -426,12 +498,35 @@
                     <div class="angle" id="sun-live-status" style="color: #9a3412;">太陽即時<br>方位: --° | 仰角: --°</div>
                 </div>
             </div>
-            <div class="solar-term-info" id="solar-term-text">
+
+            <!-- 日出方位視覺化橫條 -->
+            <div class="sunrise-viz-container">
+                <div class="sunrise-viz-title">🧭 全年日出方位軌跡 (左: 夏至 ⇄ 右: 冬至)</div>
+                <div class="sunrise-track">
+                    <!-- 夏至基準點 (左 0%) -->
+                    <div class="track-marker" style="left: 0%;"></div>
+                    <div class="track-label" style="left: 0%;">夏至</div>
+
+                    <!-- 春秋分基準點 (中 50%) -->
+                    <div class="track-marker" style="left: 50%;"></div>
+                    <div class="track-label" style="left: 50%;">春秋分</div>
+
+                    <!-- 冬至基準點 (右 100%) -->
+                    <div class="track-marker" style="left: 100%;"></div>
+                    <div class="track-label" style="left: 100%;">冬至</div>
+
+                    <!-- 今日日出方位即時定位點 -->
+                    <div class="today-marker" id="today-sun-marker" style="left: 50%;"></div>
+                    <div class="today-label" id="today-sun-label" style="left: 50%;">今日 --°</div>
+                </div>
+            </div>
+
+            <div class="solar-term-info" id="solar-term-text" style="margin-top: 6px;">
                 正在計算節氣資訊...
             </div>
         </div>
 
-        <!-- 3. 月相與月出月落卡片 (左邊純月出時間/倒數，右邊月落+月球即時仰角) -->
+        <!-- 3. 月相與月出月落卡片 -->
         <div class="card">
             <div class="card-header">
                 <h2>月相與月球即時仰角</h2>
@@ -578,6 +673,7 @@
             const sunTimes = SunCalc.getTimes(now, lat, lon);
             const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Hong_Kong' };
 
+            let sunriseAzimuthDeg = 90; // 預設防錯
             if (sunTimes.sunrise && sunTimes.sunset) {
                 document.getElementById('sunrise-time').innerText = sunTimes.sunrise.toLocaleTimeString('zh-HK', timeOptions);
                 document.getElementById('sunset-time').innerText = sunTimes.sunset.toLocaleTimeString('zh-HK', timeOptions);
@@ -587,15 +683,32 @@
 
                 const sunsetDiff = sunTimes.sunset - now;
                 document.getElementById('sunset-countdown').innerText = formatCountdown(sunsetDiff);
+
+                // 計算今日日出時的方位角
+                const sunrisePos = SunCalc.getPosition(sunTimes.sunrise, lat, lon);
+                sunriseAzimuthDeg = (sunrisePos.azimuth * (180 / Math.PI) + 180) % 360;
+                document.getElementById('sunrise-azimuth-text').innerHTML = `方位: ${Math.round(sunriseAzimuthDeg)}°`;
             }
 
-            // 2. 太陽【此時此刻】的即時方位與仰角（放在日落卡片右側）
+            // --- 計算日出方位視覺化條的百分比位置 ---
+            // 香港地區全年日出極端方位大約介乎夏至 ~62° (左端 0%) 至冬至 ~118° (右端 100%) 之間
+            const minAzimuth = 62.0;  // 夏至日出方位
+            const maxAzimuth = 118.0; // 冬至日出方位
+            let percentage = ((sunriseAzimuthDeg - minAzimuth) / (maxAzimuth - minAzimuth)) * 100;
+            percentage = Math.max(0, Math.min(100, percentage)); // 限制在 0% ~ 100% 範圍內
+
+            document.getElementById('today-sun-marker').style.left = `${percentage}%`;
+            const todayLabel = document.getElementById('today-sun-label');
+            todayLabel.style.left = `${percentage}%`;
+            todayLabel.innerText = `今日 ${Math.round(sunriseAzimuthDeg)}°`;
+
+            // 2. 太陽【此時此刻】的即時方位與仰角
             const sunPosNow = SunCalc.getPosition(now, lat, lon);
-            let sunAzimuthDeg = (sunPosNow.azimuth * (180 / Math.PI) + 180) % 360;
+            let sunAzimuthNow = (sunPosNow.azimuth * (180 / Math.PI) + 180) % 360;
             let sunAltitudeDeg = sunPosNow.altitude * (180 / Math.PI);
 
             let sunStatus = sunAltitudeDeg > 0 ? "☀️ 陽光普照" : "🌙 太陽已落山";
-            document.getElementById('sun-live-status').innerHTML = `${sunStatus}<br>方位: ${Math.round(sunAzimuthDeg)}° | 仰角: ${sunAltitudeDeg.toFixed(1)}°`;
+            document.getElementById('sun-live-status').innerHTML = `${sunStatus}<br>方位: ${Math.round(sunAzimuthNow)}° | 仰角: ${sunAltitudeDeg.toFixed(1)}°`;
 
             // 3. 節氣計算
             const year = now.getFullYear();
@@ -669,7 +782,7 @@
                 document.getElementById('moonset-countdown').innerText = "--";
             }
 
-            // 5. 月球【此時此刻】的即時方位與仰角（放在月落卡片右側）
+            // 5. 月球【此時此刻】的即時方位與仰角
             const moonPosNow = SunCalc.getMoonPosition(now, lat, lon);
             let moonAzimuthDeg = (moonPosNow.azimuth * (180 / Math.PI) + 180) % 360;
             let moonAltitudeDeg = moonPosNow.altitude * (180 / Math.PI);
@@ -780,7 +893,7 @@
             { name: "橫瀾島 (西北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wgl/latest_WGL.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WGL_photo.htm" },
             { name: "橫瀾島 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wl2/latest_WL2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/wl2_photo.htm" },
             { name: "南丫島 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lam/latest_LAM.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/LAM_photo.htm" },
-            { name: "長洲 (向北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cs2/latest_CS2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CS2_photo.htm" },
+            { name: "長洲 (向北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cs2/latest_CS2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/cs2_photo.htm" },
             { name: "德瑞國際學校 (海洋公園)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/gsi/latest_GSI.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/GSI_photo.htm" },
             { name: "尖沙咀 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/hk2/latest_HK2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/hk2_photo.htm" },
             { name: "大欖涌 (大嶼山北部)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tlc/latest_TLC.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/tlc_photo.htm" },
