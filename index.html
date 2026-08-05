@@ -235,6 +235,12 @@
             border-radius: 8px;
             padding: 10px;
             text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .sun-box:hover {
+            background: #e0f2fe;
+            border-color: #0284c7;
         }
         .sun-box h3 {
             margin: 0 0 6px 0;
@@ -424,7 +430,7 @@
             padding: 15px;
             background: #ffffff;
             border-radius: 12px;
-            box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.05);
+            box-shadow: -4px 6px -1px rgb(0 0 0 / 0.05);
             font-size: 0.9rem; 
             color: #64748b;
         }
@@ -473,7 +479,7 @@
             </div>
         </div>
 
-        <!-- 2. 日出日落卡片 (自動切換視覺化條) -->
+        <!-- 2. 日出日落卡片 (支援點擊方格切換日出/日落方位顯示) -->
         <div class="card">
             <div class="card-header">
                 <h2 id="sun-card-title">日出日落與方位視覺化</h2>
@@ -483,32 +489,34 @@
             <div class="sun-date" id="current-date-display">載入日期中...</div>
             
             <div class="sun-info-grid">
-                <div class="sun-box">
-                    <h3>🌅 日出</h3>
+                <!-- 點擊左方格切換顯示「日出」軌跡 -->
+                <div class="sun-box" onclick="setSunDisplayMode('sunrise')">
+                    <h3>🌅 日出 (點擊切換)</h3>
                     <div class="time" id="sunrise-time">計算中...</div>
                     <div class="countdown" id="sunrise-countdown">--</div>
                     <div class="angle" id="sunrise-azimuth-text" style="color: #0369a1;">方位: --°</div>
                 </div>
-                <div class="sun-box" style="background: #fff7ed; border-color: #fed7aa;">
-                    <h3 style="color: #c2410c;">🌇 日落</h3>
+                <!-- 點擊右方格切換顯示「日落」軌跡 -->
+                <div class="sun-box" style="background: #fff7ed; border-color: #fed7aa;" onclick="setSunDisplayMode('sunset')">
+                    <h3 style="color: #c2410c;">🌇 日落 (點擊切換)</h3>
                     <div class="time" id="sunset-time" style="color: #7c2d12;">計算中...</div>
                     <div class="countdown" id="sunset-countdown" style="color: #c2410c;">--</div>
                     <div class="angle" id="sunset-azimuth-text" style="color: #9a3412;">方位: --°</div>
                 </div>
             </div>
 
-            <!-- 動態視覺化條 (自動切換日出/日落軌跡) -->
+            <!-- 動態視覺化條 -->
             <div class="sunrise-viz-container">
-                <div class="sunrise-viz-title" id="sun-viz-title">🧭 全年日出方位軌跡 (左: 夏至 ⇄ 右: 冬至)</div>
+                <div class="sunrise-viz-title" id="sun-viz-title">🧭 全年日出方位軌跡 (左: 冬至 ⇄ 右: 夏至)</div>
                 <div class="sunrise-track">
                     <div class="track-marker" id="sun-mark-left" style="left: 0%;"></div>
-                    <div class="track-label" id="sun-label-left" style="left: 0%;">夏至</div>
+                    <div class="track-label" id="sun-label-left" style="left: 0%;">冬至</div>
 
                     <div class="track-marker" id="sun-mark-mid" style="left: 50%;"></div>
                     <div class="track-label" id="sun-label-mid" style="left: 50%;">春秋分</div>
 
                     <div class="track-marker" id="sun-mark-right" style="left: 100%;"></div>
-                    <div class="track-label" id="sun-label-right" style="left: 100%;">冬至</div>
+                    <div class="track-label" id="sun-label-right" style="left: 100%;">夏至</div>
 
                     <div class="today-marker" id="today-sun-marker" style="left: 50%;"></div>
                     <div class="today-label" id="today-sun-label" style="left: 50%;">今日 --°</div>
@@ -520,7 +528,7 @@
             </div>
         </div>
 
-        <!-- 3. 月相與月出月落卡片 -->
+        <!-- 3. 月相與月出月落卡片 (支援點擊方格切換月出/月落方位顯示) -->
         <div class="card">
             <div class="card-header">
                 <h2 id="moon-card-title">月相與月出月落方位視覺化</h2>
@@ -536,14 +544,16 @@
             </div>
 
             <div class="sun-info-grid">
-                <div class="sun-box" style="background: #f8fafc; border-color: #cbd5e1;">
-                    <h3 style="color: #475569;">🌙 月出</h3>
+                <!-- 點擊左方格切換顯示「月出」軌跡 -->
+                <div class="sun-box" style="background: #f8fafc; border-color: #cbd5e1;" onclick="setMoonDisplayMode('moonrise')">
+                    <h3 style="color: #475569;">🌙 月出 (點擊切換)</h3>
                     <div class="time" id="moonrise-time" style="color: #334155;">計算中...</div>
                     <div class="countdown" id="moonrise-countdown" style="color: #475569;">--</div>
                     <div class="angle" id="moonrise-azimuth-text" style="color: #475569;">方位: --°</div>
                 </div>
-                <div class="sun-box" style="background: #f8fafc; border-color: #cbd5e1;">
-                    <h3 style="color: #475569;">🌘 月落</h3>
+                <!-- 點擊右方格切換顯示「月落」軌跡 -->
+                <div class="sun-box" style="background: #f8fafc; border-color: #cbd5e1;" onclick="setMoonDisplayMode('moonset')">
+                    <h3 style="color: #475569;">🌘 月落 (點擊切換)</h3>
                     <div class="time" id="moonset-time" style="color: #334155;">計算中...</div>
                     <div class="countdown" id="moonset-countdown" style="color: #475569;">--</div>
                     <div class="angle" id="moonset-azimuth-text" style="color: #475569;">方位: --°</div>
@@ -653,6 +663,20 @@
     </footer>
 
     <script>
+        // 用戶手動點擊切換模式的變數（預設為自動 auto，或手動強制 sunrise / sunset / moonrise / moonset）
+        let userSunMode = 'auto';
+        let userMoonMode = 'auto';
+
+        function setSunDisplayMode(mode) {
+            userSunMode = mode;
+            updateAstronomicalData();
+        }
+
+        function setMoonDisplayMode(mode) {
+            userMoonMode = mode;
+            updateAstronomicalData();
+        }
+
         function formatCountdown(diffMs) {
             const absMs = Math.abs(diffMs);
             const totalMins = Math.floor(absMs / (1000 * 60));
@@ -707,19 +731,20 @@
                 document.getElementById('sunset-azimuth-text').innerHTML = `方位: ${Math.round(sunsetAzimuthDeg)}°`;
             }
 
-            // --- 判斷日出後/日落前：自動切換日出或日落的視覺化條 ---
+            // --- 太陽方位視覺化條：根據自動或手動點擊模式顯示（右方為夏至） ---
             let isAfterSunriseBeforeSunset = sunTimes.sunrise && sunTimes.sunset && now >= sunTimes.sunrise && now < sunTimes.sunset;
+            let activeSunMode = userSunMode === 'auto' ? (isAfterSunriseBeforeSunset ? 'sunset' : 'sunrise') : userSunMode;
 
-            if (isAfterSunriseBeforeSunset) {
-                document.getElementById('sun-viz-title').innerText = "🧭 全年日落方位軌跡 (左: 夏至 298° ⇄ 右: 冬至 242°)";
-                document.getElementById('sun-label-left').innerText = "夏至(298°)";
+            if (activeSunMode === 'sunset') {
+                document.getElementById('sun-viz-title').innerText = "🧭 全年日落方位軌跡 (左: 冬至 242° ⇄ 右: 夏至 298°) [點擊方格可切換]";
+                document.getElementById('sun-label-left').innerText = "冬至(242°)";
                 document.getElementById('sun-label-mid').innerText = "春秋分(270°)";
-                document.getElementById('sun-label-right').innerText = "冬至(242°)";
+                document.getElementById('sun-label-right').innerText = "夏至(298°)";
                 
-                // 日落軌跡修正：左端為夏至高角度(298°)，右端為冬至低角度(242°)
-                const maxSunsetAz = 298.0; 
-                const minSunsetAz = 242.0;
-                let sunPct = ((maxSunsetAz - sunsetAzimuthDeg) / (maxSunsetAz - minSunsetAz)) * 100;
+                // 日落軌跡：左端冬至(242°) ~ 右端夏至(298°)
+                const minSunsetAz = 242.0; 
+                const maxSunsetAz = 298.0;
+                let sunPct = ((sunsetAzimuthDeg - minSunsetAz) / (maxSunsetAz - minSunsetAz)) * 100;
                 sunPct = Math.max(0, Math.min(100, sunPct));
                 
                 document.getElementById('today-sun-marker').style.left = `${sunPct}%`;
@@ -727,14 +752,15 @@
                 sLabel.style.left = `${sunPct}%`;
                 sLabel.innerText = `今日日落 ${Math.round(sunsetAzimuthDeg)}°`;
             } else {
-                document.getElementById('sun-viz-title').innerText = "🧭 全年日出方位軌跡 (左: 夏至 62° ⇄ 右: 冬至 118°)";
-                document.getElementById('sun-label-left').innerText = "夏至(62°)";
+                document.getElementById('sun-viz-title').innerText = "🧭 全年日出方位軌跡 (左: 冬至 118° ⇄ 右: 夏至 62°) [點擊方格可切換]";
+                document.getElementById('sun-label-left').innerText = "冬至(118°)";
                 document.getElementById('sun-label-mid').innerText = "春秋分(90°)";
-                document.getElementById('sun-label-right').innerText = "冬至(118°)";
+                document.getElementById('sun-label-right').innerText = "夏至(62°)";
 
-                const minSunriseAz = 62.0;  
-                const maxSunriseAz = 118.0; 
-                let sunPct = ((sunriseAzimuthDeg - minSunriseAz) / (maxSunriseAz - minSunriseAz)) * 100;
+                // 日出軌跡調轉：左端冬至(118°) ~ 右端夏至(62°)
+                const maxSunriseAz = 118.0;  
+                const minSunriseAz = 62.0; 
+                let sunPct = ((maxSunriseAz - sunriseAzimuthDeg) / (maxSunriseAz - minSunriseAz)) * 100;
                 sunPct = Math.max(0, Math.min(100, sunPct));
 
                 document.getElementById('today-sun-marker').style.left = `${sunPct}%`;
@@ -828,11 +854,12 @@
                 document.getElementById('moonset-azimuth-text').innerHTML = `方位: --°`;
             }
 
-            // --- 判斷月出後/月落前：自動切換月出或月落的視覺化條 ---
+            // --- 月球方位視覺化條：根據自動或手動點擊模式顯示 ---
             let isAfterMoonriseBeforeMoonset = moonTimes.rise && moonTimes.set && moonTimes.rise < moonTimes.set && now >= moonTimes.rise && now < moonTimes.set;
+            let activeMoonMode = userMoonMode === 'auto' ? (isAfterMoonriseBeforeMoonset ? 'moonset' : 'moonrise') : userMoonMode;
 
-            if (isAfterMoonriseBeforeMoonset) {
-                document.getElementById('moon-viz-title').innerText = "🌘 月落方位動態基準 (左: 240° ⇄ 右: 300°)";
+            if (activeMoonMode === 'moonset') {
+                document.getElementById('moon-viz-title').innerText = "🌘 月落方位動態基準 (左: 240° ⇄ 右: 300°) [點擊方格可切換]";
                 
                 let moonSetPct = ((moonsetAzimuthDeg - 240.0) / (300.0 - 240.0)) * 100;
                 moonSetPct = Math.max(0, Math.min(100, moonSetPct));
@@ -842,7 +869,7 @@
                 mLabel.style.left = `${moonSetPct}%`;
                 mLabel.innerText = `今日月落 ${Math.round(moonsetAzimuthDeg)}°`;
             } else {
-                document.getElementById('moon-viz-title').innerText = "🌕 月出方位動態基準 (左: 60° ⇄ 右: 120°)";
+                document.getElementById('moon-viz-title').innerText = "🌕 月出方位動態基準 (左: 60° ⇄ 右: 120°) [點擊方格可切換]";
 
                 let moonRisePct = ((moonriseAzimuthDeg - 60.0) / (120.0 - 60.0)) * 100;
                 moonRisePct = Math.max(0, Math.min(100, moonRisePct));
