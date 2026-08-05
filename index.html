@@ -108,7 +108,7 @@
             font-size: 1.0rem; 
         }
 
-        .large-map-card {
+        .large-card {
             grid-column: 1 / -1;
         }
 
@@ -322,6 +322,99 @@
         .status-normal { background: #e0f2fe; color: #0369a1; }
         .status-fair { background: #fef9c3; color: #854d0e; }
         .status-poor { background: #fee2e2; color: #991b1b; }
+
+        .forecast-content-box {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            color: #334155;
+            line-height: 1.5;
+        }
+        .forecast-content-box h4 {
+            margin: 0 0 6px 0;
+            color: #0369a1;
+            font-size: 1.0rem;
+            border-bottom: 1px dashed #cbd5e1;
+            padding-bottom: 4px;
+        }
+
+        .rainfall-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 8px;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding-right: 4px;
+        }
+        .rainfall-item {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 8px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .rainfall-place {
+            font-size: 0.9rem;
+            color: #334155;
+            font-weight: bold;
+        }
+        .rainfall-val {
+            font-size: 0.95rem;
+            color: #0284c7;
+            font-weight: bold;
+        }
+
+        .fnd-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .fnd-card-item {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .fnd-date {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #0369a1;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 4px;
+            margin-bottom: 6px;
+        }
+        .fnd-temp {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #0f172a;
+            margin: 4px 0;
+        }
+        .fnd-desc {
+            font-size: 0.85rem;
+            color: #475569;
+            line-height: 1.3;
+            margin-bottom: 6px;
+        }
+        .fnd-psr {
+            font-size: 0.75rem;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            font-weight: bold;
+            align-self: flex-start;
+        }
 
         .sunrise-viz-container {
             margin-top: 12px;
@@ -611,7 +704,98 @@
             </div>
         </div>
 
-        <!-- 4. 指定測站即時氣溫卡片 -->
+        <!-- 4. 本港地區天氣預報卡片 (flw API) -->
+        <div class="card">
+            <div class="card-header">
+                <h2>本港地區天氣預報</h2>
+                <a href="https://www.hko.gov.hk/tc/wxinfo/currwx/flw.htm" class="btn-link" target="_blank">天文台預報 ↗</a>
+            </div>
+            
+            <div class="forecast-content-box">
+                <h4>📌 天氣概況</h4>
+                <div id="flw-general">讀取中...</div>
+            </div>
+
+            <div class="forecast-content-box">
+                <h4>🌤️ 今明預測</h4>
+                <div id="flw-desc">讀取中...</div>
+            </div>
+
+            <div class="forecast-content-box">
+                <h4>📈 隨後展望</h4>
+                <div id="flw-outlook">讀取中...</div>
+            </div>
+
+            <div class="forecast-content-box" id="flw-tc-box" style="display: none;">
+                <h4>🌀 熱帶氣旋消息</h4>
+                <div id="flw-tc">--</div>
+            </div>
+
+            <div class="solar-term-info" id="flw-update-time" style="margin-top: 4px;">
+                💡 預報發布時間：讀取中...
+            </div>
+        </div>
+
+        <!-- 5. 每小時各區雨量卡片 (hourlyRainfall API) -->
+        <div class="card">
+            <div class="card-header">
+                <h2>每小時各區雨量</h2>
+                <a href="https://www.hko.gov.hk/tc/wxinfo/awsgis/regional_portal.html?ele=rainfall" class="btn-link" target="_blank">分區雨量 ↗</a>
+            </div>
+            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">
+                各區自動氣象站過去一小時雨量紀錄
+            </div>
+
+            <div class="rainfall-grid" id="rainfall-grid-container">
+                <div class="rainfall-item"><span class="rainfall-place">讀取中...</span><span class="rainfall-val">--</span></div>
+            </div>
+
+            <div class="solar-term-info" id="rainfall-update-time" style="margin-top: 10px;">
+                💡 雨量數據更新時間：讀取中...
+            </div>
+        </div>
+
+        <!-- 6. 閃電次數卡片 (新增 lhl API) -->
+        <div class="card">
+            <div class="card-header">
+                <h2>各區閃電次數</h2>
+                <a href="https://www.hko.gov.hk/tc/wxinfo/currwx/lightning.htm" class="btn-link" target="_blank">閃電位置 ↗</a>
+            </div>
+            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">
+                過去一小時各區閃電偵測紀錄
+            </div>
+
+            <div class="rainfall-grid" id="lightning-grid-container">
+                <div class="rainfall-item"><span class="rainfall-place">讀取中...</span><span class="rainfall-val">--</span></div>
+            </div>
+
+            <div class="solar-term-info" id="lightning-update-time" style="margin-top: 10px;">
+                💡 閃電數據更新時間：讀取中...
+            </div>
+        </div>
+
+        <!-- 7. 九天天氣預報卡片 (fnd API) -->
+        <div class="card large-card">
+            <div class="card-header">
+                <h2>九天天氣預報</h2>
+                <a href="https://www.hko.gov.hk/tc/wxinfo/currwx/fnd.htm" class="btn-link" target="_blank">天文台九天預報 ↗</a>
+            </div>
+            
+            <div class="forecast-content-box" style="margin-bottom: 12px;">
+                <h4>📌 九天預報天氣概況</h4>
+                <div id="fnd-general">讀取中...</div>
+            </div>
+
+            <div class="fnd-grid" id="fnd-grid-container">
+                <div class="fnd-card-item"><div class="fnd-date">讀取中...</div><div class="fnd-temp">--</div><div class="fnd-desc">--</div></div>
+            </div>
+
+            <div class="solar-term-info" id="fnd-update-time" style="margin-top: 4px;">
+                💡 九天預報更新時間：讀取中...
+            </div>
+        </div>
+
+        <!-- 8. 指定測站即時氣溫卡片 -->
         <div class="card">
             <div class="card-header">
                 <h2>指定測站即時氣溫</h2>
@@ -647,7 +831,7 @@
             </div>
         </div>
 
-        <!-- 5. 香港水域能見度資訊卡片 -->
+        <!-- 9. 香港水域能見度資訊卡片 -->
         <div class="card">
             <div class="card-header">
                 <h2>香港水域能見度</h2>
@@ -683,7 +867,7 @@
             </div>
         </div>
 
-        <!-- 6. 各區即時風向風速卡片 -->
+        <!-- 10. 各區即時風向風速卡片 -->
         <div class="card">
             <div class="card-header">
                 <h2>各區即時風向與風速</h2>
@@ -719,8 +903,8 @@
             </div>
         </div>
 
-        <!-- 7. 天氣預測地圖 (衛星雲圖) -->
-        <div class="card large-map-card">
+        <!-- 11. 天氣預測地圖 (衛星雲圖) -->
+        <div class="card large-card">
             <div class="card-header">
                 <h2>衛星雲圖</h2>
                 <a href="https://www.windy.com/?22.300,114.170,6,i:satellite" class="btn-link" target="_blank">全螢幕 ↗</a>
@@ -730,8 +914,8 @@
             </div>
         </div>
 
-        <!-- 8. Windy 雷達圖 -->
-        <div class="card large-map-card">
+        <!-- 12. Windy 雷達圖 -->
+        <div class="card large-card">
             <div class="card-header">
                 <h2>雷達圖</h2>
                 <a href="https://www.windy.com/?22.300,114.170,8,i:radar" class="btn-link" target="_blank">全螢幕 ↗</a>
@@ -742,7 +926,7 @@
         </div>
 
         <!-- Windy 詳細天氣預測數據 -->
-        <div class="card" style="grid-column: 1 / -1;">
+        <div class="card large-card">
             <div class="card-header">
                 <h2>Windy 詳細天氣預測數據</h2>
             </div>
@@ -753,7 +937,7 @@
     </div>
 
     <footer>
-        <div>版本號碼：v2.1.3 | 作者：<a href="https://www.instagram.com/_852.carlo" target="_blank">@_852.carlo</a></div>
+        <div>版本號碼：v2.5.0 | 作者：<a href="https://www.instagram.com/_852.carlo" target="_blank">@_852.carlo</a></div>
         <div id="update-time" style="margin-top: 6px;">最後更新時間：載入中...</div>
     </footer>
 
@@ -842,9 +1026,144 @@
             return "北";
         }
 
-        // 非同步調用香港天文台開放數據 API（失敗時嚴格顯示 --）
+        // 非同步調用香港天文台開放數據 API
         async function fetchHKOWeatherData() {
             const nowTimeStr = new Date().toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+            // -3. 抓取閃電次數 (lhl API)
+            try {
+                const lhlRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/opendata.php?dataType=lhl&rformat=json&lang=tc');
+                if (lhlRes.ok) {
+                    const lhlJson = await lhlRes.json();
+                    if (lhlJson && lhlJson.data && Array.isArray(lhlJson.data)) {
+                        let lhlHTML = "";
+                        let recordTimeStr = nowTimeStr;
+                        lhlJson.data.forEach(row => {
+                            let timeRange = row[0]; // e.g. "202608051700-202608051759"
+                            let type = row[1];      // e.g. "雲對地" 或 "雲間"
+                            let region = row[2];    // e.g. "新界西"
+                            let count = row[3];     // e.g. "0"
+
+                            if (timeRange && timeRange.length >= 25) {
+                                recordTimeStr = `${timeRange.substring(8, 10)}:${timeRange.substring(10, 12)}`;
+                            }
+
+                            lhlHTML += `
+                                <div class="rainfall-item">
+                                    <span class="rainfall-place">${region} (${type})</span>
+                                    <span class="rainfall-val">${count} 次</span>
+                                </div>
+                            `;
+                        });
+                        document.getElementById('lightning-grid-container').innerHTML = lhlHTML || '<div class="rainfall-item"><span class="rainfall-place">暫無數據</span><span class="rainfall-val">--</span></div>';
+                        document.getElementById('lightning-update-time').innerHTML = `💡 閃電數據更新時間：<strong>${recordTimeStr}</strong> (香港天文台)`;
+                    }
+                }
+            } catch (err) {
+                document.getElementById('lightning-grid-container').innerHTML = `<div class="rainfall-item"><span class="rainfall-place">讀取失敗</span><span class="rainfall-val">--</span></div>`;
+                document.getElementById('lightning-update-time').innerHTML = `💡 閃電數據讀取失敗 (${nowTimeStr})`;
+            }
+
+            // -2. 抓取每小時各區雨量 (hourlyRainfall API)
+            try {
+                const rainRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/hourlyRainfall.php?lang=tc');
+                if (rainRes.ok) {
+                    const rainJson = await rainRes.json();
+                    if (rainJson && rainJson.hourlyRainfall && Array.isArray(rainJson.hourlyRainfall)) {
+                        let rainHTML = "";
+                        rainJson.hourlyRainfall.forEach(item => {
+                            let place = item.place || "--";
+                            let val = item.value !== undefined ? `${item.value} ${item.unit || '毫米'}` : "--";
+                            rainHTML += `
+                                <div class="rainfall-item">
+                                    <span class="rainfall-place">${place}</span>
+                                    <span class="rainfall-val">${val}</span>
+                                </div>
+                            `;
+                        });
+                        document.getElementById('rainfall-grid-container').innerHTML = rainHTML || '<div class="rainfall-item"><span class="rainfall-place">暫無數據</span><span class="rainfall-val">--</span></div>';
+                        
+                        let rainTimeStr = rainJson.recordTime ? rainJson.recordTime.substring(11, 16) : nowTimeStr;
+                        document.getElementById('rainfall-update-time').innerHTML = `💡 雨量數據更新時間：<strong>${rainTimeStr}</strong> (香港天文台)`;
+                    }
+                }
+            } catch (err) {
+                document.getElementById('rainfall-grid-container').innerHTML = `<div class="rainfall-item"><span class="rainfall-place">讀取失敗</span><span class="rainfall-val">--</span></div>`;
+                document.getElementById('rainfall-update-time').innerHTML = `💡 雨量數據讀取失敗 (${nowTimeStr})`;
+            }
+
+            // -1. 抓取九天天氣預報 (fnd API)
+            try {
+                const fndRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=tc');
+                if (fndRes.ok) {
+                    const fndJson = await fndRes.json();
+                    if (fndJson) {
+                        document.getElementById('fnd-general').innerText = fndJson.generalSituation || "--";
+                        
+                        if (fndJson.weatherForecast && Array.isArray(fndJson.weatherForecast)) {
+                            let gridHTML = "";
+                            fndJson.weatherForecast.forEach(day => {
+                                let fDate = day.forecastDate;
+                                let formattedDate = fDate ? `${fDate.substring(4,6)}月${fDate.substring(6,8)}日` : "--";
+                                let weekStr = day.week || "";
+                                let mint = day.forecastMintemp ? day.forecastMintemp.value : "--";
+                                let maxt = day.forecastMaxtemp ? day.forecastMaxtemp.value : "--";
+                                let unit = day.forecastMintemp ? day.forecastMintemp.unit : "C";
+                                let desc = day.forecastWeather || "--";
+                                let psr = day.PSR || "--";
+
+                                gridHTML += `
+                                    <div class="fnd-card-item">
+                                        <div>
+                                            <div class="fnd-date">${formattedDate} (${weekStr})</div>
+                                            <div class="fnd-temp">${mint} ~ ${maxt} °${unit}</div>
+                                            <div class="fnd-desc">${desc}</div>
+                                        </div>
+                                        <div class="fnd-psr">降雨概率: ${psr}</div>
+                                    </div>
+                                `;
+                            });
+                            document.getElementById('fnd-grid-container').innerHTML = gridHTML;
+                        }
+
+                        let fndTimeStr = fndJson.updateTime ? fndJson.updateTime.substring(11, 16) : nowTimeStr;
+                        document.getElementById('fnd-update-time').innerHTML = `💡 九天預報更新時間：<strong>${fndTimeStr}</strong> (香港天文台)`;
+                    }
+                }
+            } catch (err) {
+                document.getElementById('fnd-general').innerText = "--";
+                document.getElementById('fnd-grid-container').innerHTML = `<div class="fnd-card-item"><div class="fnd-date">讀取失敗</div><div class="fnd-temp">--</div><div class="fnd-desc">無法取得九天預報數據</div></div>`;
+                document.getElementById('fnd-update-time').innerHTML = `💡 九天預報讀取失敗 (${nowTimeStr})`;
+            }
+
+            // 0. 抓取本港地區天氣預報 (flw API)
+            try {
+                const flwRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=flw&lang=tc');
+                if (flwRes.ok) {
+                    const flwJson = await flwRes.json();
+                    if (flwJson) {
+                        document.getElementById('flw-general').innerText = flwJson.generalSituation || "--";
+                        document.getElementById('flw-desc').innerText = flwJson.forecastDesc || "--";
+                        document.getElementById('flw-outlook').innerText = flwJson.outlook || "--";
+                        
+                        if (flwJson.tcInfo && flwJson.tcInfo.trim() !== "") {
+                            document.getElementById('flw-tc').innerText = flwJson.tcInfo;
+                            document.getElementById('flw-tc-box').style.display = "block";
+                        } else {
+                            document.getElementById('flw-tc-box').style.display = "none";
+                        }
+
+                        let updateTimeStr = flwJson.updateTime ? flwJson.updateTime.substring(11, 16) : nowTimeStr;
+                        document.getElementById('flw-update-time').innerHTML = `💡 預報發布時間：<strong>${updateTimeStr}</strong> (香港天文台)`;
+                    }
+                }
+            } catch (err) {
+                document.getElementById('flw-general').innerText = "--";
+                document.getElementById('flw-desc').innerText = "--";
+                document.getElementById('flw-outlook').innerText = "--";
+                document.getElementById('flw-tc-box').style.display = "none";
+                document.getElementById('flw-update-time').innerHTML = `💡 天氣預報讀取失敗 (${nowTimeStr})`;
+            }
 
             // 1. 抓取各區氣溫 (rhrh)
             try {
@@ -878,7 +1197,7 @@
                 document.getElementById('temp-update-time').innerHTML = `💡 氣溫數據讀取失敗 (${nowTimeStr})`;
             }
 
-            // 2. 抓取能見度 (ltmv) - 根據陣列格式解析
+            // 2. 抓取能見度 (ltmv)
             try {
                 const visRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/opendata.php?dataType=ltmv&rformat=json&lang=tc');
                 if (visRes.ok) {
@@ -886,9 +1205,9 @@
                     if (visJson && visJson.data && Array.isArray(visJson.data)) {
                         let recordTimeStr = nowTimeStr;
                         visJson.data.forEach(row => {
-                            let timeVal = row[0]; // 例如 "202608051750"
-                            let station = row[1]; // 例如 "中環"
-                            let visVal = row[2];  // 例如 "18 公里"
+                            let timeVal = row[0];
+                            let station = row[1];
+                            let visVal = row[2];
 
                             if (timeVal && timeVal.length >= 12) {
                                 recordTimeStr = `${timeVal.substring(8, 10)}:${timeVal.substring(10, 12)}`;
@@ -898,7 +1217,6 @@
                                 document.getElementById(valId).innerText = valStr;
                                 const statEl = document.getElementById(statId);
                                 
-                                // 萃取數字作狀態判斷
                                 let numMatch = valStr.match(/([\d\.]+)/);
                                 if (numMatch) {
                                     let kmVal = parseFloat(numMatch[1]);
