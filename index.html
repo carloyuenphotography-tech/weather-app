@@ -611,7 +611,7 @@
             </div>
         </div>
 
-        <!-- 4. 指定測站即時氣溫卡片 (新增) -->
+        <!-- 4. 指定測站即時氣溫卡片 -->
         <div class="card">
             <div class="card-header">
                 <h2>指定測站即時氣溫</h2>
@@ -719,7 +719,7 @@
             </div>
         </div>
 
-        <!-- 7. 天氣預測地圖 (衛星雲圖 - visible 可見光預設) -->
+        <!-- 7. 天氣預測地圖 (衛星雲圖) -->
         <div class="card large-map-card">
             <div class="card-header">
                 <h2>衛星雲圖</h2>
@@ -753,7 +753,7 @@
     </div>
 
     <footer>
-        <div>版本號碼：v2.1.0 | 作者：<a href="https://www.instagram.com/_852.carlo" target="_blank">@_852.carlo</a></div>
+        <div>版本號碼：v2.1.1 | 作者：<a href="https://www.instagram.com/_852.carlo" target="_blank">@_852.carlo</a></div>
         <div id="update-time" style="margin-top: 6px;">最後更新時間：載入中...</div>
     </footer>
 
@@ -842,11 +842,11 @@
             return "北";
         }
 
-        // 串接香港天文台即時氣溫、能見度、風速 API
+        // 非同步調用香港天文台開放數據 API
         async function fetchHKOWeatherData() {
             const nowTimeStr = new Date().toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', hour12: false });
 
-            // 1. 抓取各區氣溫 (rhrh API)
+            // 1. 抓取各區氣溫 (rhrh)
             try {
                 const tempRes = await fetch('https://data.weather.gov.hk/weatherAPI/hko/opendata/weather.php?dataType=rhrh&lang=tc');
                 if (tempRes.ok) {
@@ -874,9 +874,9 @@
                 document.getElementById('temp-update-time').innerHTML = `💡 氣溫數據讀取時間：${nowTimeStr}`;
             }
 
-            // 2. 能見度 (vism)
+            // 2. 抓取能見度 (ltmv)
             try {
-                const visRes = await fetch('https://data.weather.gov.hk/weatherAPI/hko/opendata/weather.php?dataType=vism&lang=tc');
+                const visRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/opendata.php?dataType=ltmv&rformat=json&lang=tc');
                 if (visRes.ok) {
                     const visData = await visRes.json();
                     if (visData && visData.data) {
@@ -924,7 +924,7 @@
                 document.getElementById('vis-update-time').innerHTML = `💡 能見度讀取時間：${nowTimeStr}`;
             }
 
-            // 3. 風速 (wind)
+            // 3. 抓取風速 (wind)
             try {
                 const windRes = await fetch('https://data.weather.gov.hk/weatherAPI/hko/opendata/weather.php?dataType=wind&lang=tc');
                 if (windRes.ok) {
@@ -1206,7 +1206,7 @@
             { name: "橫瀾島 (西北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wgl/latest_WGL.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WGL_photo.htm" },
             { name: "橫瀾島 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wl2/latest_WL2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/wl2_photo.htm" },
             { name: "南丫島 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lam/latest_LAM.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/LAM_photo.htm" },
-            { name: "長洲 (向北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cs2/latest_CS2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/cs2_photo.htm" },
+            { name: "長洲 (向北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cs2/latest_CS2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/cs2_photo.htm" },
             { name: "德瑞國際學校 (海洋公園)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/gsi/latest_GSI.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/GSI_photo.htm" },
             { name: "尖沙咀 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/hk2/latest_HK2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/hk2_photo.htm" },
             { name: "大欖涌 (大嶼山北部)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tlc/latest_TLC.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/tlc_photo.htm" },
