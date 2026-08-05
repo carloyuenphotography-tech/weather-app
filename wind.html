@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>香港天文台即時風力資料</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        #loading { color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <h2>香港天文台最新 10 分鐘風力資料</h2>
+    <div id="loading">正在讀取資料...</div>
+    
+    <table id="windTable" style="display:none;">
+        <thead>
+            <tr id="tableHeader"></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+
+    <script>
+    // 使用 cors proxy 繞過限制
+    const targetUrl = 'https://data.weather.gov.hk/weatherAPI/hko_data/csdi/dataset/latest_10min_wind_csdi_19.csv';
+    const csvUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
+
+    async function fetchWindData() {
+        try {
+            const response = await fetch(csvUrl);
+            if (!response.ok) throw new Error('網絡回應錯誤');
+            
+            const csvText = await response.text();
+            parseCSV(csvText);
+        } catch (error) {
+            document.getElementById('loading').innerText = '讀取資料失敗: ' + error.message;
+        }
+    }
+
+    // parseCSV 函數保持不變...
+</script>
+
+</body>
+</html>
