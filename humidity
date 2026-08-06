@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <title>各區氣象站相對濕度</title>
+    <style>
+        .weather-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .station-card { border: 1px solid #ccc; padding: 15px; border-radius: 8px; background: #f9f9f9; }
+    </style>
+</head>
+<body>
+
+    <h1>各區自動氣象站相對濕度</h1>
+       </div>
+<h1>各區自動氣象站相對濕度</h1>
+    <div id="station-container" class="weather-grid">載入資料中...</div>
+
+    <script>
+        const TOKEN = 'patBE97pYHsTM2kuT';
+        const BASE_ID = 'appSQoxzwEaKHLidf';
+        const TABLE_NAME = 'HK_Weather_Logs';
+
+        async function fetchLatestWeather() {
+            // 抓取最近的記錄（確保涵蓋所有站點的最新一筆）
+            const url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}?maxRecords=50&sort[0][field]=Datetime&sort[0][direction]=desc`;
+
+            try {
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${TOKEN}` }
+                });
+                const data = await response.json();
+
+                // 用一個物件來儲存每個站點「最新」的那筆數據（避免重複顯示舊紀錄）
+                const latestDataByStation = {};
+                
+                data.records.forEach(record => {
+                    const station = record.fields['Automatic Weather Station'];
+                    const humidity = record.fields['Relative Humidity(percent)'];
+                    const time = record.fields['Datetime'];
+
+                    // 因為是以時間由新到舊排序，如果這個站還沒被存過，就記錄下來
+                    if (station && !latestDataByStation[station]) {
+                        latestDataByStation[station] = { humidity, time };
+                    }
+                });
+
+                // 渲染到網頁上
+                const container = document.getElementById('station-container');
+                container.innerHTML = '';
+
+                for (const [station, info] of Object.entries(latestDataByStation)) {
+                    container.innerHTML += `
+                        <div class="station-card">
+                            <h3>${station}</h3>
+                            <p>相對濕度：<strong>${info.humidity}%</strong></p>
+                            <small>更新時間：${info.time}</small>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('讀取失敗:', error);
+                document.getElementById('station-container').innerHTML = '無法載入氣象資料。';
+            }
+        }
+
+        fetchLatestWeather();
+    </script>
+</body>
+</html>
