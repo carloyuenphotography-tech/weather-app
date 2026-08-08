@@ -326,6 +326,14 @@
             padding-bottom: 4px;
         }
 
+        /* 九天天氣預報樣式 */
+        .forecast-general { background: #f0f9ff; border: 1px solid #bae6fd; padding: 10px 12px; border-radius: 8px; font-size: 0.95rem; margin-bottom: 12px; line-height: 1.4; color: #0369a1; }
+        .fnd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+        .fnd-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
+        .fnd-date { font-weight: bold; font-size: 0.9rem; color: #0f172a; margin-bottom: 4px; }
+        .fnd-temp { font-size: 0.95rem; font-weight: bold; color: #0284c7; margin: 6px 0; }
+        .fnd-hum { font-size: 0.8rem; color: #475569; }
+
         .sunrise-viz-container {
             margin-top: 12px;
             padding: 10px;
@@ -467,7 +475,7 @@
 <body>
 
     <header>
-        <h1>觀天之道．賞天之雲---即時天氣資訊</h1>
+        <h1>【觀天之道．賞天之雲】即時天氣資訊面板</h1>
         
         <div class="menu-container">
             <a href="photo.html" class="menu-btn" target="_blank">📷 天氣相片</a>
@@ -646,7 +654,7 @@
             </div>
         </div>
 
-        <!-- 8. 香港水域能見度 -->
+        <!-- 5. 香港水域能見度 -->
         <div class="card">
             <div class="card-header">
                 <h2>香港水域能見度</h2>
@@ -682,18 +690,32 @@
             </div>
         </div>
 
-        <!-- 5. 衛星雲圖 -->
+        <!-- 6. 九天天氣預報 (置於衛星雲圖之前) -->
+        <div class="card large-card">
+            <div class="card-header">
+                <h2>九天天氣預報</h2>
+                <div id="fnd-update-time" style="font-size: 0.85rem; color: #64748b; font-weight: bold;">載入中...</div>
+            </div>
+            <div class="forecast-general" id="fnd-general-situation">
+                正在讀取天氣概況...
+            </div>
+            <div id="fnd-container" class="fnd-grid">
+                <p>正在載入九天預報數據...</p>
+            </div>
+        </div>
+
+        <!-- 7. 衛星雲圖 -->
         <div class="card large-card">
             <div class="card-header">
                 <h2>衛星雲圖</h2>
                 <a href="https://www.windy.com/?22.300,114.170,6,i:satellite" class="btn-link" target="_blank">全螢幕 ↗</a>
             </div>
             <div class="large-map-container">
-                <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=6&level=surface&overlay=visible&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"></iframe>
+                <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=6&level=surface&overlay=statellite&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"></iframe>
             </div>
         </div>
 
-        <!-- 6. 雷達圖 -->
+        <!-- 8. 雷達圖 -->
         <div class="card large-card">
             <div class="card-header">
                 <h2>雷達圖</h2>
@@ -704,8 +726,7 @@
             </div>
         </div>
 
-
-
+    </div>
 
     <footer>
         <div>版本號碼：v2.20.1 | 作者：<a href="https://www.instagram.com/_852.carlo" target="_blank">@_852.carlo</a></div>
@@ -790,6 +811,54 @@
             return "北";
         }
 
+        // 1. 抓取九天天氣預報 (FND API)
+        async function fetchNineDayForecast() {
+            const container = document.getElementById('fnd-container');
+            const generalEl = document.getElementById('fnd-general-situation');
+            const timeEl = document.getElementById('fnd-update-time');
+
+            try {
+                const res = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=tc');
+                const data = await res.json();
+
+                if (data && data.weatherForecast) {
+                    generalEl.innerText = data.generalSituation || "暫無天氣概況";
+                    
+                    if (data.updateTime) {
+                        const ut = data.updateTime.replace('T', ' ').substring(0, 16);
+                        timeEl.innerText = `發布時間: ${ut}`;
+                    }
+
+                    container.innerHTML = '';
+                    data.records.forEach(day => {
+                        let dStr = day.forecastDate;
+                        let formattedDate = `${dStr.substring(4, 6)}/${dStr.substring(6, 8)}`;
+                        
+                        let minTemp = day.forecastMintemp ? `${day.forecastMintemp.value}°C` : '--';
+                        let maxTemp = day.forecastMaxtemp ? `${day.forecastMaxtemp.value}°C` : '--';
+                        let minRh = day.forecastMinrh ? `${day.forecastMinrh.value}%` : '';
+                        let maxRh = day.forecastMaxrh ? `${day.forecastMaxrh.value}%` : '';
+                        let humStr = (minRh && maxRh) ? `濕度: ${minRh}-${maxRh}` : '';
+
+                        container.innerHTML += `
+                            <div class="fnd-box">
+                                <div>
+                                    <div class="fnd-date">${formattedDate} (${day.week})</div>
+                                    <div style="font-size: 0.8rem; color: #0284c7; font-weight: bold; margin-bottom: 4px;">${day.forecastWeather}</div>
+                                </div>
+                                <div>
+                                    <div class="fnd-temp">${minTemp} - ${maxTemp}</div>
+                                    <div class="fnd-hum">${humStr}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (err) {
+                container.innerHTML = `<p style="color:red;">九天天氣預報載入失敗。</p>`;
+            }
+        }
+
         async function fetchHKOWeatherData() {
             const nowTimeStr = new Date().toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', hour12: false });
 
@@ -835,99 +904,7 @@
                 document.getElementById('vis-update-time').innerHTML = `💡 能見度讀取失敗 (${nowTimeStr})`;
             }
 
-            // 2. 抓取各區相對濕度 CSV 數據 (修正為帶有 _uc.csv 的繁體中文正確網址)
-            try {
-                const humRes = await fetch('https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_1min_humidity_uc.csv');
-                if (humRes.ok) {
-                    const csvText = await humRes.text();
-                    let recordTimeStr = nowTimeStr;
-                    
-                    csvText.split('\n').forEach((line, index) => {
-                        if (index === 0 || !line.trim()) return;
-                        let cols = line.split(',');
-                        if (cols.length >= 10) {
-                            let hour = cols[3], minute = cols[4];
-                            if (hour && minute) {
-                                recordTimeStr = `${hour.padStart(2,'0')}:${minute.padStart(2,'0')}`;
-                            }
-
-                            let stationEn = cols[7] || "";
-                            let stationZh = cols[18] || "";
-                            let humidityVal = cols[9] || "--";
-
-                            function updateHumBox(valId, statId, hum) {
-                                document.getElementById(valId).innerText = `${hum}%`;
-                                const statEl = document.getElementById(statId);
-                                let hNum = parseInt(hum);
-                                if (!isNaN(hNum)) {
-                                    if (hNum >= 85) { statEl.innerText = "潮濕"; statEl.className = "vis-status status-fair"; }
-                                    else if (hNum >= 50) { statEl.innerText = "舒適"; statEl.className = "vis-status status-good"; }
-                                    else { statEl.innerText = "乾燥"; statEl.className = "vis-status status-poor"; }
-                                }
-                            }
-
-                            if (stationEn.includes('Hong Kong Observatory') || stationZh.includes('天文台')) {
-                                updateHumBox('hum-hko', 'status-hum-hko', humidityVal);
-                            }
-                            if (stationEn.includes('Chek Lap Kok') || stationZh.includes('赤鱲角')) {
-                                updateHumBox('hum-airport', 'status-hum-airport', humidityVal);
-                            }
-                            if (stationEn.includes('Sha Tin') || stationZh.includes('沙田')) {
-                                updateHumBox('hum-st', 'status-hum-st', humidityVal);
-                            }
-                            if (stationEn.includes('Cheung Chau') || stationZh.includes('長洲')) {
-                                updateHumBox('hum-cc', 'status-hum-cc', humidityVal);
-                            }
-                        }
-                    });
-                    document.getElementById('hum-update-time').innerHTML = `💡 相對濕度更新時間：<strong>${recordTimeStr}</strong> (香港天文台)`;
-                }
-            } catch (err) {
-                document.getElementById('hum-update-time').innerHTML = `💡 相對濕度讀取失敗 (${nowTimeStr})`;
-            }
-
-            // 3. 串接 CSDI dataset_18.csv 風速數據（專注天星碼頭）
-            try {
-                const windRes = await fetch('https://data.weather.gov.hk/weatherAPI/hko_data/csdi/dataset/latest_10min_wind_csdi_18.csv');
-                if (windRes.ok) {
-                    const csvText = await windRes.text();
-                    let recordTimeStr = nowTimeStr;
-                    let found = false;
-                    
-                    csvText.split('\n').forEach((line, index) => {
-                        if (index === 0 || !line.trim()) return;
-                        let cols = line.split(',');
-                        if (cols.length >= 11) {
-                            let year = cols[0], month = cols[1], day = cols[2], hour = cols[3], minute = cols[4];
-                            if (year && month && day && hour && minute) {
-                                recordTimeStr = `${hour.padStart(2,'0')}:${minute.padStart(2,'0')}`;
-                            }
-
-                            let stationEn = cols[7] || "";
-                            let stationZh = cols[18] || "";
-                            let windDirZh = cols[19] || cols[8] || "--";
-                            let windSpeed = cols[9] || "--";
-
-                            if (stationEn.includes('Star Ferry') || stationZh.includes('天星碼頭')) {
-                                document.getElementById('wind-star').innerText = `${windSpeed} km/h`;
-                                document.getElementById('dir-star').innerText = `方向: ${windDirZh}`;
-                                found = true;
-                            }
-                        }
-                    });
-                    if (found) {
-                        document.getElementById('wind-update-time').innerHTML = `💡 風速數據更新時間：<strong>${recordTimeStr}</strong> (CSDI dataset_18)`;
-                    } else {
-                        document.getElementById('wind-update-time').innerHTML = `💡 找不到天星碼頭數據 (${nowTimeStr})`;
-                    }
-                } else {
-                    throw new Error('dataset_18 fetch failed');
-                }
-            } catch (err) {
-                document.getElementById('wind-update-time').innerHTML = `💡 風速數據讀取失敗 (${nowTimeStr})`;
-            }
-
-            // 4. 抓取本港地區天氣預報 (flw API)
+            // 2. 抓取本港地區天氣預報 (flw API)
             try {
                 const flwRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=flw&lang=tc');
                 if (flwRes.ok) {
@@ -1208,7 +1185,12 @@
         }
         updateTimestamp();
 
+        // 初始化執行資料抓取
+        fetchNineDayForecast();
+        fetchHKOWeatherData();
+
         setInterval(() => {
+            fetchNineDayForecast();
             fetchHKOWeatherData();
         }, 10 * 60 * 1000);
 
