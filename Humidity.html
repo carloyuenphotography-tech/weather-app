@@ -3,73 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【觀天之道．賞天之雲】即時天氣資訊面板</title>
+    <title>觀天之道 - 即時相對濕度面板</title>
     <link rel="icon" type="image/png" href="myweatherapp.png">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
     <style>
-        /* 保留你原有的風格設定，新增 Airtable 卡片樣式 */
         :root { --primary-color: #0284c7; --bg-color: #e2e8f0; --card-bg: #ffffff; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); padding: 15px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); padding: 15px; margin: 0; color: #1e293b; }
         .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px; max-width: 1400px; margin: 0 auto; }
         .card { background: var(--card-bg); border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); border: 1px solid #cbd5e1; }
         .large-card { grid-column: 1 / -1; }
         .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px; }
+        .card-header h2 { font-size: 1.2rem; margin: 0; color: #334155; }
         
-        /* 濕度網格優化 */
+        /* 濕度卡片網格樣式 */
         .humidity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
         .hum-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; text-align: center; }
         .hum-box h3 { font-size: 0.85rem; color: #475569; margin: 0 0 5px 0; }
         .hum-box .value { font-size: 1.2rem; font-weight: bold; color: #0284c7; }
+
+        header { text-align: center; margin-bottom: 20px; background: #ffffff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
+        header h1 { margin: 0 0 10px 0; color: var(--primary-color); font-size: 1.6rem; }
+        .refresh-btn { background-color: #0284c7; color: white; border: none; padding: 8px 16px; font-size: 1.0rem; font-weight: bold; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .refresh-btn:hover { background-color: #0369a1; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>觀天之道．賞天之雲---即時天氣資訊</h1>
-        <div class="menu-container">
-            <button class="refresh-btn" onclick="location.reload();">🔄 重新整理頁面</button>
-        </div>
+        <h1>觀天之道</h1>
+        <button class="refresh-btn" onclick="location.reload();">🔄 重新整理頁面</button>
     </header>
 
     <div class="dashboard">
         <!-- Airtable 濕度顯示區 -->
         <div class="card large-card">
             <div class="card-header">
-                <h2>各區最新相對濕度 (Airtable Sync)</h2>
+                <h2>即時相對濕度</h2>
+                <div id="airtable-update-time" style="font-size: 0.85rem; color: #64748b; font-weight: bold;">等待載入...</div>
             </div>
             <div id="airtable-humidity-container" class="humidity-grid">
-                <p>正在載入數據...</p>
+                <p>正在載入最新氣象數據...</p>
             </div>
         </div>
-
-        <!-- 保持你原本的其他卡片區塊... -->
-        <!-- (例如：天氣照片、日出日落、能見度等) -->
     </div>
 
     <script>
-        // 設定區
+       // 設定區
         const AIRTABLE_CONFIG = {
             TOKEN: 'patftfAQM6uhwFZPX.a3149e4fa0ec6cd36d9c0eaa9e0dc2b875a70b6db87854d75e400bb2e33451ca',
             BASE_ID: 'appSQoxzwEaKHLidf',
             TABLE: 'HK_Weather_Logs'
         };
 
+
         async function fetchAirtableHumidity() {
             const container = document.getElementById('airtable-humidity-container');
+            const timeDisplay = document.getElementById('airtable-update-time');
+            
             const url = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.BASE_ID}/${AIRTABLE_CONFIG.TABLE}?maxRecords=100&sort[0][field]=Datetime&sort[0][direction]=desc`;
 
             try {
-                const response = await fetch(url, {
-                    headers: { 'Authorization': `Bearer ${AIRTABLE_CONFIG.TOKEN}` }
+                const response = await fetch(url, { 
+                    headers: { 'Authorization': `Bearer ${AIRTABLE_CONFIG.TOKEN}` } 
                 });
                 const data = await response.json();
 
                 const latestData = {};
-                data.records.forEach(r => {
+                let latestDatetime = null;
+
+                data.records.forEach((r, index) => {
                     const station = r.fields['Automatic Weather Station'];
-                    const humidity = r.fields['Relative Humidity(percent)'];
-                    if (station && !latestData[station]) {
-                        latestData[station] = humidity;
+                    const hum = r.fields['Relative Humidity(percent)'];
+                    let dt = r.fields['Datetime'];
+
+                    // 將時間格式從 202608080810 轉換為 2026-08-08 08:10
+                    if (dt && dt.length === 12) {
+                        dt = `${dt.substring(0, 4)}-${dt.substring(4, 6)}-${dt.substring(6, 8)} ${dt.substring(8, 10)}:${dt.substring(10, 12)}`;
+                    }
+
+                    // 抓取第一筆的 Datetime 作為最後更新時間
+                    if (index === 0 && dt) {
+                        latestDatetime = dt;
+                    }
+                    
+                    if (station && !latestData[station] && hum !== undefined) {
+                        latestData[station] = hum;
                     }
                 });
 
@@ -78,18 +95,26 @@
                     container.innerHTML += `
                         <div class="hum-box">
                             <h3>${station}</h3>
-                            <div class="value">${hum}%</div>
+                            <div class="value">${hum !== "N/A" ? hum + '%' : '--'}</div>
                         </div>
                     `;
                 }
+                
+                // 顯示轉換後的 Airtable 時間
+                if (latestDatetime) {
+                    timeDisplay.innerText = `最後更新: ${latestDatetime}`;
+                } else {
+                    timeDisplay.innerText = `最後更新: 無可用時間`;
+                }
+
             } catch (err) {
-                container.innerHTML = `<p>載入失敗，請檢查 API 設定。</p>`;
+                container.innerHTML = `<p style="color:red;">載入失敗，請確認 API 設定是否正確。</p>`;
             }
         }
 
-        // 初始化
+        // 初始化執行
         fetchAirtableHumidity();
-        setInterval(fetchAirtableHumidity, 600000); // 每10分鐘更新一次
+        setInterval(fetchAirtableHumidity, 600000); // 每10分鐘自動更新一次
     </script>
 </body>
 </html>
