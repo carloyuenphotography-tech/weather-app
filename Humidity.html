@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【觀天之道．賞天之雲】即時天氣資訊面板</title>
+    <link rel="icon" type="image/png" href="myweatherapp.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
+    <style>
+        /* 保留你原有的風格設定，新增 Airtable 卡片樣式 */
+        :root { --primary-color: #0284c7; --bg-color: #e2e8f0; --card-bg: #ffffff; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); padding: 15px; }
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px; max-width: 1400px; margin: 0 auto; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); border: 1px solid #cbd5e1; }
+        .large-card { grid-column: 1 / -1; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px; }
+        
+        /* 濕度網格優化 */
+        .humidity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+        .hum-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; text-align: center; }
+        .hum-box h3 { font-size: 0.85rem; color: #475569; margin: 0 0 5px 0; }
+        .hum-box .value { font-size: 1.2rem; font-weight: bold; color: #0284c7; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>觀天之道．賞天之雲---即時天氣資訊</h1>
+        <div class="menu-container">
+            <button class="refresh-btn" onclick="location.reload();">🔄 重新整理頁面</button>
+        </div>
+    </header>
+
+    <div class="dashboard">
+        <!-- Airtable 濕度顯示區 -->
+        <div class="card large-card">
+            <div class="card-header">
+                <h2>各區最新相對濕度 (Airtable Sync)</h2>
+            </div>
+            <div id="airtable-humidity-container" class="humidity-grid">
+                <p>正在載入數據...</p>
+            </div>
+        </div>
+
+        <!-- 保持你原本的其他卡片區塊... -->
+        <!-- (例如：天氣照片、日出日落、能見度等) -->
+    </div>
+
+    <script>
+        // 設定區
+        const AIRTABLE_CONFIG = {
+            TOKEN: 'patBE97pYHsTM2kuT',
+            BASE_ID: 'appSQoxzwEaKHLidf',
+            TABLE: 'HK_Weather_Logs'
+        };
+
+        async function fetchAirtableHumidity() {
+            const container = document.getElementById('airtable-humidity-container');
+            const url = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.BASE_ID}/${AIRTABLE_CONFIG.TABLE}?maxRecords=100&sort[0][field]=Datetime&sort[0][direction]=desc`;
+
+            try {
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${AIRTABLE_CONFIG.TOKEN}` }
+                });
+                const data = await response.json();
+
+                const latestData = {};
+                data.records.forEach(r => {
+                    const station = r.fields['Automatic Weather Station'];
+                    const humidity = r.fields['Relative Humidity(percent)'];
+                    if (station && !latestData[station]) {
+                        latestData[station] = humidity;
+                    }
+                });
+
+                container.innerHTML = '';
+                for (const [station, hum] of Object.entries(latestData)) {
+                    container.innerHTML += `
+                        <div class="hum-box">
+                            <h3>${station}</h3>
+                            <div class="value">${hum}%</div>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                container.innerHTML = `<p>載入失敗，請檢查 API 設定。</p>`;
+            }
+        }
+
+        // 初始化
+        fetchAirtableHumidity();
+        setInterval(fetchAirtableHumidity, 600000); // 每10分鐘更新一次
+    </script>
+</body>
+</html>
