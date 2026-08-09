@@ -1,189 +1,47 @@
-<!DOCTYPE html>
-<html lang="zh-HK">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【尖鼻咀】未來30日潮汐漲退預測</title>
-    <style>
-        :root {
-            --primary-color: #0284c7;
-            --bg-color: #e2e8f0;      
-            --card-bg: #ffffff;
-            --text-color: #1e293b;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        header { 
-            text-align: center; 
-            margin-bottom: 20px; 
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
-        }
-        header h1 { margin: 0 0 10px 0; color: var(--primary-color); font-size: 1.5rem; }
-        .back-btn {
-            display: inline-block;
-            background-color: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            color: #0284c7;
-            padding: 6px 14px;
-            font-size: 0.95rem; 
-            font-weight: bold;
-            border-radius: 6px;
-            text-decoration: none;
-            margin-top: 10px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        .back-btn:hover { background-color: #e0f2fe; }
+<script>
+    async function load30DaysTide() {
+        const container = document.getElementById('tide-30days-container');
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
-        }
-        .day-card {
-            background-color: var(--card-bg);
-            border-radius: 10px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
-            border: 1px solid #cbd5e1;
-            padding: 15px;
-        }
-        .day-header {
-            font-size: 1.05rem;
-            font-weight: bold;
-            color: #0369a1;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 6px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        .tide-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 6px 8px;
-            margin-bottom: 5px;
-            background: #f8fafc;
-            border-radius: 6px;
-            font-size: 0.95rem;
-        }
-        .loading-text, .error-text {
-            grid-column: 1 / -1;
-            text-align: center;
-            font-size: 1.1rem;
-            color: #64748b;
-            padding: 40px;
-            background: #fff;
-            border-radius: 10px;
-        }
-        .error-text { color: #dc2626; }
-    </style>
-</head>
-<body>
+        try {
+            // 直接讀取 Python 處理好的 JSON 檔案，100% 成功且極速
+            const res = await fetch('tide_30days.json');
+            if (!res.ok) throw new Error('無法讀取 tide_30days.json 檔案');
 
-    <header>
-        <h1>🌊 尖鼻咀未來 30 日潮汐漲退預測</h1>
-        <div style="font-size: 0.9rem; color: #64748b;">自動讀取根目錄 tbt2026.csv 數據</div>
-        <a href="index.html" class="back-btn">⬅ 返回即時天氣面板</a>
-    </header>
+            const tideMap = await res.json();
+            container.innerHTML = '';
+            let sortedKeys = Object.keys(tideMap).sort();
 
-    <div class="container" id="tide-30days-container">
-        <div class="loading-text">正在載入未來 30 日潮汐預測資料，請稍候...</div>
-    </div>
+            if (sortedKeys.length === 0) {
+                container.innerHTML = `<div class="error-text">找不到由今日起 30 日內的潮汐紀錄。</div>`;
+                return;
+            }
 
-    <script>
-        async function load30DaysTide() {
-            const container = document.getElementById('tide-30days-container');
-            const now = new Date();
-            now.setHours(0, 0, 0, 0);
+            sortedKeys.forEach(dateKey => {
+                let records = tideMap[dateKey];
+                let displayDate = dateKey.replace(/-/g, '/');
 
-            // 計算 30 天後的日期
-            const endDate = new Date(now.getTime());
-            endDate.setDate(endDate.getDate() + 30);
-
-            try {
-                const res = await fetch('tbt2026.csv');
-                if (!res.ok) throw new Error('無法讀取 tbt2026.csv 檔案');
-
-                const text = await res.text();
-                const lines = text.split('\n');
-                let tideMap = {};
-
-                lines.forEach((line, index) => {
-                    if (index === 0 || !line.trim()) return;
-                    let cols = line.split(',').map(c => c.trim());
-                    if (cols.length >= 3) {
-                        let dateStr = cols[0].replace(/"/g, ''); // 預期格式如 YYYY-MM-DD 或 YYYYMMDD
-                        let timeStr = cols[1].replace(/"/g, '');
-                        let heightStr = cols[2].replace(/"/g, '');
-
-                        // 標準化日期解析
-                        let parsedDate = null;
-                        if (dateStr.includes('-')) {
-                            parsedDate = new Date(dateStr);
-                        } else if (dateStr.length === 8) {
-                            let y = dateStr.substring(0,4);
-                            let m = dateStr.substring(4,6);
-                            let d = dateStr.substring(6,8);
-                            parsedDate = new Date(`${y}-${m}-${d}`);
-                        }
-
-                        if (parsedDate && !isNaN(parsedDate)) {
-                            parsedDate.setHours(0, 0, 0, 0);
-                            // 過濾由今日開始至未來 30 日內的資料
-                            if (parsedDate >= now && parsedDate <= endDate) {
-                                let key = parsedDate.toISOString().split('T')[0];
-                                if (!tideMap[key]) tideMap[key] = [];
-                                tideMap[key].push({ time: timeStr, height: heightStr });
-                            }
-                        }
-                    }
-                });
-
-                container.innerHTML = '';
-                let sortedKeys = Object.keys(tideMap).sort();
-
-                if (sortedKeys.length === 0) {
-                    container.innerHTML = `<div class="error-text">找不到由今日起 30 日內的潮汐紀錄。</div>`;
-                    return;
-                }
-
-                sortedKeys.forEach(dateKey => {
-                    let records = tideMap[dateKey];
-                    let displayDate = dateKey.replace(/-/g, '/');
-
-                    let rowsHtml = '';
-                    records.forEach(r => {
-                        rowsHtml += `
-                            <div class="tide-row">
-                                <span>⏰ <strong>${r.time}</strong></span>
-                                <span style="color: #0284c7; font-weight: bold;">🌊 ${r.height} 米</span>
-                            </div>
-                        `;
-                    });
-
-                    container.innerHTML += `
-                        <div class="day-card">
-                            <div class="day-header">📅 ${displayDate}</div>
-                            ${rowsHtml}
+                let rowsHtml = '';
+                records.forEach(r => {
+                    rowsHtml += `
+                        <div class="tide-row">
+                            <span>⏰ <strong>${r.time}</strong></span>
+                            <span style="color: #0284c7; font-weight: bold;">🌊 ${r.height} 米</span>
                         </div>
                     `;
                 });
 
-            } catch (err) {
-                container.innerHTML = `<div class="error-text">載入失敗：請確保 root 目錄下已正確上載 tbt2026.csv 檔案。</div>`;
-            }
-        }
+                container.innerHTML += `
+                    <div class="day-card">
+                        <div class="day-header">📅 ${displayDate}</div>
+                        ${rowsHtml}
+                    </div>
+                `;
+            });
 
-        load30DaysTide();
-    </script>
-</body>
-</html>
+        } catch (err) {
+            container.innerHTML = `<div class="error-text">載入失敗：請確認已執行 Python 腳本並將 tide_30days.json 上載至 GitHub。</div>`;
+        }
+    }
+
+    load30DaysTide();
+</script>
