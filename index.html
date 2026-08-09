@@ -334,12 +334,11 @@
         .fnd-temp { font-size: 0.95rem; font-weight: bold; color: #0284c7; margin: 6px 0; }
         .fnd-hum { font-size: 0.8rem; color: #475569; }
 
-        /* 潮汐預測樣式 */
-        .tide-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-        .tide-box { background: #f0f9ff; border: 1px solid #bae6fd; padding: 10px; border-radius: 8px; text-align: center; }
-        .tide-box h3 { font-size: 0.9rem; color: #0369a1; margin: 0 0 5px 0; }
-        .tide-box .time { font-size: 1.1rem; font-weight: bold; color: #0c4a6e; }
-        .tide-box .height { font-size: 0.95rem; color: #0284c7; margin-top: 2px; }
+        /* 潮汐預測樣式 (精準漲退潮判斷) */
+        .tide-section-title { font-size: 0.95rem; font-weight: bold; color: #0369a1; margin: 10px 0 6px 0; border-bottom: 1px dashed #bae6fd; padding-bottom: 3px; }
+        .tide-row { display: flex; justify-content: space-between; align-items: center; background: #f0f9ff; border: 1px solid #bae6fd; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; font-size: 0.95rem; }
+        .tide-type-up { color: #0284c7; font-weight: bold; }
+        .tide-type-down { color: #d97706; font-weight: bold; }
 
         /* RHRREAD 天氣報告樣式 */
         .rhr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
@@ -760,20 +759,20 @@
             </div>
         </div>
 
-        <!-- 8. 尖鼻咀潮汐預測 -->
+        <!-- 8. 尖鼻咀潮汐預測 (修正漲退潮判定) -->
         <div class="card">
             <div class="card-header">
                 <h2>尖鼻咀潮汐預測</h2>
-                <a href="https://www.hko.gov.hk/tc/tide/tbtide.htm" class="btn-link" target="_blank">天文台數據 ↗</a>
+                <a href="https://www.hko.gov.hk/tc/tide/predtide.htm?s=TBT" class="btn-link" target="_blank">天文台數據 ↗</a>
             </div>
-            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;" id="tide-date-title">
-                今日潮汐預測數據
+            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">
+                今日與明日潮汐漲退預測
             </div>
-            <div id="tide-container" class="tide-grid">
-                <p style="grid-column: 1 / -1; text-align: center;">正在載入潮汐資料...</p>
+            <div id="tide-container">
+                <p style="text-align: center; color: #64748b;">正在載入潮汐資料...</p>
             </div>
             <div class="solar-term-info" id="tide-update-time" style="margin-top: 12px;">
-                💡 資料來源：GitHub (TBT 潮汐預測)
+                💡 資料來源：tide_30days.json (精準高低潮判斷)
             </div>
         </div>
 
@@ -946,57 +945,82 @@
             }
         }
 
-        // 2. 抓取尖鼻咀潮汐預測資料
+        // 2. 尖鼻咀潮汐預測資料 (修正漲退潮判定：基於區域波峰波谷極值)
         async function fetchTideData() {
             const container = document.getElementById('tide-container');
-            const now = new Date();
-            const year = now.getFullYear();
             
+            const now = new Date();
             const yyyy = now.getFullYear();
             const mm = String(now.getMonth() + 1).padStart(2, '0');
             const dd = String(now.getDate()).padStart(2, '0');
-            const todayStr1 = `${yyyy}-${mm}-${dd}`;
-            const todayStr2 = `${yyyy}${mm}${dd}`;
+            const todayKey = `${yyyy}-${mm}-${dd}`;
 
-            const fileName = `TBT${year}.csv`; 
+            const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+            const tYyyy = tomorrow.getFullYear();
+            const tMm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+            const tDd = String(tomorrow.getDate()).padStart(2, '0');
+            const tomorrowKey = `${tYyyy}-${tMm}-${tDd}`;
 
             try {
-                const res = await fetch(fileName);
-                if (!res.ok) throw new Error('無法讀取潮汐檔案');
+                const res = await fetch('tide_30days.json');
+                if (!res.ok) throw new Error('無法讀取 tide_30days.json');
                 
-                const text = await res.text();
-                const lines = text.split('\n');
-                let todayRecords = [];
-
-                lines.forEach((line, index) => {
-                    if (index === 0 || !line.trim()) return;
-                    let cols = line.split(',').map(c => c.trim());
-                    if (cols.length >= 3) {
-                        let dateCol = cols[0];
-                        if (dateCol.includes(todayStr1) || dateCol.includes(todayStr2)) {
-                            todayRecords.push({ time: cols[1], height: cols[2] });
-                        }
-                    }
-                });
-
+                const tideMap = await res.json();
                 container.innerHTML = '';
-                if (todayRecords.length > 0) {
-                    document.getElementById('tide-date-title').innerText = `今日 (${yyyy}-${mm}-${dd}) 尖鼻咀潮汐預測`;
-                    todayRecords.forEach((tide, i) => {
-                        container.innerHTML += `
-                            <div class="tide-box">
-                                <h3>潮汐 ${i + 1}</h3>
-                                <div class="time">⏰ ${tide.time}</div>
-                                <div class="height">🌊 ${tide.height} 米</div>
+
+                let todayRecords = tideMap[todayKey] || [];
+                let tomorrowRecords = tideMap[tomorrowKey] || [];
+
+                function renderDayTides(records) {
+                    if (records.length === 0) return `<p style="font-size: 0.85rem; color: #64748b; text-align: center; margin: 4px 0;">暫無紀錄</p>`;
+                    
+                    let html = '';
+                    for (let i = 0; i < records.length; i++) {
+                        let current = records[i];
+                        let curHeight = parseFloat(current.height);
+                        let tideType = "漲潮 📈";
+                        let typeClass = "tide-type-up";
+
+                        // 精準極值判定：如果該數值明顯比前後鄰居都低，則是退潮（低潮）
+                        let prevHeight = i > 0 ? parseFloat(records[i-1].height) : 999;
+                        let nextHeight = i < records.length - 1 ? parseFloat(records[i+1].height) : 999;
+
+                        if (curHeight < prevHeight && curHeight < nextHeight) {
+                            tideType = "退潮 📉";
+                            typeClass = "tide-type-down";
+                        } else if (curHeight > prevHeight && curHeight > nextHeight) {
+                            tideType = "漲潮 📈";
+                            typeClass = "tide-type-up";
+                        } else {
+                            // 預備交替備用邏輯
+                            if (i < records.length - 1 && nextHeight < curHeight) {
+                                tideType = "退潮 📉";
+                                typeClass = "tide-type-down";
+                            }
+                        }
+
+                        html += `
+                            <div class="tide-row">
+                                <span class="${typeClass}"><strong>${tideType}</strong></span>
+                                <span>🌊 ${current.height} m</span>
+                                <span>⏰ <strong>${current.time}</strong></span>
                             </div>
                         `;
-                    });
-                } else {
-                    container.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #64748b;">今日暫無潮汐預測紀錄</p>`;
+                    }
+                    return html;
                 }
 
+                let htmlContent = '';
+                htmlContent += `<div class="tide-section-title">📅 今日 (${todayKey})</div>`;
+                htmlContent += renderDayTides(todayRecords);
+
+                htmlContent += `<div class="tide-section-title">📅 明日 (${tomorrowKey})</div>`;
+                htmlContent += renderDayTides(tomorrowRecords);
+
+                container.innerHTML = htmlContent;
+
             } catch (err) {
-                container.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: red;">無法載入尖鼻咀潮汐資料 (${fileName})</p>`;
+                container.innerHTML = `<p style="text-align: center; color: red;">無法載入潮汐資料 (請確認 tide_30days.json 是否存在)</p>`;
             }
         }
 
