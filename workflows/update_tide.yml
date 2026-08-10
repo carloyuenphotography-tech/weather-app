@@ -1,34 +1,45 @@
-name: 自動更新天氣與潮汐資料
+name: 部署網頁與更新天氣資料
 
 on:
   schedule:
-    # 設定為每 15 分鐘執行一次
-    - cron: '*/1 * * * *'
-  workflow_dispatch: # 允許手動觸發
+    - cron: '*/1 * * * *' # 每 15 分鐘自動執行一次
+  workflow_dispatch:      # 允許手動觸發
 
 jobs:
-  update-data:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: 檢出程式碼倉庫
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 設定 Python 環境
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      # 執行潮汐與紫外線的 Python 腳本
-      - name: 執行 Python 腳本
+      # 1. 執行 Python 腳本，自動抓取最新潮汐與紫外線並覆蓋本地 JSON
+      - name: 執行 Python 產生最新 JSON
         run: |
           python generate_tide.py
           python generate_uv.py
 
-      # 自動提交並推送變更（若內容有更新才推送）
-      - name: 自動提交並推送變更
+      # 2. 自動把新生成的 json 提交回倉庫（避免下次編譯遺失）
+      - name: 提交更新後的 JSON 檔案
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add tide_30days.json uv_data.json
-          git diff --staged --quiet || git commit -m "自動每15分鐘更新潮汐與紫外線資料"
-          git push
+          git diff --staged --quiet || (git commit -m "自動更新潮汐與紫外線 JSON 數據" && git push)
+
+      # 3. 接下來才是原本 GitHub Pages 的打包與部署流程
+      - name: 設定 Pages
+        uses: actions/configure-pages@v4
+      
+      - name: 上傳網頁Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: 部署至 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
