@@ -1,0 +1,12 @@
+- name: 執行 Python 產生最新 JSON
+        run: |
+          python generate_tide.py
+          python generate_uv.py
+          python generate_rss.py  # 新增這行
+
+      - name: 提交更新後的 JSON 檔案
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tide_30days.json uv_data.json rss_data.json  # 記得加上 rss_data.json
+          git diff --staged --quiet || (git commit -m "自動更新氣象、潮汐與 RSS 報告 JSON" && git push)
