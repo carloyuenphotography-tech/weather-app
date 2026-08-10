@@ -790,7 +790,36 @@
             }
         }
 
-        async function fetchTideData() {
+        async function fetchWeatherWarnings() {
+            const warningBox = document.getElementById('summary-warning-box');
+            const warningText = document.getElementById('summary-warning-text');
+            
+            try {
+                const res = await fetch(`warnings_data.json?t=${Date.now()}`);
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                
+                if (data.warnings && data.warnings.length > 0) {
+                    let alertHtml = "";
+                    data.warnings.forEach(item => {
+                        // 組合標題與詳細描述
+                        alertHtml += `<div style="margin-bottom: 6px;"><strong>${item.title}</strong><br>${item.description}</div>`;
+                    });
+                    
+                    warningText.innerHTML = alertHtml;
+                    warningBox.style.display = "block"; // 顯示警告紅框
+                } else {
+                    warningBox.style.display = "none"; // 沒有警告時隱藏
+                }
+            } catch (err) {
+                // 若檔案尚不存在或載入失敗則隱藏
+                warningBox.style.display = "none";
+            }
+        }
+	
+fetchWeatherWarnings();
+
+	async function fetchTideData() {
             const container = document.getElementById('tide-container');
             const now = new Date();
             const yyyy = now.getFullYear();
