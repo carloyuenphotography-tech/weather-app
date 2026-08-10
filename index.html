@@ -429,7 +429,6 @@
         </div>
     </header>
 
-    <div class="dashboard">
 <!-- 新增：即時天氣摘要卡片 -->
         <div class="card" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border: none;">
             <div class="card-header" style="border-bottom-color: rgba(255,255,255,0.2);">
@@ -454,9 +453,15 @@
                     --%
                 </div>
                 
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 10px; margin-bottom: 10px;">
                     <span id="summary-station-name">京士柏 / 自動觀測站</span>
                     <span id="summary-uv-text">紫外線指數: --</span>
+                </div>
+
+                <!-- 🌟 新增：特別天氣提示區塊 -->
+                <div id="summary-warning-box" style="display: none; background: rgba(225, 29, 72, 0.2); border: 1px solid rgba(244, 63, 94, 0.4); padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #fecdd3; line-height: 1.4;">
+                    <div style="font-weight: bold; margin-bottom: 2px; color: #fb7185;">⚠️ 特別天氣提示</div>
+                    <div id="summary-warning-text">--</div>
                 </div>
             </div>
         </div>
@@ -925,6 +930,35 @@
         }
 
         async function fetchHKOWeatherData() {
+// 抓取本港地區天氣預報 (flw API)
+            try {
+                const flwRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=flw&lang=tc');
+                if (flwRes.ok) {
+                    const flw = await flwRes.json();
+                    document.getElementById('flw-general').innerText = flw.generalSituation || "--";
+                    document.getElementById('flw-desc').innerText = flw.forecastDesc || "--";
+                    document.getElementById('flw-outlook').innerText = flw.outlook || "--";
+
+                    // 🌟 新增：將天氣警告或特別提示同步到新卡片中
+                    const warningBox = document.getElementById('summary-warning-box');
+                    const warningText = document.getElementById('summary-warning-text');
+                    
+                    // 天文台 flw 資料若包含 fireWarning 或 generalSituation 中的警告重點
+                    let alertContent = "";
+                    if (flw.fireWarning) alertContent += `[${flw.fireWarning}] `;
+                    if (flw.generalSituation) {
+                        // 擷取概況中比較重要的警示字眼或直接顯示概況
+                        alertContent += flw.generalSituation;
+                    }
+
+                    if (alertContent.trim() !== "") {
+                        warningText.innerText = alertContent;
+                        warningBox.style.display = "block"; // 有資料才顯示紅框提示
+                    } else {
+                        warningBox.style.display = "none";
+                    }
+                }
+            } catch (e) {}
             try {
                 const visRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/opendata.php?dataType=ltmv&rformat=json&lang=tc');
                 if (visRes.ok) {
