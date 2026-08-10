@@ -744,7 +744,7 @@
             }
         }
 
-        async function fetchTideData() {
+       async function fetchTideData() {
             const container = document.getElementById('tide-container');
             const now = new Date();
             const yyyy = now.getFullYear();
@@ -764,19 +764,39 @@
                 function renderDayTides(records) {
                     if (!records || records.length === 0) return `<p style="font-size: 0.85rem; color: #64748b; text-align: center; margin: 4px 0;">暫無紀錄</p>`;
                     let html = '';
+                    
                     for (let i = 0; i < records.length; i++) {
                         let current = records[i];
                         let curHeight = parseFloat(current.height);
                         let tideType = "漲潮 📈";
                         let typeClass = "tide-type-up";
-                        let prevHeight = i > 0 ? parseFloat(records[i-1].height) : 999;
-                        let nextHeight = i < records.length - 1 ? parseFloat(records[i+1].height) : 999;
 
-                        if (curHeight < prevHeight && curHeight < nextHeight) {
-                            tideType = "退潮 📉"; typeClass = "tide-type-down";
-                        } else if (i < records.length - 1 && nextHeight < curHeight) {
-                            tideType = "退潮 📉"; typeClass = "tide-type-down";
+                        let prevHeight = i > 0 ? parseFloat(records[i-1].height) : null;
+                        let nextHeight = i < records.length - 1 ? parseFloat(records[i+1].height) : null;
+
+                        // 判斷邏輯：
+                        // 1. 如果下一個數值比當前大，或者前面是極低點，代表正要漲潮
+                        // 2. 如果當前數值小於前後兩側（或前一個大於當前），則是低潮/退潮的轉折
+                        if (prevHeight !== null && nextHeight !== null) {
+                            if (curHeight < prevHeight && curHeight < nextHeight) {
+                                tideType = "低潮🔽"; typeClass = "tide-type-down";
+                            } else if (curHeight > prevHeight && curHeight > nextHeight) {
+                                tideType = "高潮🔼"; typeClass = "tide-type-up";
+                            } else if (curHeight > prevHeight) {
+                                tideType = "漲潮 📈"; typeClass = "tide-type-up";
+                            } else {
+                                tideType = "退潮 📉"; typeClass = "tide-type-down";
+                            }
+                        } else if (prevHeight !== null) {
+                            // 針對當天最後一個點的備用判斷
+                            tideType = curHeight > prevHeight ? "漲潮 📈" : "退潮 📉";
+                            typeClass = curHeight > prevHeight ? "tide-type-up" : "tide-type-down";
+                        } else if (nextHeight !== null) {
+                            // 針對當天第一個點的備用判斷
+                            tideType = nextHeight > curHeight ? "漲潮 📈" : "退潮 📉";
+                            typeClass = nextHeight > curHeight ? "tide-type-up" : "tide-type-down";
                         }
+
                         html += `<div class="tide-row"><span class="${typeClass}"><strong>${tideType}</strong></span><span>🌊 ${current.height} m</span><span>⏰ <strong>${current.time}</strong></span></div>`;
                     }
                     return html;
@@ -788,7 +808,6 @@
                 container.innerHTML = `<p style="text-align: center; color: red;">無法載入 tide_30days.json</p>`;
             }
         }
-
         async function fetchRhrReadData() {
             try {
                 const res = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc');
