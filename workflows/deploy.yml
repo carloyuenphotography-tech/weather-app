@@ -3,6 +3,7 @@
           python generate_tide.py
           python generate_uv.py
           python generate_rss.py  # 新增這行
+          python generate_warnings.py  # 新增這行
 
       - name: 提交更新後的 JSON 檔案
         run: |
