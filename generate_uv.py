@@ -1,6 +1,5 @@
 from datetime import datetime
 import json
-import os
 import ssl
 import urllib.request
 
@@ -11,18 +10,28 @@ output_filename = "uv_data.json"
 print("正在從香港天文台下載最新紫外線資料...")
 
 try:
-  # 建立忽略 SSL 憑證驗證的 Context，解決憑證報錯
   context = ssl._create_unverified_context()
-
   req = urllib.request.urlopen(url, context=context)
   lines = [line.decode("utf-8-sig").strip() for line in req.readlines()]
 
-  if len(lines) > 1:
-    latest_line = lines[-1]
-    cols = [c.replace('"', "").strip() for c in latest_line.split(",")]
+  valid_rows = []
+  # 從頭到尾讀取所有有效行
+  for line in lines[1:]:  # 跳過標題行
+    if not line:
+      continue
+    cols = [c.replace('"', "").strip() for c in line.split(",")]
+    if len(cols) >= 2 and cols[1] != "" and cols[1] != "-":
+      valid_rows.append(cols)
 
-    time_col = cols[0] if len(cols) > 0 else "--"
-    uv_val = cols[1] if len(cols) > 1 else "--"
+  if len(valid_rows) > 0:
+    # 取得最接近當前時間的最後一行（即最新資料）
+    latest = valid_rows[-1]
+    time_col = latest[0]  # 例如 08:45 或 202608100845
+    uv_val = latest[1]  # 例如 3
+
+    # 格式化時間顯示格式 (若格式為 HH:MM 或長數字，統一轉為好看的格式)
+    if len(time_col) >= 12:
+      time_col = f"{time_col[8:10]}:{time_col[10:12]}"
 
     try:
       num_uv = float(uv_val)
@@ -48,7 +57,7 @@ try:
         f"✅ 成功：已生成 {output_filename} (時間: {time_col}, 紫外線: {uv_val})"
     )
   else:
-    print("❌ 錯誤：CSV 內容為空。")
+    print("❌ 錯誤：找不到有效的紫外線資料。")
 
 except Exception as e:
   print(f"❌ 發生錯誤：{e}")

@@ -832,18 +832,23 @@
             } catch (err) {}
         }
 
-        async function fetch15MinUvIndex() {
+       async function fetch15MinUvIndex() {
             try {
-                const res = await fetch('uv_data.json');
+                // 加上時間戳記避免瀏覽器快取舊的 json 檔案
+                const res = await fetch(`uv_data.json?t=${Date.now()}`);
                 if (!res.ok) throw new Error();
                 const data = await res.json();
+                
+                // 數值以 JSON 內為準
                 document.getElementById('uv-15min-val').innerText = data.value || "--";
                 document.getElementById('uv-15min-desc').innerText = `紫外線強度：${data.description || "無數據"}`;
-                document.getElementById('uv-update-time').innerHTML = `💡 數據時間：<strong>${data.time}</strong> (香港天文台)`;
+                
+                // 時間嚴格以 JSON 內的時間為準
+                document.getElementById('uv-update-time').innerHTML = `💡 數據時間：<strong>${data.time || "--"}</strong> (香港天文台)`;
             } catch (err) {
                 document.getElementById('uv-15min-val').innerText = "--";
                 document.getElementById('uv-15min-desc').innerText = "讀取失敗";
-                document.getElementById('uv-update-time').innerHTML = `💡 請先執行 python3 generate_uv.py`;
+                document.getElementById('uv-update-time').innerHTML = `💡 請確認 uv_data.json 是否存在`;
             }
         }
 
