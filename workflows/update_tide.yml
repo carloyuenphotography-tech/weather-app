@@ -27,10 +27,20 @@ jobs:
         with:
           python-version: '3.10'
 
-      # 3. 執行你的 Python 腳本來生成 tide_30days.json
+     # 3. 執行 Python 腳本來生成潮汐與紫外線 JSON
       - name: 執行 Python 腳本
-        run: python generate_tide.py
+        run: |
+          python generate_tide.py
+          python generate_uv.py
 
+      # 4. 自動把更新後的 JSON 檔案提交並推送到 GitHub 倉庫
+      - name: 自動提交並推送變更
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tide_30days.json uv_data.json
+          git diff --staged --quiet || git commit -m "自動更新未來 30 日潮汐與紫外線資料 (JSON)"
+          git push
       # 4. 自動把更新後的 JSON 檔案提交並推送到 GitHub 倉庫
       - name: 自動提交並推送變更
         run: |
