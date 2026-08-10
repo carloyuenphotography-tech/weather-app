@@ -745,6 +745,16 @@
                     }
                     const records = data.weatherForecast;
                     if (records && Array.isArray(records)) {
+                        // 🌟 額外功能：自動把九天預報的第一天（今天）最高最低溫填入新卡片中
+                        if (records.length > 0) {
+                            let todayMin = records[0].forecastMintemp ? `${records[0].forecastMintemp.value}°C` : '--°C';
+                            let todayMax = records[0].forecastMaxtemp ? `${records[0].forecastMaxtemp.value}°C` : '--°C';
+                            const minMaxEl = document.getElementById('summary-minmax-temp');
+                            if (minMaxEl) {
+                                minMaxEl.innerText = `↓ ${todayMin} ↑ ${todayMax}`;
+                            }
+                        }
+
                         container.innerHTML = '';
                         records.forEach(day => {
                             let dStr = day.forecastDate;
