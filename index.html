@@ -334,7 +334,7 @@
         .fnd-temp { font-size: 0.95rem; font-weight: bold; color: #0284c7; margin: 6px 0; }
         .fnd-hum { font-size: 0.8rem; color: #475569; }
 
-        /* 潮汐預測樣式 (精準漲退潮判斷) */
+        /* 潮汐預報樣式 */
         .tide-section-title { font-size: 0.95rem; font-weight: bold; color: #0369a1; margin: 10px 0 6px 0; border-bottom: 1px dashed #bae6fd; padding-bottom: 3px; }
         .tide-row { display: flex; justify-content: space-between; align-items: center; background: #f0f9ff; border: 1px solid #bae6fd; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; font-size: 0.95rem; }
         .tide-type-up { color: #0284c7; font-weight: bold; }
@@ -759,7 +759,7 @@
             </div>
         </div>
 
-        <!-- 8. 尖鼻咀潮汐預測 (修正漲退潮判定) -->
+        <!-- 8. 尖鼻咀潮汐預測 -->
         <div class="card">
             <div class="card-header">
                 <h2>尖鼻咀潮汐預測</h2>
@@ -897,7 +897,7 @@
             return "北";
         }
 
-        // 1. 抓取九天天氣預報 (FND API)
+        // 1. 抓取九天天氣預報 (FND API) - 已修正 weatherForecast 陣列讀取
         async function fetchNineDayForecast() {
             const container = document.getElementById('fnd-container');
             const generalEl = document.getElementById('fnd-general-situation');
@@ -907,7 +907,7 @@
                 const res = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=tc');
                 const data = await res.json();
 
-                if (data && data.weatherForecast) {
+                if (data) {
                     generalEl.innerText = data.generalSituation || "暫無天氣概況";
                     
                     if (data.updateTime) {
@@ -915,37 +915,43 @@
                         timeEl.innerText = `發布時間: ${ut}`;
                     }
 
-                    container.innerHTML = '';
-                    data.records.forEach(day => {
-                        let dStr = day.forecastDate;
-                        let formattedDate = `${dStr.substring(4, 6)}/${dStr.substring(6, 8)}`;
-                        
-                        let minTemp = day.forecastMintemp ? `${day.forecastMintemp.value}°C` : '--';
-                        let maxTemp = day.forecastMaxtemp ? `${day.forecastMaxtemp.value}°C` : '--';
-                        let minRh = day.forecastMinrh ? `${day.forecastMinrh.value}%` : '';
-                        let maxRh = day.forecastMaxrh ? `${day.forecastMaxrh.value}%` : '';
-                        let humStr = (minRh && maxRh) ? `濕度: ${minRh}-${maxRh}` : '';
+                    // 確保使用正確的天文台陣列屬性名稱：weatherForecast
+                    const records = data.weatherForecast;
+                    if (records && Array.isArray(records)) {
+                        container.innerHTML = '';
+                        records.forEach(day => {
+                            let dStr = day.forecastDate;
+                            let formattedDate = `${dStr.substring(4, 6)}/${dStr.substring(6, 8)}`;
+                            
+                            let minTemp = day.forecastMintemp ? `${day.forecastMintemp.value}°C` : '--';
+                            let maxTemp = day.forecastMaxtemp ? `${day.forecastMaxtemp.value}°C` : '--';
+                            let minRh = day.forecastMinrh ? `${day.forecastMinrh.value}%` : '';
+                            let maxRh = day.forecastMaxrh ? `${day.forecastMaxrh.value}%` : '';
+                            let humStr = (minRh && maxRh) ? `濕度: ${minRh}-${maxRh}` : '';
 
-                        container.innerHTML += `
-                            <div class="fnd-box">
-                                <div>
-                                    <div class="fnd-date">${formattedDate} (${day.week})</div>
-                                    <div style="font-size: 0.8rem; color: #0284c7; font-weight: bold; margin-bottom: 4px;">${day.forecastWeather}</div>
+                            container.innerHTML += `
+                                <div class="fnd-box">
+                                    <div>
+                                        <div class="fnd-date">${formattedDate} (${day.week})</div>
+                                        <div style="font-size: 0.8rem; color: #0284c7; font-weight: bold; margin-bottom: 4px;">${day.forecastWeather}</div>
+                                    </div>
+                                    <div>
+                                        <div class="fnd-temp">${minTemp} - ${maxTemp}</div>
+                                        <div class="fnd-hum">${humStr}</div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div class="fnd-temp">${minTemp} - ${maxTemp}</div>
-                                    <div class="fnd-hum">${humStr}</div>
-                                </div>
-                            </div>
-                        `;
-                    });
+                            `;
+                        });
+                    } else {
+                        container.innerHTML = `<p style="color:red;">九天預報資料格式不符。</p>`;
+                    }
                 }
             } catch (err) {
                 container.innerHTML = `<p style="color:red;">九天天氣預報載入失敗。</p>`;
             }
         }
 
-        // 2. 尖鼻咀潮汐預測資料 (修正漲退潮判定：基於區域波峰波谷極值)
+        // 2. 尖鼻咀潮汐預測資料
         async function fetchTideData() {
             const container = document.getElementById('tide-container');
             
@@ -981,7 +987,6 @@
                         let tideType = "漲潮 📈";
                         let typeClass = "tide-type-up";
 
-                        // 精準極值判定：如果該數值明顯比前後鄰居都低，則是退潮（低潮）
                         let prevHeight = i > 0 ? parseFloat(records[i-1].height) : 999;
                         let nextHeight = i < records.length - 1 ? parseFloat(records[i+1].height) : 999;
 
@@ -992,7 +997,6 @@
                             tideType = "漲潮 📈";
                             typeClass = "tide-type-up";
                         } else {
-                            // 預備交替備用邏輯
                             if (i < records.length - 1 && nextHeight < curHeight) {
                                 tideType = "退潮 📉";
                                 typeClass = "tide-type-down";
@@ -1066,45 +1070,25 @@
         }
 
         // 4. 抓取 15 分鐘平均紫外線指數 CSV
+       // 4. 抓取 Python 生成的 uv_data.json 紫外線指數
         async function fetch15MinUvIndex() {
             const nowTimeStr = new Date().toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', hour12: false });
             try {
-                const res = await fetch('https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_15min_uvindex_uc.csv');
-                if (res.ok) {
-                    const text = await res.text();
-                    const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-                    
-                    if (lines.length > 1) {
-                        let latestLine = lines[lines.length - 1];
-                        let cols = latestLine.split(',').map(c => c.replace(/"/g, '').trim());
-                        
-                        let timeCol = cols[0] || "--";
-                        let uvVal = cols[1] || cols[cols.length - 1] || "--";
+                const res = await fetch('uv_data.json');
+                if (!res.ok) throw new Error('無法讀取 uv_data.json');
+                
+                const data = await res.json();
+                
+                document.getElementById('uv-15min-val').innerText = data.value || "--";
+                document.getElementById('uv-15min-desc').innerText = `紫外線強度：${data.description || "無數據"}`;
+                document.getElementById('uv-update-time').innerHTML = `💡 數據時間：<strong>${data.time}</strong> (香港天文台)`;
 
-                        document.getElementById('uv-15min-val').innerText = uvVal;
-                        
-                        let numUv = parseFloat(uvVal);
-                        let desc = "無數據";
-                        if (!isNaN(numUv)) {
-                            if (numUv < 3) desc = "低";
-                            else if (numUv < 6) desc = "中等";
-                            else if (numUv < 8) desc = "高";
-                            else if (numUv < 11) desc = "甚高";
-                            else desc = "極高";
-                        }
-                        document.getElementById('uv-15min-desc').innerText = `紫外線強度：${desc}`;
-                        document.getElementById('uv-update-time').innerHTML = `💡 數據時間：<strong>${timeCol}</strong> (香港天文台)`;
-                    }
-                }
             } catch (err) {
                 document.getElementById('uv-15min-val').innerText = "--";
                 document.getElementById('uv-15min-desc').innerText = "讀取失敗";
                 document.getElementById('uv-update-time').innerHTML = `💡 紫外線讀取失敗 (${nowTimeStr})`;
             }
         }
-
-        async function fetchHKOWeatherData() {
-            const nowTimeStr = new Date().toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', hour12: false });
 
             // 1. 抓取能見度 (ltmv API)
             try {
