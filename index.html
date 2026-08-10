@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>【觀天之道．賞天之雲】即時天氣資訊面板</title>
     
-    <!-- 內置您的自訂桌面捷徑圖示 -->
     <link rel="icon" type="image/png" href="myweatherapp.png">
     <link rel="apple-touch-icon" href="myweatherapp.png">
 
-    <!-- 引入專業的 SunCalc 庫 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
 
     <style>
@@ -63,10 +61,7 @@
             box-sizing: border-box;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
-        .menu-btn:hover {
-            background-color: #e0f2fe;
-            border-color: #0284c7;
-        }
+        .menu-btn:hover { background-color: #e0f2fe; border-color: #0284c7; }
 
         .refresh-btn {
             background-color: #0284c7;
@@ -80,9 +75,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: background-color 0.2s;
         }
-        .refresh-btn:hover {
-            background-color: #0369a1;
-        }
+        .refresh-btn:hover { background-color: #0369a1; }
 
         .dashboard {
             display: grid;
@@ -108,9 +101,7 @@
             font-size: 1.0rem; 
         }
 
-        .large-card {
-            grid-column: 1 / -1;
-        }
+        .large-card { grid-column: 1 / -1; }
 
         .card-header {
             display: flex;
@@ -146,11 +137,7 @@
             justify-content: center;
             box-sizing: border-box;
         }
-        .media-container a {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
+        .media-container a { width: 100%; height: 100%; display: block; }
         .media-container img, .media-container iframe {
             width: 100%; height: 100%; border: none; object-fit: contain;
             box-sizing: border-box;
@@ -168,11 +155,7 @@
             justify-content: center;
             box-sizing: border-box;
         }
-        .large-map-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+        .large-map-container iframe { width: 100%; height: 100%; border: none; }
 
         .photo-controls {
             display: flex;
@@ -192,9 +175,7 @@
             font-weight: bold;
             flex-grow: 1;
         }
-        .photo-nav-btn:hover {
-            background-color: #e2e8f0;
-        }
+        .photo-nav-btn:hover { background-color: #e2e8f0; }
         
         .sun-date {
             text-align: center;
@@ -221,33 +202,11 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .sun-box:hover {
-            background: #e0f2fe;
-            border-color: #0284c7;
-        }
-        .sun-box h3 {
-            margin: 0 0 6px 0;
-            font-size: 1.1rem; 
-            color: #0369a1;
-        }
-        .sun-box .time {
-            font-size: 1.3rem; 
-            font-weight: bold;
-            color: #0c4a6e;
-            margin-bottom: 2px;
-        }
-        .sun-box .countdown {
-            font-size: 0.9rem;
-            font-weight: bold;
-            color: #0284c7;
-            margin-bottom: 4px;
-        }
-        .sub-lunar-tag {
-            font-size: 0.8rem;
-            color: #64748b;
-            font-weight: normal;
-            margin-top: 2px;
-        }
+        .sun-box:hover { background: #e0f2fe; border-color: #0284c7; }
+        .sun-box h3 { margin: 0 0 6px 0; font-size: 1.1rem; color: #0369a1; }
+        .sun-box .time { font-size: 1.3rem; font-weight: bold; color: #0c4a6e; margin-bottom: 2px; }
+        .sun-box .countdown { font-size: 0.9rem; font-weight: bold; color: #0284c7; margin-bottom: 4px; }
+        .sub-lunar-tag { font-size: 0.8rem; color: #64748b; font-weight: normal; margin-top: 2px; }
         
         .sun-altitude-banner {
             margin-top: 10px;
@@ -285,16 +244,8 @@
             padding: 10px;
             text-align: center;
         }
-        .visibility-box h3 {
-            margin: 0 0 4px 0;
-            font-size: 0.95rem;
-            color: #475569;
-        }
-        .visibility-box .vis-value {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #0f172a;
-        }
+        .visibility-box h3 { margin: 0 0 4px 0; font-size: 0.95rem; color: #475569; }
+        .visibility-box .vis-value { font-size: 1.2rem; font-weight: bold; color: #0f172a; }
         .visibility-box .vis-status {
             font-size: 0.8rem;
             margin-top: 2px;
@@ -326,7 +277,6 @@
             padding-bottom: 4px;
         }
 
-        /* 九天天氣預報樣式 */
         .forecast-general { background: #f0f9ff; border: 1px solid #bae6fd; padding: 10px 12px; border-radius: 8px; font-size: 0.95rem; margin-bottom: 12px; line-height: 1.4; color: #0369a1; }
         .fnd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
         .fnd-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
@@ -334,19 +284,16 @@
         .fnd-temp { font-size: 0.95rem; font-weight: bold; color: #0284c7; margin: 6px 0; }
         .fnd-hum { font-size: 0.8rem; color: #475569; }
 
-        /* 潮汐預報樣式 */
         .tide-section-title { font-size: 0.95rem; font-weight: bold; color: #0369a1; margin: 10px 0 6px 0; border-bottom: 1px dashed #bae6fd; padding-bottom: 3px; }
         .tide-row { display: flex; justify-content: space-between; align-items: center; background: #f0f9ff; border: 1px solid #bae6fd; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; font-size: 0.95rem; }
         .tide-type-up { color: #0284c7; font-weight: bold; }
         .tide-type-down { color: #d97706; font-weight: bold; }
 
-        /* RHRREAD 天氣報告樣式 */
         .rhr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
         .rhr-box { background: #f8fafc; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; text-align: center; }
         .rhr-box h3 { font-size: 0.9rem; color: #475569; margin: 0 0 4px 0; }
         .rhr-box .rhr-val { font-size: 1.1rem; font-weight: bold; color: #0f172a; }
 
-        /* 15分鐘平均紫外線指數樣式 */
         .uv-display-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 15px; text-align: center; }
         .uv-val { font-size: 2.2rem; font-weight: bold; color: #d97706; margin: 5px 0; }
         .uv-desc { font-size: 0.95rem; color: #b45309; font-weight: bold; }
@@ -435,24 +382,10 @@
             margin-bottom: 10px;
             gap: 15px;
         }
-        .moon-svg-box {
-            width: 48px; 
-            height: 48px;
-            flex-shrink: 0;
-        }
-        .moon-svg-box svg {
-            width: 100%;
-            height: 100%;
-        }
-        .moon-details-text {
-            flex-grow: 1;
-            font-size: 1.0rem; 
-            color: #334155;
-            line-height: 1.4;
-        }
-        .moon-details-text strong {
-            color: #0284c7;
-        }
+        .moon-svg-box { width: 48px; height: 48px; flex-shrink: 0; }
+        .moon-svg-box svg { width: 100%; height: 100%; }
+        .moon-details-text { flex-grow: 1; font-size: 1.0rem; color: #334155; line-height: 1.4; }
+        .moon-details-text strong { color: #0284c7; }
 
         .next-fullmoon-banner {
             margin-top: 10px;
@@ -476,30 +409,20 @@
             font-size: 0.9rem; 
             color: #64748b;
         }
-        footer a {
-            color: #0284c7;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        footer a:hover {
-            text-decoration: underline;
-        }
-        footer div {
-            margin-top: 4px;
-        }
+        footer a { color: #0284c7; text-decoration: none; font-weight: bold; }
+        footer a:hover { text-decoration: underline; }
+        footer div { margin-top: 4px; }
     </style>
 </head>
 <body>
 
     <header>
         <h1>【觀天之道．賞天之雲】即時天氣資訊面板</h1>
-        
         <div class="menu-container">
             <a href="photo.html" class="menu-btn" target="_blank">📷 天氣相片</a>
             <a href="satellite.html" class="menu-btn" target="_blank">🛰️ 衛星與雷達</a>
             <a href="highlowtide.html" class="menu-btn" target="_blank">🌊 潮汐漲退 (30日)</a>
         </div>
-
         <div style="margin-top: 15px;">
             <button class="refresh-btn" onclick="location.reload();">🔄 重新整理頁面</button>
         </div>
@@ -522,36 +445,29 @@
             </div>
         </div>
 
-        <!-- 2. 本港天氣預報 (flw API) -->
+        <!-- 2. 本港天氣預報 -->
         <div class="card">
             <div class="card-header">
                 <h2>本港地區天氣預報</h2>
                 <a href="https://www.hko.gov.hk/tc/wxinfo/currwx/flw.htm" class="btn-link" target="_blank">天文台預報 ↗</a>
             </div>
-            
             <div class="forecast-content-box">
                 <h4>📌 天氣概況</h4>
                 <div id="flw-general">讀取中...</div>
             </div>
-
             <div class="forecast-content-box">
                 <h4>🌤️ 今明預測</h4>
                 <div id="flw-desc">讀取中...</div>
             </div>
-
             <div class="forecast-content-box">
                 <h4>📈 隨後展望</h4>
                 <div id="flw-outlook">讀取中...</div>
             </div>
-
             <div class="forecast-content-box" id="flw-tc-box" style="display: none;">
                 <h4>🌀 熱帶氣旋消息</h4>
                 <div id="flw-tc">--</div>
             </div>
-
-            <div class="solar-term-info" id="flw-update-time" style="margin-top: 4px;">
-                💡 預報發布時間：讀取中...
-            </div>
+            <div class="solar-term-info" id="flw-update-time" style="margin-top: 4px;">💡 預報發布時間：讀取中...</div>
         </div>
 
         <!-- 3. 日出/日落 -->
@@ -560,9 +476,7 @@
                 <h2>日出/日落</h2>
                 <a href="https://suncalc.org/#/22.3193,114.1694,12" class="btn-link" target="_blank">地圖檢視 ↗</a>
             </div>
-            
             <div class="sun-date" id="current-date-display">載入日期中...</div>
-            
             <div class="sun-info-grid">
                 <div class="sun-box" onclick="setSunDisplayMode('sunrise')">
                     <h3>🌅 日出</h3>
@@ -575,43 +489,29 @@
                     <div class="countdown" id="sunset-countdown" style="color: #c2410c;">--</div>
                 </div>
             </div>
-
-            <div class="sun-altitude-banner" id="sun-altitude-banner-text">
-                ☀️ 太陽即時仰角: 計算中...
-            </div>
-
+            <div class="sun-altitude-banner" id="sun-altitude-banner-text">☀️ 太陽即時仰角: 計算中...</div>
             <div class="sunrise-viz-container">
                 <div class="sunrise-viz-title" id="sun-viz-title">🧭 太陽方位軌跡</div>
                 <div class="sunrise-track">
                     <div class="track-marker marker-gray" style="left: 0%;"></div>
                     <div class="track-label label-gray" style="left: 0%;">夏至<br>64.2°</div>
-
                     <div class="track-marker marker-blue" style="left: 16.7%;"></div>
                     <div class="track-label label-blue" style="left: 16.7%;">東<br>90°</div>
-
                     <div class="track-marker marker-gray" style="left: 33.3%;"></div>
                     <div class="track-label label-gray" style="left: 33.3%;">冬至<br>115.1°</div>
-
                     <div class="track-marker marker-blue" style="left: 50%;"></div>
                     <div class="track-label label-blue" style="left: 50%;">南<br>180°</div>
-
                     <div class="track-marker marker-gray" style="left: 66.7%;"></div>
                     <div class="track-label label-gray" style="left: 66.7%;">冬至<br>244.9°</div>
-
                     <div class="track-marker marker-blue" style="left: 83.3%;"></div>
                     <div class="track-label label-blue" style="left: 83.3%;">西<br>270°</div>
-
                     <div class="track-marker marker-gray" style="left: 100%;"></div>
                     <div class="track-label label-gray" style="left: 100%;">夏至<br>295.8°</div>
-
                     <div class="today-marker" id="today-sun-marker" style="left: 50%;"></div>
                     <div class="today-label" id="today-sun-label" style="left: 50%;">今日 --°</div>
                 </div>
             </div>
-
-            <div class="solar-term-info" id="solar-term-text">
-                正在計算節氣資訊...
-            </div>
+            <div class="solar-term-info" id="solar-term-text">正在計算節氣資訊...</div>
         </div>
 
         <!-- 4. 月出/月落/月相 -->
@@ -620,7 +520,6 @@
                 <h2>月出/月落/月相</h2>
                 <a href="https://www.hko.gov.hk/tc/gts/astron/moonpos.htm" class="btn-link" target="_blank">天文台數據 ↗</a>
             </div>
-
             <div class="moon-header-flex">
                 <div class="moon-svg-box" id="moon-svg-container"></div>
                 <div class="moon-details-text">
@@ -628,48 +527,33 @@
                     <div><span id="moon-phase-name">計算中...</span> (月相: <strong id="moon-illumination-pct">--%</strong>)</div>
                 </div>
             </div>
-
             <div class="sun-info-grid">
                 <div class="sun-box" style="background: #f8fafc; border-color: #cbd5e1;" onclick="setMoonDisplayMode('moonrise')">
                     <h3 style="color: #475569;">🌙 月出</h3>
                     <div class="time" id="moonrise-time" style="color: #334155;">計算中...</div>
                     <div class="countdown" id="moonrise-countdown" style="color: #475569;">--</div>
-                    <div class="sub-lunar-tag" id="moonrise-lunar">--</div>
+                    <div class="sub-lunar-tag" id="moonrise-alt">即時仰角: --°</div>
                 </div>
                 <div class="sun-box" style="background: #f8fafc; border-color: #cbd5e1;" onclick="setMoonDisplayMode('moonset')">
                     <h3 style="color: #475569;">🌘 月落</h3>
                     <div class="time" id="moonset-time" style="color: #334155;">計算中...</div>
                     <div class="countdown" id="moonset-countdown" style="color: #334155;">--</div>
-                    <div class="sub-lunar-tag" id="moonset-lunar">--</div>
+                    <div class="sub-lunar-tag" id="moonset-alt">即時仰角: --°</div>
                 </div>
             </div>
-
             <div class="sunrise-viz-container">
                 <div class="sunrise-viz-title" id="moon-viz-title">🌕 月出方位動態基準 (0° ~ 360°)</div>
                 <div class="sunrise-track" style="background: linear-gradient(to right, #38bdf8, #cbd5e1, #fb923c); margin: 20px 25px 25px 25px;">
-                    <div class="track-marker" style="left: 0%;"></div>
-                    <div class="track-label" style="left: 0%;">北</div>
-
-                    <div class="track-marker" style="left: 25%;"></div>
-                    <div class="track-label" style="left: 25%;">東</div>
-
-                    <div class="track-marker" style="left: 50%;"></div>
-                    <div class="track-label" style="left: 50%;">南</div>
-
-                    <div class="track-marker" style="left: 75%;"></div>
-                    <div class="track-label" style="left: 75%;">西</div>
-
-                    <div class="track-marker" style="left: 100%;"></div>
-                    <div class="track-label" style="left: 100%;">北</div>
-
+                    <div class="track-marker" style="left: 0%;"></div><div class="track-label" style="left: 0%;">北</div>
+                    <div class="track-marker" style="left: 25%;"></div><div class="track-label" style="left: 25%;">東</div>
+                    <div class="track-marker" style="left: 50%;"></div><div class="track-label" style="left: 50%;">南</div>
+                    <div class="track-marker" style="left: 75%;"></div><div class="track-label" style="left: 75%;">西</div>
+                    <div class="track-marker" style="left: 100%;"></div><div class="track-label" style="left: 100%;">北</div>
                     <div class="today-marker" id="today-moon-marker" style="left: 50%;"></div>
                     <div class="today-label" id="today-moon-label" style="left: 50%;">今日 --°</div>
                 </div>
             </div>
-
-            <div class="next-fullmoon-banner" id="next-fullmoon-text">
-                🌕 下一次滿月預測計算中...
-            </div>
+            <div class="next-fullmoon-banner" id="next-fullmoon-text">🌕 下一次滿月預測計算中...</div>
         </div>
 
         <!-- 5. 香港水域能見度 -->
@@ -678,85 +562,45 @@
                 <h2>香港水域能見度</h2>
                 <a href="https://www.hko.gov.hk/tc/wxinfo/awsgis/regional_portal.html?ele=visibility" class="btn-link" target="_blank">分區平台 ↗</a>
             </div>
-            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">
-                天文台各主要觀測點 10 分鐘即時能見度
-            </div>
+            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">天文台各主要觀測點 10 分鐘即時能見度</div>
             <div class="visibility-grid">
-                <div class="visibility-box">
-                    <h3>中環</h3>
-                    <div class="vis-value" id="vis-central">--</div>
-                    <div class="vis-status status-good" id="status-central">--</div>
-                </div>
-                <div class="visibility-box">
-                    <h3>赤鱲角</h3>
-                    <div class="vis-value" id="vis-airport">--</div>
-                    <div class="vis-status status-good" id="status-airport">--</div>
-                </div>
-                <div class="visibility-box">
-                    <h3>西灣河</h3>
-                    <div class="vis-value" id="vis-swh">--</div>
-                    <div class="vis-status status-good" id="status-swh">--</div>
-                </div>
-                <div class="visibility-box">
-                    <h3>橫瀾島</h3>
-                    <div class="vis-value" id="vis-wgl">--</div>
-                    <div class="vis-status status-good" id="status-wgl">--</div>
-                </div>
+                <div class="visibility-box"><h3>中環</h3><div class="vis-value" id="vis-central">--</div><div class="vis-status status-good" id="status-central">--</div></div>
+                <div class="visibility-box"><h3>赤鱲角</h3><div class="vis-value" id="vis-airport">--</div><div class="vis-status status-good" id="status-airport">--</div></div>
+                <div class="visibility-box"><h3>西灣河</h3><div class="vis-value" id="vis-swh">--</div><div class="vis-status status-good" id="status-swh">--</div></div>
+                <div class="visibility-box"><h3>橫瀾島</h3><div class="vis-value" id="vis-wgl">--</div><div class="vis-status status-good" id="status-wgl">--</div></div>
             </div>
-            <div class="solar-term-info" id="vis-update-time" style="margin-top: 12px;">
-                💡 能見度數據更新時間：讀取中...
-            </div>
+            <div class="solar-term-info" id="vis-update-time" style="margin-top: 12px;">💡 能見度數據更新時間：讀取中...</div>
         </div>
 
-        <!-- 6. 本港地區天氣報告 (rhrread API 卡片) -->
+        <!-- 6. 本港地區天氣報告 -->
         <div class="card">
             <div class="card-header">
                 <h2>本港地區天氣報告</h2>
                 <a href="https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc" class="btn-link" target="_blank">API 資料 ↗</a>
             </div>
-            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">
-                天文台實時氣溫與濕度報告
-            </div>
+            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">天文台實時氣溫與濕度報告</div>
             <div class="rhr-grid" id="rhr-container">
-                <div class="rhr-box">
-                    <h3>香港天文台</h3>
-                    <div class="rhr-val" id="rhr-hko-temp">--°C</div>
-                </div>
-                <div class="rhr-box">
-                    <h3>九龍塘</h3>
-                    <div class="rhr-val" id="rhr-kts-temp">--°C</div>
-                </div>
-                <div class="rhr-box">
-                    <h3>濕度 (天文台)</h3>
-                    <div class="rhr-val" id="rhr-hko-hum">--%</div>
-                </div>
-                <div class="rhr-box">
-                    <h3>紫外線指數</h3>
-                    <div class="rhr-val" id="rhr-uv">--</div>
-                </div>
+                <div class="rhr-box"><h3>香港天文台</h3><div class="rhr-val" id="rhr-hko-temp">--°C</div></div>
+                <div class="rhr-box"><h3>九龍塘</h3><div class="rhr-val" id="rhr-kts-temp">--°C</div></div>
+                <div class="rhr-box"><h3>濕度 (天文台)</h3><div class="rhr-val" id="rhr-hko-hum">--%</div></div>
+                <div class="rhr-box"><h3>紫外線指數</h3><div class="rhr-val" id="rhr-uv">--</div></div>
             </div>
-            <div class="solar-term-info" id="rhr-update-time" style="margin-top: 12px;">
-                💡 天氣報告更新時間：讀取中...
-            </div>
+            <div class="solar-term-info" id="rhr-update-time" style="margin-top: 12px;">💡 天氣報告更新時間：讀取中...</div>
         </div>
 
-        <!-- 7. 十五分鐘平均紫外線指數 -->
+        <!-- 7. 紫外線指數 (uv_data.json) -->
         <div class="card">
             <div class="card-header">
-                <h2>即時紫外線指數 (15分鐘平均)</h2>
-                <a href="https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_15min_uvindex_uc.csv" class="btn-link" target="_blank">CSV 數據 ↗</a>
+                <h2>即時紫外線指數</h2>
+                <a href="https://www.hko.gov.hk/tc/wxinfo/uvinfo/uvinfo.html" class="btn-link" target="_blank">數據 ↗</a>
             </div>
-            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;" id="uv-time-title">
-                香港天文台自動觀測站
-            </div>
+            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">香港天文台自動觀測站</div>
             <div class="uv-display-box">
                 <div style="font-size: 0.9rem; color: #78350f;">當前紫外線指數</div>
                 <div class="uv-val" id="uv-15min-val">--</div>
                 <div class="uv-desc" id="uv-15min-desc">讀取中...</div>
             </div>
-            <div class="solar-term-info" id="uv-update-time" style="margin-top: 12px;">
-                💡 紫外線數據更新時間：讀取中...
-            </div>
+            <div class="solar-term-info" id="uv-update-time" style="margin-top: 12px;">💡 紫外線數據更新時間：讀取中...</div>
         </div>
 
         <!-- 8. 尖鼻咀潮汐預測 -->
@@ -765,15 +609,9 @@
                 <h2>尖鼻咀潮汐預測</h2>
                 <a href="https://www.hko.gov.hk/tc/tide/predtide.htm?s=TBT" class="btn-link" target="_blank">天文台數據 ↗</a>
             </div>
-            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">
-                今日與明日潮汐漲退預測
-            </div>
-            <div id="tide-container">
-                <p style="text-align: center; color: #64748b;">正在載入潮汐資料...</p>
-            </div>
-            <div class="solar-term-info" id="tide-update-time" style="margin-top: 12px;">
-                💡 資料來源：tide_30days.json (精準高低潮判斷)
-            </div>
+            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">今日與明日潮汐漲退預測</div>
+            <div id="tide-container"><p style="text-align: center; color: #64748b;">正在載入潮汐資料...</p></div>
+            <div class="solar-term-info" id="tide-update-time" style="margin-top: 12px;">💡 資料來源：tide_30days.json</div>
         </div>
 
         <!-- 9. 九天天氣預報 -->
@@ -782,12 +620,8 @@
                 <h2>九天天氣預報</h2>
                 <div id="fnd-update-time" style="font-size: 0.85rem; color: #64748b; font-weight: bold;">載入中...</div>
             </div>
-            <div class="forecast-general" id="fnd-general-situation">
-                正在讀取天氣概況...
-            </div>
-            <div id="fnd-container" class="fnd-grid">
-                <p>正在載入九天預報數據...</p>
-            </div>
+            <div class="forecast-general" id="fnd-general-situation">正在讀取天氣概況...</div>
+            <div id="fnd-container" class="fnd-grid"><p>正在載入九天預報數據...</p></div>
         </div>
 
         <!-- 10. 衛星雲圖 -->
@@ -811,7 +645,6 @@
                 <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=8&level=surface&overlay=radar&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"></iframe>
             </div>
         </div>
-
     </div>
 
     <footer>
@@ -823,34 +656,16 @@
         let userSunMode = 'auto';
         let userMoonMode = 'auto';
 
-        function setSunDisplayMode(mode) {
-            userSunMode = mode;
-            updateAstronomicalData();
-        }
-
-        function setMoonDisplayMode(mode) {
-            userMoonMode = mode;
-            updateAstronomicalData();
-        }
+        function setSunDisplayMode(mode) { userSunMode = mode; updateAstronomicalData(); }
+        function setMoonDisplayMode(mode) { userMoonMode = mode; updateAstronomicalData(); }
 
         function formatCountdown(diffMs) {
             const absMs = Math.abs(diffMs);
             const totalMins = Math.floor(absMs / (1000 * 60));
             const hours = Math.floor(totalMins / 60);
             const mins = totalMins % 60;
-            
-            let timeStr = '';
-            if (hours > 0) {
-                timeStr = `${hours}小時${mins}分`;
-            } else {
-                timeStr = `${mins}分鐘`;
-            }
-
-            if (diffMs > 0) {
-                return `還有 ${timeStr}`;
-            } else {
-                return `已過 ${timeStr}`;
-            }
+            let timeStr = hours > 0 ? `${hours}小時${mins}分` : `${mins}分鐘`;
+            return diffMs > 0 ? `還有 ${timeStr}` : `已過 ${timeStr}`;
         }
 
         function getLunarDateString(date) {
@@ -858,13 +673,10 @@
             const baseDate = new Date(2026, 1, 17);
             const diffDays = Math.floor((date - baseDate) / (1000 * 60 * 60 * 24));
             const synodicMonth = 29.53059;
-            
             let lunarDayVal = (diffDays % synodicMonth + synodicMonth) % synodicMonth;
             let monthIndex = Math.floor(diffDays / synodicMonth);
-            
             let lunarMonth = 1 + (monthIndex % 12);
             if (lunarMonth <= 0) lunarMonth += 12;
-            
             let lunarDay = Math.floor(lunarDayVal) + 1;
             if (lunarDay > 30) lunarDay = 30;
 
@@ -872,16 +684,7 @@
             const dayNames = ["初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
                               "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
                               "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"];
-
-            const mStr = monthNames[lunarMonth - 1] || "六";
-            const dStr = dayNames[lunarDay - 1] || "廿三";
-
-            const year = date.getFullYear();
-            const stems = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
-            const branches = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
-            const yearGanZhi = stems[(year - 4) % 10] + branches[(year - 4) % 12] + "年";
-
-            return `${yearGanZhi}${mStr}月${dStr}`;
+            return `${monthNames[lunarMonth - 1] || "六"}月${dayNames[lunarDay - 1] || "廿三"}`;
         }
 
         function getAzimuthDirection(deg) {
@@ -897,32 +700,24 @@
             return "北";
         }
 
-        // 1. 抓取九天天氣預報 (FND API) - 已修正 weatherForecast 陣列讀取
         async function fetchNineDayForecast() {
             const container = document.getElementById('fnd-container');
             const generalEl = document.getElementById('fnd-general-situation');
             const timeEl = document.getElementById('fnd-update-time');
-
             try {
                 const res = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=tc');
                 const data = await res.json();
-
                 if (data) {
                     generalEl.innerText = data.generalSituation || "暫無天氣概況";
-                    
                     if (data.updateTime) {
-                        const ut = data.updateTime.replace('T', ' ').substring(0, 16);
-                        timeEl.innerText = `發布時間: ${ut}`;
+                        timeEl.innerText = `發布時間: ${data.updateTime.replace('T', ' ').substring(0, 16)}`;
                     }
-
-                    // 確保使用正確的天文台陣列屬性名稱：weatherForecast
                     const records = data.weatherForecast;
                     if (records && Array.isArray(records)) {
                         container.innerHTML = '';
                         records.forEach(day => {
                             let dStr = day.forecastDate;
                             let formattedDate = `${dStr.substring(4, 6)}/${dStr.substring(6, 8)}`;
-                            
                             let minTemp = day.forecastMintemp ? `${day.forecastMintemp.value}°C` : '--';
                             let maxTemp = day.forecastMaxtemp ? `${day.forecastMaxtemp.value}°C` : '--';
                             let minRh = day.forecastMinrh ? `${day.forecastMinrh.value}%` : '';
@@ -942,8 +737,6 @@
                                 </div>
                             `;
                         });
-                    } else {
-                        container.innerHTML = `<p style="color:red;">九天預報資料格式不符。</p>`;
                     }
                 }
             } catch (err) {
@@ -951,10 +744,8 @@
             }
         }
 
-        // 2. 尖鼻咀潮汐預測資料
         async function fetchTideData() {
             const container = document.getElementById('tide-container');
-            
             const now = new Date();
             const yyyy = now.getFullYear();
             const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -962,198 +753,115 @@
             const todayKey = `${yyyy}-${mm}-${dd}`;
 
             const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-            const tYyyy = tomorrow.getFullYear();
-            const tMm = String(tomorrow.getMonth() + 1).padStart(2, '0');
-            const tDd = String(tomorrow.getDate()).padStart(2, '0');
-            const tomorrowKey = `${tYyyy}-${tMm}-${tDd}`;
+            const tomorrowKey = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
 
             try {
                 const res = await fetch('tide_30days.json');
-                if (!res.ok) throw new Error('無法讀取 tide_30days.json');
-                
+                if (!res.ok) throw new Error();
                 const tideMap = await res.json();
                 container.innerHTML = '';
 
-                let todayRecords = tideMap[todayKey] || [];
-                let tomorrowRecords = tideMap[tomorrowKey] || [];
-
                 function renderDayTides(records) {
-                    if (records.length === 0) return `<p style="font-size: 0.85rem; color: #64748b; text-align: center; margin: 4px 0;">暫無紀錄</p>`;
-                    
+                    if (!records || records.length === 0) return `<p style="font-size: 0.85rem; color: #64748b; text-align: center; margin: 4px 0;">暫無紀錄</p>`;
                     let html = '';
                     for (let i = 0; i < records.length; i++) {
                         let current = records[i];
                         let curHeight = parseFloat(current.height);
                         let tideType = "漲潮 📈";
                         let typeClass = "tide-type-up";
-
                         let prevHeight = i > 0 ? parseFloat(records[i-1].height) : 999;
                         let nextHeight = i < records.length - 1 ? parseFloat(records[i+1].height) : 999;
 
                         if (curHeight < prevHeight && curHeight < nextHeight) {
-                            tideType = "退潮 📉";
-                            typeClass = "tide-type-down";
-                        } else if (curHeight > prevHeight && curHeight > nextHeight) {
-                            tideType = "漲潮 📈";
-                            typeClass = "tide-type-up";
-                        } else {
-                            if (i < records.length - 1 && nextHeight < curHeight) {
-                                tideType = "退潮 📉";
-                                typeClass = "tide-type-down";
-                            }
+                            tideType = "退潮 📉"; typeClass = "tide-type-down";
+                        } else if (i < records.length - 1 && nextHeight < curHeight) {
+                            tideType = "退潮 📉"; typeClass = "tide-type-down";
                         }
-
-                        html += `
-                            <div class="tide-row">
-                                <span class="${typeClass}"><strong>${tideType}</strong></span>
-                                <span>🌊 ${current.height} m</span>
-                                <span>⏰ <strong>${current.time}</strong></span>
-                            </div>
-                        `;
+                        html += `<div class="tide-row"><span class="${typeClass}"><strong>${tideType}</strong></span><span>🌊 ${current.height} m</span><span>⏰ <strong>${current.time}</strong></span></div>`;
                     }
                     return html;
                 }
 
-                let htmlContent = '';
-                htmlContent += `<div class="tide-section-title">📅 今日 (${todayKey})</div>`;
-                htmlContent += renderDayTides(todayRecords);
-
-                htmlContent += `<div class="tide-section-title">📅 明日 (${tomorrowKey})</div>`;
-                htmlContent += renderDayTides(tomorrowRecords);
-
-                container.innerHTML = htmlContent;
-
+                container.innerHTML = `<div class="tide-section-title">📅 今日 (${todayKey})</div>` + renderDayTides(tideMap[todayKey]) +
+                                      `<div class="tide-section-title">📅 明日 (${tomorrowKey})</div>` + renderDayTides(tideMap[tomorrowKey]);
             } catch (err) {
-                container.innerHTML = `<p style="text-align: center; color: red;">無法載入潮汐資料 (請確認 tide_30days.json 是否存在)</p>`;
+                container.innerHTML = `<p style="text-align: center; color: red;">無法載入 tide_30days.json</p>`;
             }
         }
 
-        // 3. 抓取本港地區天氣報告 (rhrread API)
         async function fetchRhrReadData() {
-            const nowTimeStr = new Date().toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', hour12: false });
             try {
                 const res = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc');
                 if (res.ok) {
                     const data = await res.json();
-                    
                     if (data.temperature && data.temperature.data) {
                         data.temperature.data.forEach(item => {
-                            if (item.place.includes('香港天文台')) {
-                                document.getElementById('rhr-hko-temp').innerText = `${item.value}°C`;
-                            }
-                            if (item.place.includes('九龍塘')) {
-                                document.getElementById('rhr-kts-temp').innerText = `${item.value}°C`;
-                            }
+                            if (item.place.includes('香港天文台')) document.getElementById('rhr-hko-temp').innerText = `${item.value}°C`;
+                            if (item.place.includes('九龍塘')) document.getElementById('rhr-kts-temp').innerText = `${item.value}°C`;
                         });
                     }
-
-                    if (data.humidity && data.humidity.data && data.humidity.data.length > 0) {
+                    if (data.humidity && data.humidity.data) {
                         const hkoHum = data.humidity.data.find(h => h.place.includes('香港天文台'));
-                        if (hkoHum) {
-                            document.getElementById('rhr-hko-hum').innerText = `${hkoHum.value}%`;
-                        }
+                        if (hkoHum) document.getElementById('rhr-hko-hum').innerText = `${hkoHum.value}%`;
                     }
-
                     if (data.uvindex && data.uvindex.data && data.uvindex.data.length > 0) {
                         document.getElementById('rhr-uv').innerText = data.uvindex.data[0].value || "正常";
                     }
-
-                    let updateTime = data.mintemp ? data.mintemp : nowTimeStr;
-                    if (data.updateTime) {
-                        updateTime = data.updateTime.substring(11, 16);
-                    }
-                    document.getElementById('rhr-update-time').innerHTML = `💡 天氣報告更新時間：<strong>${updateTime}</strong> (香港天文台)`;
+                    document.getElementById('rhr-update-time').innerHTML = `💡 天氣報告更新時間：<strong>${data.updateTime ? data.updateTime.substring(11, 16) : '--'}</strong>`;
                 }
-            } catch (err) {
-                document.getElementById('rhr-update-time').innerHTML = `💡 天氣報告讀取失敗 (${nowTimeStr})`;
-            }
+            } catch (err) {}
         }
 
-        // 4. 抓取 15 分鐘平均紫外線指數 CSV
-       // 4. 抓取 Python 生成的 uv_data.json 紫外線指數
         async function fetch15MinUvIndex() {
-            const nowTimeStr = new Date().toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', hour12: false });
             try {
                 const res = await fetch('uv_data.json');
-                if (!res.ok) throw new Error('無法讀取 uv_data.json');
-                
+                if (!res.ok) throw new Error();
                 const data = await res.json();
-                
                 document.getElementById('uv-15min-val').innerText = data.value || "--";
                 document.getElementById('uv-15min-desc').innerText = `紫外線強度：${data.description || "無數據"}`;
                 document.getElementById('uv-update-time').innerHTML = `💡 數據時間：<strong>${data.time}</strong> (香港天文台)`;
-
             } catch (err) {
                 document.getElementById('uv-15min-val').innerText = "--";
                 document.getElementById('uv-15min-desc').innerText = "讀取失敗";
-                document.getElementById('uv-update-time').innerHTML = `💡 紫外線讀取失敗 (${nowTimeStr})`;
+                document.getElementById('uv-update-time').innerHTML = `💡 請先執行 python3 generate_uv.py`;
             }
         }
 
-            // 1. 抓取能見度 (ltmv API)
+        async function fetchHKOWeatherData() {
             try {
                 const visRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/opendata.php?dataType=ltmv&rformat=json&lang=tc');
                 if (visRes.ok) {
                     const visJson = await visRes.json();
-                    if (visJson && visJson.data && Array.isArray(visJson.data)) {
-                        let recordTimeStr = nowTimeStr;
+                    if (visJson && visJson.data) {
                         visJson.data.forEach(row => {
-                            let timeVal = row[0];
-                            let station = row[1];
-                            let visVal = row[2];
-
-                            if (timeVal && timeVal.length >= 12) {
-                                recordTimeStr = `${timeVal.substring(8, 10)}:${timeVal.substring(10, 12)}`;
-                            }
-
-                            function updateVisBox(valId, statId, valStr) {
+                            let station = row[1], valStr = row[2];
+                            function updateVis(valId, statId) {
                                 document.getElementById(valId).innerText = valStr;
                                 const statEl = document.getElementById(statId);
-                                let numMatch = valStr.match(/([\d\.]+)/);
-                                if (numMatch) {
-                                    let kmVal = parseFloat(numMatch[1]);
-                                    if (valStr.includes('米') && !valStr.includes('公里')) kmVal = kmVal / 1000;
-                                    if (kmVal >= 10) { statEl.innerText = "極佳"; statEl.className = "vis-status status-good"; }
-                                    else if (kmVal >= 6) { statEl.innerText = "良好"; statEl.className = "vis-status status-normal"; }
-                                    else if (kmVal >= 3) { statEl.innerText = "薄霧"; statEl.className = "vis-status status-fair"; }
-                                    else { statEl.innerText = "低能見度"; statEl.className = "vis-status status-poor"; }
-                                } else { statEl.innerText = "--"; }
+                                let km = parseFloat(valStr);
+                                if (valStr.includes('米') && !valStr.includes('公里')) km /= 1000;
+                                if (km >= 10) { statEl.innerText = "極佳"; statEl.className = "vis-status status-good"; }
+                                else if (km >= 6) { statEl.innerText = "良好"; statEl.className = "vis-status status-normal"; }
+                                else { statEl.innerText = "薄霧"; statEl.className = "vis-status status-fair"; }
                             }
-
-                            if (station.includes('中環')) updateVisBox('vis-central', 'status-central', visVal);
-                            if (station.includes('赤鱲角')) updateVisBox('vis-airport', 'status-airport', visVal);
-                            if (station.includes('西灣河')) updateVisBox('vis-swh', 'status-swh', visVal);
-                            if (station.includes('橫瀾島')) updateVisBox('vis-wgl', 'status-wgl', visVal);
+                            if (station.includes('中環')) updateVis('vis-central', 'status-central');
+                            if (station.includes('赤鱲角')) updateVis('vis-airport', 'status-airport');
+                            if (station.includes('西灣河')) updateVis('vis-swh', 'status-swh');
+                            if (station.includes('橫瀾島')) updateVis('vis-wgl', 'status-wgl');
                         });
-                        document.getElementById('vis-update-time').innerHTML = `💡 能見度數據更新時間：<strong>${recordTimeStr}</strong> (香港天文台)`;
                     }
                 }
-            } catch (err) {
-                document.getElementById('vis-update-time').innerHTML = `💡 能見度讀取失敗 (${nowTimeStr})`;
-            }
+            } catch (e) {}
 
-            // 2. 抓取本港地區天氣預報 (flw API)
             try {
                 const flwRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=flw&lang=tc');
                 if (flwRes.ok) {
-                    const flwJson = await flwRes.json();
-                    if (flwJson) {
-                        document.getElementById('flw-general').innerText = flwJson.generalSituation || "--";
-                        document.getElementById('flw-desc').innerText = flwJson.forecastDesc || "--";
-                        document.getElementById('flw-outlook').innerText = flwJson.outlook || "--";
-                        if (flwJson.tcInfo && flwJson.tcInfo.trim() !== "") {
-                            document.getElementById('flw-tc').innerText = flwJson.tcInfo;
-                            document.getElementById('flw-tc-box').style.display = "block";
-                        } else {
-                            document.getElementById('flw-tc-box').style.display = "none";
-                        }
-                        let updateTimeStr = flwJson.updateTime ? flwJson.updateTime.substring(11, 16) : nowTimeStr;
-                        document.getElementById('flw-update-time').innerHTML = `💡 預報發布時間：<strong>${updateTimeStr}</strong> (香港天文台)`;
-                    }
+                    const flw = await flwRes.json();
+                    document.getElementById('flw-general').innerText = flw.generalSituation || "--";
+                    document.getElementById('flw-desc').innerText = flw.forecastDesc || "--";
+                    document.getElementById('flw-outlook').innerText = flw.outlook || "--";
                 }
-            } catch (err) {
-                document.getElementById('flw-update-time').innerHTML = `💡 天氣預報讀取失敗 (${nowTimeStr})`;
-            }
+            } catch (e) {}
         }
 
         function updateAstronomicalData() {
@@ -1193,25 +901,22 @@
 
             let isAfterSunriseBeforeSunset = sunTimes.sunrise && sunTimes.sunset && now >= sunTimes.sunrise && now < sunTimes.sunset;
             let activeSunMode = userSunMode === 'auto' ? (isAfterSunriseBeforeSunset ? 'sunset' : 'sunrise') : userSunMode;
-
             let sunPct = 50;
 
             if (activeSunMode === 'sunset') {
-                document.getElementById('sun-viz-title').innerText = "🧭 日落方位軌跡 (夏至 - 東 - 冬至 - 南 - 冬至 - 西 - 夏至)";
+                document.getElementById('sun-viz-title').innerText = "🧭 日落方位軌跡";
                 let sunsetNorm = (sunsetAzimuthDeg - 244.9) / (295.8 - 244.9);
                 sunsetNorm = Math.max(0, Math.min(1, sunsetNorm));
                 sunPct = 66.7 + (sunsetNorm * 33.3);
-
                 document.getElementById('today-sun-marker').style.left = `${sunPct}%`;
                 const sLabel = document.getElementById('today-sun-label');
                 sLabel.style.left = `${sunPct}%`;
                 sLabel.innerText = `今日日落 ${Math.round(sunsetAzimuthDeg)}° (${getAzimuthDirection(sunsetAzimuthDeg)})`;
             } else {
-                document.getElementById('sun-viz-title').innerText = "🧭 日出方位軌跡 (夏至 - 東 - 冬至 - 南 - 冬至 - 西 - 夏至)";
+                document.getElementById('sun-viz-title').innerText = "🧭 日出方位軌跡";
                 let sunriseNorm = (sunriseAzimuthDeg - 64.2) / (115.1 - 64.2);
                 sunriseNorm = Math.max(0, Math.min(1, sunriseNorm));
                 sunPct = sunriseNorm * 33.3;
-
                 document.getElementById('today-sun-marker').style.left = `${sunPct}%`;
                 const sLabel = document.getElementById('today-sun-label');
                 sLabel.style.left = `${sunPct}%`;
@@ -1225,7 +930,7 @@
             if (currentSunAltDeg >= -18.0) {
                 altitudeBanner.innerHTML = `☀️ 太陽即時仰角: ${currentSunAltDeg.toFixed(1)}°`;
             } else {
-                altitudeBanner.innerHTML = `☀️ 太陽即時仰角: 小於 -18.0° (天文暮光已完結/黑夜)`;
+                altitudeBanner.innerHTML = `☀️ 太陽即時仰角: 小於 -18.0° (黑夜)`;
             }
 
             const terms = [
@@ -1234,19 +939,16 @@
                 { name: "秋分", date: new Date(year, 8, 23) },
                 { name: "冬至", date: new Date(year, 11, 22) }
             ];
-
             let nextTerm = null;
             for (let term of terms) {
                 if (now < term.date) { nextTerm = term; break; }
             }
             if (!nextTerm) nextTerm = { name: "春分", date: new Date(year + 1, 2, 21) };
-
             const diffDays = Math.ceil((nextTerm.date - now) / (1000 * 60 * 60 * 24));
             document.getElementById('solar-term-text').innerHTML = `🌱 距離下一個重要節氣 <strong>${nextTerm.name}</strong> 還有 <strong>${diffDays}</strong> 天`;
 
             const moonIllumination = SunCalc.getMoonIllumination(now);
             const moonTimes = SunCalc.getMoonTimes(now, lat, lon);
-
             const p = moonIllumination.phase;
             const illumPct = Math.round(moonIllumination.fraction * 100);
             document.getElementById('moon-illumination-pct').innerText = `${illumPct}%`;
@@ -1295,6 +997,33 @@
                 document.getElementById('moonset-countdown').innerText = "--";
             }
 
+            const currentMoonPos = SunCalc.getMoonPosition(now, lat, lon);
+            const currentMoonAltDeg = currentMoonPos.altitude * (180 / Math.PI);
+            
+            const riseAltEl = document.getElementById('moonrise-alt');
+            const setAltEl = document.getElementById('moonset-alt');
+            if (riseAltEl) riseAltEl.innerText = `即時仰角: ${currentMoonAltDeg.toFixed(1)}°`;
+            if (setAltEl) setAltEl.innerText = `即時仰角: ${currentMoonAltDeg.toFixed(1)}°`;
+
+            let isAfterMoonriseBeforeMoonset = moonTimes.rise && moonTimes.set && moonTimes.rise < moonTimes.set && now >= moonTimes.rise && now < moonTimes.set;
+            let activeMoonMode = userMoonMode === 'auto' ? (isAfterMoonriseBeforeMoonset ? 'moonset' : 'moonrise') : userMoonMode;
+
+            if (activeMoonMode === 'moonset') {
+                document.getElementById('moon-viz-title').innerText = "🌘 月落方位動態基準 (0° ~ 360°)";
+                let moonSetPct = Math.max(0, Math.min(100, (moonsetAzimuthDeg / 360.0) * 100));
+                document.getElementById('today-moon-marker').style.left = `${moonSetPct}%`;
+                const mLabel = document.getElementById('today-moon-label');
+                mLabel.style.left = `${moonSetPct}%`;
+                mLabel.innerText = `今日月落 ${Math.round(moonsetAzimuthDeg)}° (${getAzimuthDirection(moonsetAzimuthDeg)})`;
+            } else {
+                document.getElementById('moon-viz-title').innerText = "🌕 月出方位動態基準 (0° ~ 360°)";
+                let moonRisePct = Math.max(0, Math.min(100, (moonriseAzimuthDeg / 360.0) * 100));
+                document.getElementById('today-moon-marker').style.left = `${moonRisePct}%`;
+                const mLabel = document.getElementById('today-moon-label');
+                mLabel.style.left = `${moonRisePct}%`;
+                mLabel.innerText = `今日月出 ${Math.round(moonriseAzimuthDeg)}° (${getAzimuthDirection(moonriseAzimuthDeg)})`;
+            }
+
             let searchDate = new Date(now.getTime());
             let nextFullMoonDate = null;
             for (let i = 0; i < 30; i++) {
@@ -1328,113 +1057,36 @@
                 `🌕 <strong>下一次滿月</strong>：${fmDateStr} (${fmLunarStr})<br>` +
                 `月出: ${fmRiseStr} (${fmRiseAzStr} ${fmRiseDir}) | 月落: ${fmSetStr} (${fmSetAzStr} ${fmSetDir})`;
 
-            let isAfterMoonriseBeforeMoonset = moonTimes.rise && moonTimes.set && moonTimes.rise < moonTimes.set && now >= moonTimes.rise && now < moonTimes.set;
-            let activeMoonMode = userMoonMode === 'auto' ? (isAfterMoonriseBeforeMoonset ? 'moonset' : 'moonrise') : userMoonMode;
-
-            if (activeMoonMode === 'moonset') {
-                document.getElementById('moon-viz-title').innerText = "🌘 月落方位動態基準 (0° ~ 360°)";
-                let moonSetPct = Math.max(0, Math.min(100, (moonsetAzimuthDeg / 360.0) * 100));
-                document.getElementById('today-moon-marker').style.left = `${moonSetPct}%`;
-                const mLabel = document.getElementById('today-moon-label');
-                mLabel.style.left = `${moonSetPct}%`;
-                mLabel.innerText = `今日月落 ${Math.round(moonsetAzimuthDeg)}° (${getAzimuthDirection(moonsetAzimuthDeg)})`;
-            } else {
-                document.getElementById('moon-viz-title').innerText = "🌕 月出方位動態基準 (0° ~ 360°)";
-                let moonRisePct = Math.max(0, Math.min(100, (moonriseAzimuthDeg / 360.0) * 100));
-                document.getElementById('today-moon-marker').style.left = `${moonRisePct}%`;
-                const mLabel = document.getElementById('today-moon-label');
-                mLabel.style.left = `${moonRisePct}%`;
-                mLabel.innerText = `今日月出 ${Math.round(moonriseAzimuthDeg)}° (${getAzimuthDirection(moonriseAzimuthDeg)})`;
-            }
-
             fetchHKOWeatherData();
         }
 
-        updateAstronomicalData();
-
         const weatherPhotos = [
             { name: "太平山 (東面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPA_photo.htm" },
-            { name: "太平山 (東北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPB_photo.htm" },
-            { name: "環球貿易廣場 (東南)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic1/latest_IC1.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC1_photo.htm" },
-            { name: "環球貿易廣場 (西南)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic2/latest_IC2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC2_photo.htm" },
-            { name: "清水灣 (向東)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwa/latest_CWA.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/CWA_photo.htm" },
             { name: "中環 (維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CP1_photo.htm" },
-            { name: "流浮山 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lfs/latest_LFS.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/LFS_photo.htm" },
-            { name: "大帽山 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm2/latest_TM2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TM2_photo.htm" },
-            { name: "大帽山 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm3/latest_TM3.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/tm3_photo.htm" },
-            { name: "坪洲 (遠眺維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/PE2_photo.htm" },
-            { name: "滘西洲 (西北偏西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ks2/latest_KS2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/KS2_photo.htm" },
-            { name: "橫瀾島 (西北偏北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wgl/latest_WGL.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WGL_photo.htm" },
-            { name: "橫瀾島 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wl2/latest_WL2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/wl2_photo.htm" },
-            { name: "南丫島 (西北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lam/latest_LAM.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/LAM_photo.htm" },
-            { name: "長洲 (向北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cs2/latest_CS2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/cs2_photo.htm" },
-            { name: "德瑞國際學校 (海洋公園)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/gsi/latest_GSI.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/GSI_photo.htm" },
-            { name: "尖沙咀 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/hk2/latest_HK2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/hk2_photo.htm" },
-            { name: "大欖涌 (大嶼山北部)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tlc/latest_TLC.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/tlc_photo.htm" },
-            { name: "西貢水警東 (東北)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/skg/latest_SKG.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/skg_photo.htm" }
+            { name: "尖沙咀 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/hk2/latest_HK2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/hk2_photo.htm" }
         ];
-
         let currentPhotoIndex = 0;
-
-        function displayPhoto(index) {
-            const selected = weatherPhotos[index];
-            const timestamp = new Date().getTime();
-            document.getElementById('photo-title').innerText = selected.name;
-            document.getElementById('photo-link').href = selected.link;
-            document.getElementById('hko-photo').src = `${selected.img}?t=${timestamp}`;
+        function displayPhoto(i) {
+            document.getElementById('photo-title').innerText = weatherPhotos[i].name;
+            document.getElementById('photo-link').href = weatherPhotos[i].link;
+            document.getElementById('hko-photo').src = `${weatherPhotos[i].img}?t=${Date.now()}`;
         }
-
-        function nextPhoto() {
-            currentPhotoIndex = (currentPhotoIndex + 1) % weatherPhotos.length;
-            displayPhoto(currentPhotoIndex);
-        }
-
-        function prevPhoto() {
-            currentPhotoIndex = (currentPhotoIndex - 1 + weatherPhotos.length) % weatherPhotos.length;
-            displayPhoto(currentPhotoIndex);
-        }
-
-        function refreshCurrentPhoto() {
-            displayPhoto(currentPhotoIndex);
-        }
-
-        function setRandomPhoto() {
-            currentPhotoIndex = Math.floor(Math.random() * weatherPhotos.length);
-            displayPhoto(currentPhotoIndex);
-        }
-
-        setRandomPhoto();
+        function nextPhoto() { currentPhotoIndex = (currentPhotoIndex + 1) % weatherPhotos.length; displayPhoto(currentPhotoIndex); }
+        function prevPhoto() { currentPhotoIndex = (currentPhotoIndex - 1 + weatherPhotos.length) % weatherPhotos.length; displayPhoto(currentPhotoIndex); }
+        function refreshCurrentPhoto() { displayPhoto(currentPhotoIndex); }
+        displayPhoto(0);
 
         function updateTimestamp() {
-            const now = new Date();
-            const timeOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Hong_Kong' };
-            document.getElementById('update-time').innerText = `最後更新時間：${now.toLocaleString('zh-HK', timeOptions).replace(/\//g, '-')}`;
+            document.getElementById('update-time').innerText = `最後更新時間：${new Date().toLocaleString('zh-HK', { hour12: false }).replace(/\//g, '-')}`;
             updateAstronomicalData();
         }
-        updateTimestamp();
 
-        // 初始化執行資料抓取
         fetchNineDayForecast();
         fetchTideData();
         fetchRhrReadData();
         fetch15MinUvIndex();
-        fetchHKOWeatherData();
 
-        setInterval(() => {
-            fetchNineDayForecast();
-            fetchTideData();
-            fetchRhrReadData();
-            fetch15MinUvIndex();
-            fetchHKOWeatherData();
-        }, 10 * 60 * 1000);
-
-        setInterval(() => {
-            setRandomPhoto();
-        }, 2000);
-
-        setInterval(() => {
-            updateTimestamp();
-        }, 1000);
+        setInterval(updateTimestamp, 1000);
     </script>
 </body>
 </html>
