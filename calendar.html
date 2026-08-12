@@ -122,8 +122,8 @@
         資料來源：Google Sheets 風景攝影曆
     </footer>
 
-    <script>
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT61-FX0_mqbtsfcV6gzu6cpL6VPmCITC6dk_DcU6TknUDtdPEFe3XNC3e_fBn_jvVVvw8syaYSu1uA/pubhtml?gid=0&single=true'; // 記得換成你的 CSV 網址
+   <script>
+        const CSV_URL = 'YOUR_CSV_URL_HERE'; // 記得改成你的 CSV 網址
 
         async function fetchGoogleSheetData() {
             const container = document.getElementById('calendar-container');
@@ -133,12 +133,14 @@
                 const csvText = await res.text();
                 
                 const events = parseCSV(csvText);
+                console.log("成功解析出的事件清單：", events); // 👈 可以在瀏覽器 F12 檢查
                 renderCalendar(events);
             } catch (err) {
-                container.innerHTML = `<p style="text-align: center; color: red;">載入失敗，請確認 Google Sheets 是否已正確發布為 CSV 格式。<br><small>${err.message}</small></p>`;
+                container.innerHTML = `<p style="text-align: center; color: red;">載入失敗：${err.message}</p>`;
             }
         }
 
+        // 更穩健的 CSV 解析器
         function parseCSV(text) {
             const lines = text.split('\n');
             const result = [];
@@ -163,15 +165,15 @@
                 }
                 cols.push(current.trim());
 
-                if (cols.length >= 3) {
+                if (cols.length >= 3 && cols[0]) {
                     result.push({
                         startDate: cols[0],
-                        endDate: cols[1],
-                        title: cols[2],
-                        location: cols[3],
-                        composition: cols[4],
-                        time: cols[5],
-                        desc: cols[6]
+                        endDate: cols[1] || cols[0],
+                        title: cols[2] || '未命名事件',
+                        location: cols[3] || '--',
+                        composition: cols[4] || '--',
+                        time: cols[5] || '--',
+                        desc: cols[6] || '--'
                     });
                 }
             }
@@ -180,16 +182,30 @@
 
         function parseDate(dateStr) {
             if (!dateStr) return null;
+            dateStr = dateStr.trim();
+            
+            // 支援 D/M/YYYY 格式（例如 17/8/2026）
             if (dateStr.includes('/')) {
                 const parts = dateStr.split('/');
                 if (parts.length === 3) {
-                    return new Date(`${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`);
+                    const day = parseInt(parts[0], 10);
+                    const month = parseInt(parts[1], 10) - 1; 
+                    const year = parseInt(parts[2], 10);
+                    const d = new Date(year, month, day);
+                    if (!isNaN(d)) return d;
+                }
+            }
+            // 支援 YYYY-MM-DD 格式
+            if (dateStr.includes('-')) {
+                const parts = dateStr.split('-');
+                if (parts.length === 3) {
+                    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                    if (!isNaN(d)) return d;
                 }
             }
             return new Date(dateStr);
         }
 
-        // 🌟 計算倒數天數的函數
         function getCountdownText(dateStr) {
             const evDate = parseDate(dateStr);
             if (!evDate || isNaN(evDate)) return { text: "日期格式錯誤", class: "cd-future" };
@@ -219,12 +235,15 @@
             container.innerHTML = '';
 
             const now = new Date();
+            now.setHours(0, 0, 0, 0);
             const oneYearLater = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
             const oneMonthLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
+            // 💡 調整篩選：顯示今天以後到未來一年內的事件（包含今天）
             const filteredEvents = events.filter(ev => {
                 const evDate = parseDate(ev.startDate);
-                return evDate && !isNaN(evDate) && evDate <= oneYearLater;
+                console.log(`事件: ${ev.title}, 解析日期:`, evDate); // 檢查每個事件的日期解析結果
+                return evDate && !isNaN(evDate) && evDate >= now && evDate <= oneYearLater;
             }).sort((a, b) => parseDate(a.startDate) - parseDate(b.startDate));
 
             if (filteredEvents.length === 0) {
@@ -239,7 +258,6 @@
                 const cardClass = isWithinOneMonth ? "cal-card highlight-card" : "cal-card";
                 const dateClass = isWithinOneMonth ? "cal-date-box highlight-date" : "cal-date-box";
                 
-                // 取得倒數資訊
                 const countdown = getCountdownText(ev.startDate);
 
                 let dateDisplay = ev.startDate;
@@ -251,9 +269,8 @@
                     <div class="${cardClass}">
                         <div class="cal-info">
                             <h3>${ev.title}</h3>
-                            <p>📍 <strong>地點：</strong>${ev.location || '--'} | 📷 <strong>構圖：</strong>${ev.composition || '--'}</p>
-                            <p>⏰ <strong>時間：</strong>${ev.time || '--'} | 📝 <strong>備註：</strong>${ev.desc || '--'}</p>
-                            <!-- 顯示倒數標籤 -->
+                            <p>📍 <strong>地點：</strong>${ev.location} | 📷 <strong>構圖：</strong>${ev.composition}</p>
+                            <p>⏰ <strong>時間：</strong>${ev.time} | 📝 <strong>備註：</strong>${ev.desc}</p>
                             <div><span class="countdown-badge ${countdown.class}">⏳ ${countdown.text}</span></div>
                         </div>
                         <div class="${dateClass}">
@@ -265,29 +282,6 @@
         }
 
         fetchGoogleSheetData();
-		function parseDate(dateStr) {
-            if (!dateStr) return null;
-            dateStr = dateStr.trim();
-            
-            // 針對 D/M/YYYY 格式（例如 12/9/2026 或 05/08/2026）
-            if (dateStr.includes('/')) {
-                const parts = dateStr.split('/');
-                if (parts.length === 3) {
-                    const day = parseInt(parts[0], 10);
-                    const month = parseInt(parts[1], 10) - 1; // JS 月份從 0 開始
-                    const year = parseInt(parts[2], 10);
-                    return new Date(year, month, day);
-                }
-            }
-            // 針對 YYYY-MM-DD 格式
-            if (dateStr.includes('-')) {
-                const parts = dateStr.split('-');
-                if (parts.length === 3) {
-                    return new Date(parts[0], parts[1] - 1, parts[2]);
-                }
-            }
-            return new Date(dateStr);
-        }
     </script>
 </body>
 </html>
