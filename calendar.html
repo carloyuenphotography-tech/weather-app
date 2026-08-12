@@ -91,6 +91,19 @@
             color: #64748b;
             font-size: 0.9rem;
         }
+	/* 倒數標籤樣式 */
+        .countdown-badge {
+            display: inline-block;
+            font-size: 0.85rem;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 6px;
+            margin-top: 5px;
+        }
+        .cd-urgent { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; } /* 7天內：緊急 */
+        .cd-soon { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }   /* 30天內：近期 */
+        .cd-future { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; } /* 遠期 */
+        .cd-past { background: #f8fafc; color: #94a3b8; text-decoration: line-through; } /* 已過期 */
     </style>
 </head>
 <body>
@@ -110,8 +123,7 @@
     </footer>
 
     <script>
-        // 替換成你的 Google Sheets 發布 CSV 網址
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT61-FX0_mqbtsfcV6gzu6cpL6VPmCITC6dk_DcU6TknUDtdPEFe3XNC3e_fBn_jvVVvw8syaYSu1uA/pub?gid=0&single=true&output=csv';
+        const CSV_URL = 'YOUR_CSV_URL_HERE'; // 記得換成你的 CSV 網址
 
         async function fetchGoogleSheetData() {
             const container = document.getElementById('calendar-container');
@@ -127,12 +139,10 @@
             }
         }
 
-        // 簡單的 CSV 解析器（支援引號與逗號）
         function parseCSV(text) {
             const lines = text.split('\n');
             const result = [];
             
-            // 從第 1 行開始（跳過標題列第 0 行）
             for (let i = 1; i < lines.length; i++) {
                 const line = lines[i].trim();
                 if (!line) continue;
@@ -155,17 +165,53 @@
 
                 if (cols.length >= 3) {
                     result.push({
-                        startDate: cols[0], // 開始日期
-                        endDate: cols[1],   // 結束日期
-                        title: cols[2],     // 事件名稱
-                        location: cols[3],  // 拍攝地點
-                        composition: cols[4], // 拍攝構圖
-                        time: cols[5],      // 拍攝時間
-                        desc: cols[6]       // 備註/拍攝建議
+                        startDate: cols[0],
+                        endDate: cols[1],
+                        title: cols[2],
+                        location: cols[3],
+                        composition: cols[4],
+                        time: cols[5],
+                        desc: cols[6]
                     });
                 }
             }
             return result;
+        }
+
+        function parseDate(dateStr) {
+            if (!dateStr) return null;
+            if (dateStr.includes('/')) {
+                const parts = dateStr.split('/');
+                if (parts.length === 3) {
+                    return new Date(`${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`);
+                }
+            }
+            return new Date(dateStr);
+        }
+
+        // 🌟 計算倒數天數的函數
+        function getCountdownText(dateStr) {
+            const evDate = parseDate(dateStr);
+            if (!evDate || isNaN(evDate)) return { text: "日期格式錯誤", class: "cd-future" };
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            evDate.setHours(0, 0, 0, 0);
+
+            const diffTime = evDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) {
+                return { text: `已過期 (${Math.abs(diffDays)} 天)`, class: "cd-past" };
+            } else if (diffDays === 0) {
+                return { text: "🔥 就是今天！", class: "cd-urgent" };
+            } else if (diffDays <= 7) {
+                return { text: `還有 ${diffDays} 天 (本週)`, class: "cd-urgent" };
+            } else if (diffDays <= 30) {
+                return { text: `還有 ${diffDays} 天`, class: "cd-soon" };
+            } else {
+                return { text: `還有 ${diffDays} 天`, class: "cd-future" };
+            }
         }
 
         function renderCalendar(events) {
@@ -176,23 +222,9 @@
             const oneYearLater = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
             const oneMonthLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-            // 轉換日期格式 (支援 D/M/YYYY 或 YYYY-MM-DD)
-            function parseDate(dateStr) {
-                if (!dateStr) return null;
-                // 如果是 D/M/YYYY 格式
-                if (dateStr.includes('/')) {
-                    const parts = dateStr.split('/');
-                    if (parts.length === 3) {
-                        return new Date(`${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`);
-                    }
-                }
-                return new Date(dateStr);
-            }
-
-            // 過濾未來一年內的事件並按日期排序
             const filteredEvents = events.filter(ev => {
                 const evDate = parseDate(ev.startDate);
-                return evDate && !isNaN(evDate) && evDate >= new Date(now.toDateString()) && evDate <= oneYearLater;
+                return evDate && !isNaN(evDate) && evDate <= oneYearLater;
             }).sort((a, b) => parseDate(a.startDate) - parseDate(b.startDate));
 
             if (filteredEvents.length === 0) {
@@ -202,11 +234,13 @@
 
             filteredEvents.forEach(ev => {
                 const evDate = parseDate(ev.startDate);
-                const isWithinOneMonth = evDate <= oneMonthLater; // 是否為最近一個月
+                const isWithinOneMonth = evDate >= now && evDate <= oneMonthLater;
 
                 const cardClass = isWithinOneMonth ? "cal-card highlight-card" : "cal-card";
                 const dateClass = isWithinOneMonth ? "cal-date-box highlight-date" : "cal-date-box";
-                const badge = isWithinOneMonth ? " 🔥 近期行程" : "";
+                
+                // 取得倒數資訊
+                const countdown = getCountdownText(ev.startDate);
 
                 let dateDisplay = ev.startDate;
                 if (ev.endDate && ev.endDate !== ev.startDate) {
@@ -216,9 +250,11 @@
                 container.innerHTML += `
                     <div class="${cardClass}">
                         <div class="cal-info">
-                            <h3>${ev.title} ${badge}</h3>
+                            <h3>${ev.title}</h3>
                             <p>📍 <strong>地點：</strong>${ev.location || '--'} | 📷 <strong>構圖：</strong>${ev.composition || '--'}</p>
                             <p>⏰ <strong>時間：</strong>${ev.time || '--'} | 📝 <strong>備註：</strong>${ev.desc || '--'}</p>
+                            <!-- 顯示倒數標籤 -->
+                            <div><span class="countdown-badge ${countdown.class}">⏳ ${countdown.text}</span></div>
                         </div>
                         <div class="${dateClass}">
                             📅 ${dateDisplay}
@@ -228,7 +264,6 @@
             });
         }
 
-        // 頁面載入時執行抓取
         fetchGoogleSheetData();
     </script>
 </body>
