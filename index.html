@@ -432,7 +432,7 @@
 	        <a href="satellite.html" class="menu-btn" target="_blank">🛰️ 衛星與雷達</a>
 	        <a href="highlowtide.html" class="menu-btn" target="_blank">🌊 潮汐漲退 (30日)</a>
 	        <a href="weather_report.html" class="menu-btn" target="_blank">📄 天氣報告 RSS</a>
-	        <a href="calendar.html" class="menu-btn" target="_blank">📅 風景攝影曆</a> <!-- 👈 新增這行 -->
+	        <a href="calendar.html" class="menu-btn" target="_blank">📅 風景攝影曆</a>
 	    </div>
         <div style="margin-top: 15px;">
             <button class="refresh-btn" onclick="location.reload();">🔄 重新整理頁面</button>
@@ -440,7 +440,7 @@
     </header>
 
     <div class="dashboard">
-        <!-- 即時天氣摘要卡片（帶地點切換功能） -->
+        <!-- 即時天氣摘要卡片（帶地點切換功能與特別天氣提示） -->
         <div class="card" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border: none;">
             <div class="card-header" style="border-bottom-color: rgba(255,255,255,0.2);">
                 <h2 style="color: #f8fafc;">天氣報告</h2>
@@ -470,14 +470,12 @@
                     --%
                 </div>
                 
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 10px; margin-bottom: 12px;">
                     <span>自動觀測站實時數據</span>
                     <span id="summary-uv-text">紫外線指數: --</span>
                 </div>
-            </div>
-        </div>
 
-                <!-- 特別天氣提示區塊 -->
+                <!-- 特別天氣提示區塊（完美整合在卡片內） -->
                 <div id="summary-warning-box" style="display: none; background: rgba(225, 29, 72, 0.2); border: 1px solid rgba(244, 63, 94, 0.4); padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #fecdd3; line-height: 1.4;">
                     <div style="font-weight: bold; margin-bottom: 2px; color: #fb7185;">⚠️ 特別天氣提示</div>
                     <div id="summary-warning-text">--</div>
@@ -882,40 +880,6 @@
             }
         }
 
-        async function fetchRhrReadData() {
-            try {
-                const res = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc');
-                if (res.ok) {
-                    const data = await res.json();
-                    
-                    if (data.temperature && data.temperature.data) {
-                        data.temperature.data.forEach(item => {
-                            if (item.place.includes('香港天文台')) {
-                                document.getElementById('summary-current-temp').innerText = `${item.value}°C`;
-                            }
-                        });
-                    }
-
-                    if (data.humidity && data.humidity.data && data.humidity.data.length > 0) {
-                        const hkoHumObj = data.humidity.data.find(h => h.place.includes('香港天文台'));
-                        if (hkoHumObj) {
-                            document.getElementById('summary-current-hum').innerText = `${hkoHumObj.value}%`;
-                        }
-                    }
-
-                    if (data.uvindex && data.uvindex.data && data.uvindex.data.length > 0) {
-                        let uvVal = data.uvindex.data[0].value || "正常";
-                        document.getElementById('summary-uv-text').innerText = `紫外線指數: ${uvVal}`;
-                    }
-
-                    let updateTime = data.updateTime ? data.updateTime.substring(11, 16) : "--:--";
-                    document.getElementById('summary-update-time').innerText = `${updateTime} 更新`;
-                }
-            } catch (err) {
-                console.error("天氣報告載入失敗", err);
-            }
-        }
-
         async function fetch15MinUvIndex() {
             try {
                 const res = await fetch(`uv_data.json?t=${Date.now()}`);
@@ -1210,7 +1174,8 @@
         fetch15MinUvIndex();
 
         setInterval(updateTimestamp, 1000);
-	// 1. 預設想要切換的熱門觀測站名稱
+
+        // 地點切換與天氣報告邏輯
         const targetStations = [
             "香港天文台", 
             "九龍塘", 
@@ -1222,10 +1187,9 @@
             "西貢"
         ];
         
-        let currentStationIndex = 0; // 目前選擇的地點索引
-        let rawTemperatureData = [];  // 用來快取天文台回傳的所有地點溫度
+        let currentStationIndex = 0;
+        let rawTemperatureData = [];
 
-        // 2. 左右切換函數
         function prevStation() {
             currentStationIndex = (currentStationIndex - 1 + targetStations.length) % targetStations.length;
             updateStationDisplay();
@@ -1236,13 +1200,11 @@
             updateStationDisplay();
         }
 
-        // 3. 更新畫面上的氣溫與地點名稱
         function updateStationDisplay() {
             const currentStation = targetStations[currentStationIndex];
             document.getElementById('summary-station-name').innerText = currentStation;
 
             if (rawTemperatureData && rawTemperatureData.length > 0) {
-                // 從 API 資料中搜尋對應地點的氣溫
                 const found = rawTemperatureData.find(item => item.place.includes(currentStation));
                 if (found) {
                     document.getElementById('summary-current-temp').innerText = `${found.value}°C`;
@@ -1252,20 +1214,17 @@
             }
         }
 
-        // 4. 更新 API 讀取邏輯（快取氣溫數據）
         async function fetchRhrReadData() {
             try {
                 const res = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc');
                 if (res.ok) {
                     const data = await res.json();
                     
-                    // 保存全港各站氣溫資料
                     if (data.temperature && data.temperature.data) {
                         rawTemperatureData = data.temperature.data;
-                        updateStationDisplay(); // 載入後立即更新當前地點溫度
+                        updateStationDisplay();
                     }
 
-                    // 抓取濕度 (預設顯示香港天文台)
                     if (data.humidity && data.humidity.data && data.humidity.data.length > 0) {
                         const hkoHumObj = data.humidity.data.find(h => h.place.includes('香港天文台'));
                         if (hkoHumObj) {
@@ -1273,7 +1232,6 @@
                         }
                     }
 
-                    // 抓取紫外線
                     if (data.uvindex && data.uvindex.data && data.uvindex.data.length > 0) {
                         let uvVal = data.uvindex.data[0].value || "正常";
                         document.getElementById('summary-uv-text').innerText = `紫外線指數: ${uvVal}`;
