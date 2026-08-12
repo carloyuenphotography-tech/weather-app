@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【觀天之道．賞天之雲】即時天氣資訊</title>
+    <title>【觀天之道．賞天之雲】即時天氣資訊面板</title>
     
     <link rel="icon" type="image/png" href="myweatherapp.png">
     <link rel="apple-touch-icon" href="myweatherapp.png">
@@ -32,9 +32,11 @@
             min-height: 100vh;
             font-size: var(--font-size-base);
         }
+        
+        /* 響應式 Header：手機版垂直排列，桌面版左右橫向排列 */
         header { 
             text-align: center; 
-            margin-bottom: 20px; 
+            margin: 0 auto 20px auto; 
             background: #ffffff;
             padding: 15px;
             border-radius: 12px;
@@ -43,10 +45,21 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            max-width: 1400px;
+            width: 100%;
+            box-sizing: border-box;
+            gap: 10px;
         }
-        header h1 { margin: 0 auto; color: var(--primary-color); font-size: 1.5rem; }
+        header h1 { 
+            margin: 0; 
+            color: var(--primary-color); 
+            font-size: 1.3rem; 
+            flex-grow: 1;
+            text-align: center;
+            line-height: 1.3;
+        }
 
-        /* 導覽抽屜按鈕 (漢堡選單) */
+        /* 導覽抽屜按鈕 */
         .menu-toggle-btn {
             background: #f1f5f9;
             border: 1px solid #cbd5e1;
@@ -57,8 +70,26 @@
             cursor: pointer;
             font-weight: bold;
             transition: background 0.2s;
+            flex-shrink: 0;
         }
         .menu-toggle-btn:hover { background: #e0f2fe; }
+
+        /* 重新整理按鈕：適合手機與桌面 */
+        .refresh-btn {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 0.9rem; 
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .refresh-btn:hover { background-color: #0369a1; }
 
         /* 側邊隱藏式抽屜樣式 */
         .drawer-overlay {
@@ -140,20 +171,6 @@
             color: #38bdf8;
             transform: translateX(4px);
         }
-
-        .refresh-btn {
-            background-color: #0284c7;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            font-size: 1.0rem; 
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: background-color 0.2s;
-        }
-        .refresh-btn:hover { background-color: #0369a1; }
 
         .dashboard {
             display: grid;
@@ -379,10 +396,6 @@
         .rhr-box h3 { font-size: 0.9rem; color: #475569; margin: 0 0 4px 0; }
         .rhr-box .rhr-val { font-size: 1.1rem; font-weight: bold; color: #0f172a; }
 
-        .uv-display-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 15px; text-align: center; }
-        .uv-val { font-size: 2.2rem; font-weight: bold; color: #d97706; margin: 5px 0; }
-        .uv-desc { font-size: 0.95rem; color: #b45309; font-weight: bold; }
-
         .sunrise-viz-container {
             margin-top: 12px;
             padding: 10px;
@@ -493,6 +506,10 @@
             box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.05);
             font-size: 0.9rem; 
             color: #64748b;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
         }
         footer a { color: #0284c7; text-decoration: none; font-weight: bold; }
         footer a:hover { text-decoration: underline; }
@@ -517,7 +534,7 @@
     </div>
 
     <header>
-        <!-- 漢堡選單按鈕 -->
+        <!-- 漢堡選單按鈕 (僅 ☰) -->
         <button class="menu-toggle-btn" onclick="toggleDrawer()">☰</button>
         <h1>【觀天之道．賞天之雲】即時天氣資訊</h1>
         <button class="refresh-btn" onclick="location.reload();">🔄 重新整理</button>
@@ -559,7 +576,7 @@
                     <span id="summary-uv-text">紫外線指數: --</span>
                 </div>
 
-                <!-- 特別天氣提示區塊（完美整合在卡片內） -->
+                <!-- 特別天氣提示區塊 -->
                 <div id="summary-warning-box" style="display: none; background: rgba(225, 29, 72, 0.2); border: 1px solid rgba(244, 63, 94, 0.4); padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #fecdd3; line-height: 1.4;">
                     <div style="font-weight: bold; margin-bottom: 2px; color: #fb7185;">⚠️ 特別天氣提示</div>
                     <div id="summary-warning-text">--</div>
@@ -694,7 +711,29 @@
             <div class="next-fullmoon-banner" id="next-fullmoon-text">🌕 下一次滿月預測計算中...</div>
         </div>
 
-        <!-- 5. 香港水域能見度 -->
+        <!-- 5. 尖鼻咀潮汐預測 -->
+        <div class="card">
+            <div class="card-header">
+                <h2>尖鼻咀潮汐預測</h2>
+                <a href="https://www.hko.gov.hk/tc/tide/predtide.htm?s=TBT" class="btn-link" target="_blank">天文台數據 ↗</a>
+            </div>
+            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">今日與明日潮汐漲退預測</div>
+            <div id="tide-container"><p style="text-align: center; color: #64748b;">正在載入潮汐資料...</p></div>
+            <div class="solar-term-info" id="tide-update-time" style="margin-top: 12px;">💡 資料來源：tide_30days.json</div>
+        </div>
+
+        <!-- 6. 香港空氣質素即時地圖 -->
+        <div class="card">
+            <div class="card-header">
+                <h2>香港空氣質素即時地圖</h2>
+                <a href="https://waqi.info/#/c/23.143/112.923/7.7z" class="btn-link" target="_blank">WAQI ↗</a>
+            </div>
+            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">AQICN 即時空氣質素監測</div>
+            <div id="aqi-map"></div>
+            <div class="solar-term-info" style="margin-top: 12px;">💡 資料來源：WAQI / USEPA AQI</div>
+        </div>
+
+        <!-- 7. 香港水域能見度 -->
         <div class="card">
             <div class="card-header">
                 <h2>香港水域能見度</h2>
@@ -710,44 +749,7 @@
             <div class="solar-term-info" id="vis-update-time" style="margin-top: 12px;">💡 能見度數據更新時間：讀取中...</div>
         </div>
 
-        <!-- 6. 即時紫外線指數 (uv_data.json) -->
-        <div class="card">
-            <div class="card-header">
-                <h2>即時紫外線指數</h2>
-                <a href="https://www.hko.gov.hk/tc/wxinfo/uvinfo/uvinfo.html" class="btn-link" target="_blank">數據 ↗</a>
-            </div>
-            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">香港天文台自動觀測站</div>
-            <div class="uv-display-box">
-                <div style="font-size: 0.9rem; color: #78350f;">當前紫外線指數</div>
-                <div class="uv-val" id="uv-15min-val">--</div>
-                <div class="uv-desc" id="uv-15min-desc">讀取中...</div>
-            </div>
-            <div class="solar-term-info" id="uv-update-time" style="margin-top: 12px;">💡 紫外線數據更新時間：讀取中...</div>
-        </div>
-
-        <!-- 7. 尖鼻咀潮汐預測 -->
-        <div class="card">
-            <div class="card-header">
-                <h2>尖鼻咀潮汐預測</h2>
-                <a href="https://www.hko.gov.hk/tc/tide/predtide.htm?s=TBT" class="btn-link" target="_blank">天文台數據 ↗</a>
-            </div>
-            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">今日與明日潮汐漲退預測</div>
-            <div id="tide-container"><p style="text-align: center; color: #64748b;">正在載入潮汐資料...</p></div>
-            <div class="solar-term-info" id="tide-update-time" style="margin-top: 12px;">💡 資料來源：tide_30days.json</div>
-        </div>
-
-        <!-- 8. 空氣質素即時地圖 (新插入的卡片，放在尖鼻咀潮汐預測之後) -->
-        <div class="card">
-            <div class="card-header">
-                <h2>香港空氣質素即時地圖</h2>
-                <a href="https://waqi.info/" class="btn-link" target="_blank">WAQI ↗</a>
-            </div>
-            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">AQICN 即時空氣質素監測</div>
-            <div id="aqi-map"></div>
-            <div class="solar-term-info" style="margin-top: 12px;">💡 資料來源：WAQI / USEPA AQI</div>
-        </div>
-
-        <!-- 9. 九天天氣預報 -->
+        <!-- 8. 九天天氣預報 -->
         <div class="card large-card">
             <div class="card-header">
                 <h2>九天天氣預報</h2>
@@ -757,7 +759,7 @@
             <div id="fnd-container" class="fnd-grid"><p>正在載入九天預報數據...</p></div>
         </div>
 
-        <!-- 10. 衛星雲圖 -->
+        <!-- 9. 衛星雲圖 -->
         <div class="card large-card">
             <div class="card-header">
                 <h2>衛星雲圖</h2>
@@ -768,7 +770,7 @@
             </div>
         </div>
 
-        <!-- 11. 雷達圖 -->
+        <!-- 10. 雷達圖 -->
         <div class="card large-card">
             <div class="card-header">
                 <h2>雷達圖</h2>
@@ -972,22 +974,6 @@
             }
         }
 
-        async function fetch15MinUvIndex() {
-            try {
-                const res = await fetch(`uv_data.json?t=${Date.now()}`);
-                if (!res.ok) throw new Error();
-                const data = await res.json();
-                
-                document.getElementById('uv-15min-val').innerText = data.value || "--";
-                document.getElementById('uv-15min-desc').innerText = `紫外線強度：${data.description || "無數據"}`;
-                document.getElementById('uv-update-time').innerHTML = `💡 數據時間：<strong>${data.time || "--"}</strong> (香港天文台)`;
-            } catch (err) {
-                document.getElementById('uv-15min-val').innerText = "--";
-                document.getElementById('uv-15min-desc').innerText = "讀取失敗";
-                document.getElementById('uv-update-time').innerHTML = `💡 請確認 uv_data.json 是否存在`;
-            }
-        }
-
         async function fetchHKOWeatherData() {
             try {
                 const flwRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=flw&lang=tc');
@@ -996,6 +982,14 @@
                     document.getElementById('flw-general').innerText = flw.generalSituation || "--";
                     document.getElementById('flw-desc').innerText = flw.forecastDesc || "--";
                     document.getElementById('flw-outlook').innerText = flw.outlook || "--";
+
+                    if (flw.forecastPeriod) {
+                        document.getElementById('flw-update-time').innerHTML = `💡 預報發布時間：<strong>${flw.forecastPeriod}</strong>`;
+                    } else if (flw.updateTime) {
+                        document.getElementById('flw-update-time').innerHTML = `💡 預報發布時間：<strong>${flw.updateTime.replace('T', ' ').substring(0, 16)}</strong>`;
+                    } else {
+                        document.getElementById('flw-update-time').innerHTML = `💡 本港地區天氣預報 (香港天文台)`;
+                    }
 
                     const warningBox = document.getElementById('summary-warning-box');
                     const warningText = document.getElementById('summary-warning-text');
@@ -1237,11 +1231,20 @@
             fetchHKOWeatherData();
         }
 
+        /* 10個指定的的天氣照片列表 */
         const weatherPhotos = [
-            { name: "太平山 (東面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPA_photo.htm" },
-            { name: "中環 (維港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CP1_photo.htm" },
-            { name: "尖沙咀 (向西)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/hk2/latest_HK2.jpg", link: "https://www.hko.gov.hk/en/wxinfo/ts/webcam/hk2_photo.htm" }
+            { name: "太平山 (望向東面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPA_photo.htm" },
+            { name: "太平山 (望向東北偏北面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPB_photo.htm" },
+            { name: "環球貿易廣場 (望向東南面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic1/latest_IC1.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC1_photo.htm" },
+            { name: "環球貿易廣場 (西南面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic2/latest_IC2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC2_photo.htm" },
+            { name: "清水灣 (向東)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwb/latest_CWB.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CWB_photo.htm" },
+            { name: "中環 (維多利亞港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CP1_photo.htm" },
+            { name: "流浮山 (望向西面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lfs/latest_LFS.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/LFS_photo.htm" },
+            { name: "大帽山 (望向西南面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm2/latest_TM2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TM2_photo.htm" },
+            { name: "大帽山 (望向東北面)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm3/latest_TM3.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TM3_photo.htm" },
+            { name: "坪洲 (遠眺維多利亞港)", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/PE2_photo.htm" }
         ];
+
         let currentPhotoIndex = 0;
         function displayPhoto(i) {
             document.getElementById('photo-title').innerText = weatherPhotos[i].name;
@@ -1263,17 +1266,16 @@
         fetchNineDayForecast();
         fetchTideData();
         fetchRhrReadData();
-        fetch15MinUvIndex();
 
         setInterval(updateTimestamp, 1000);
 
-        // 地點切換與天氣報告邏輯
+        /* 更新後的 8 個天氣報告站點 */
         const targetStations = [
             "香港天文台", 
-            "九龍塘", 
-            "中環", 
+            "九龍城", 
+            "打鼓嶺", 
             "赤鱲角", 
-            "沙田", 
+            "赤柱", 
             "屯門", 
             "將軍澳", 
             "西貢"
