@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>風景攝影曆 - 拍攝行程規劃</title>
+    <link rel="icon" type="image/png" href="myweatherapp.png">
+    <style>
+        :root {
+            --primary-color: #0284c7;
+            --bg-color: #e2e8f0;      
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header { 
+            text-align: center; 
+            margin-bottom: 20px; 
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+        }
+        header h1 { margin: 0 0 10px 0; color: var(--primary-color); font-size: 1.6rem; }
+        .back-btn {
+            display: inline-block;
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #0284c7;
+            padding: 6px 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-top: 10px;
+        }
+        .back-btn:hover { background-color: #e0f2fe; }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            width: 100%;
+            flex-grow: 1;
+        }
+        .cal-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+            border: 1px solid #cbd5e1;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+        /* 最近一個月的高亮樣式 */
+        .highlight-card {
+            border: 2px solid #0284c7;
+            background: linear-gradient(to right, #f0f9ff, #ffffff);
+            box-shadow: 0 10px 15px -3px rgba(2, 132, 199, 0.15);
+        }
+        .cal-info h3 { margin: 0 0 6px 0; color: #0369a1; font-size: 1.2rem; }
+        .cal-info p { margin: 3px 0; color: #475569; font-size: 0.92rem; line-height: 1.4; }
+        .cal-date-box {
+            text-align: right;
+            font-weight: bold;
+            color: #0f172a;
+            background: #e2e8f0;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        .highlight-date {
+            background: #0284c7;
+            color: white;
+        }
+        footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>📅 風景攝影曆</h1>
+        <div style="font-size: 0.9rem; color: #64748b;">即時同步 Google Sheets 拍攝行程（ 🔥 自動高亮最近一個月行程）</div>
+        <a href="index.html" class="back-btn">⬅ 返回主面板</a>
+    </header>
+
+    <div class="container" id="calendar-container">
+        <p style="text-align: center; color: #64748b;">正在從 Google Sheets 載入攝影行程...</p>
+    </div>
+
+    <footer>
+        資料來源：Google Sheets 風景攝影曆
+    </footer>
+
+    <script>
+        // 替換成你的 Google Sheets 發布 CSV 網址
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT61-FX0_mqbtsfcV6gzu6cpL6VPmCITC6dk_DcU6TknUDtdPEFe3XNC3e_fBn_jvVVvw8syaYSu1uA/pub?gid=0&single=true&output=csv';
+
+        async function fetchGoogleSheetData() {
+            const container = document.getElementById('calendar-container');
+            try {
+                const res = await fetch(CSV_URL);
+                if (!res.ok) throw new Error('無法讀取試算表');
+                const csvText = await res.text();
+                
+                const events = parseCSV(csvText);
+                renderCalendar(events);
+            } catch (err) {
+                container.innerHTML = `<p style="text-align: center; color: red;">載入失敗，請確認 Google Sheets 是否已正確發布為 CSV 格式。<br><small>${err.message}</small></p>`;
+            }
+        }
+
+        // 簡單的 CSV 解析器（支援引號與逗號）
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            const result = [];
+            
+            // 從第 1 行開始（跳過標題列第 0 行）
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                const cols = [];
+                let current = '';
+                let inQuotes = false;
+                
+                for (let char of line) {
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        cols.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                cols.push(current.trim());
+
+                if (cols.length >= 3) {
+                    result.push({
+                        startDate: cols[0], // 開始日期
+                        endDate: cols[1],   // 結束日期
+                        title: cols[2],     // 事件名稱
+                        location: cols[3],  // 拍攝地點
+                        composition: cols[4], // 拍攝構圖
+                        time: cols[5],      // 拍攝時間
+                        desc: cols[6]       // 備註/拍攝建議
+                    });
+                }
+            }
+            return result;
+        }
+
+        function renderCalendar(events) {
+            const container = document.getElementById('calendar-container');
+            container.innerHTML = '';
+
+            const now = new Date();
+            const oneYearLater = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+            const oneMonthLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+            // 轉換日期格式 (支援 D/M/YYYY 或 YYYY-MM-DD)
+            function parseDate(dateStr) {
+                if (!dateStr) return null;
+                // 如果是 D/M/YYYY 格式
+                if (dateStr.includes('/')) {
+                    const parts = dateStr.split('/');
+                    if (parts.length === 3) {
+                        return new Date(`${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`);
+                    }
+                }
+                return new Date(dateStr);
+            }
+
+            // 過濾未來一年內的事件並按日期排序
+            const filteredEvents = events.filter(ev => {
+                const evDate = parseDate(ev.startDate);
+                return evDate && !isNaN(evDate) && evDate >= new Date(now.toDateString()) && evDate <= oneYearLater;
+            }).sort((a, b) => parseDate(a.startDate) - parseDate(b.startDate));
+
+            if (filteredEvents.length === 0) {
+                container.innerHTML = `<p style="text-align: center; color: #64748b;">未來一年暫無登錄的攝影行程。</p>`;
+                return;
+            }
+
+            filteredEvents.forEach(ev => {
+                const evDate = parseDate(ev.startDate);
+                const isWithinOneMonth = evDate <= oneMonthLater; // 是否為最近一個月
+
+                const cardClass = isWithinOneMonth ? "cal-card highlight-card" : "cal-card";
+                const dateClass = isWithinOneMonth ? "cal-date-box highlight-date" : "cal-date-box";
+                const badge = isWithinOneMonth ? " 🔥 近期行程" : "";
+
+                let dateDisplay = ev.startDate;
+                if (ev.endDate && ev.endDate !== ev.startDate) {
+                    dateDisplay += ` ~ ${ev.endDate}`;
+                }
+
+                container.innerHTML += `
+                    <div class="${cardClass}">
+                        <div class="cal-info">
+                            <h3>${ev.title} ${badge}</h3>
+                            <p>📍 <strong>地點：</strong>${ev.location || '--'} | 📷 <strong>構圖：</strong>${ev.composition || '--'}</p>
+                            <p>⏰ <strong>時間：</strong>${ev.time || '--'} | 📝 <strong>備註：</strong>${ev.desc || '--'}</p>
+                        </div>
+                        <div class="${dateClass}">
+                            📅 ${dateDisplay}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 頁面載入時執行抓取
+        fetchGoogleSheetData();
+    </script>
+</body>
+</html>
