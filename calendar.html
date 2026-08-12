@@ -265,6 +265,29 @@
         }
 
         fetchGoogleSheetData();
+		function parseDate(dateStr) {
+            if (!dateStr) return null;
+            dateStr = dateStr.trim();
+            
+            // 針對 D/M/YYYY 格式（例如 12/9/2026 或 05/08/2026）
+            if (dateStr.includes('/')) {
+                const parts = dateStr.split('/');
+                if (parts.length === 3) {
+                    const day = parseInt(parts[0], 10);
+                    const month = parseInt(parts[1], 10) - 1; // JS 月份從 0 開始
+                    const year = parseInt(parts[2], 10);
+                    return new Date(year, month, day);
+                }
+            }
+            // 針對 YYYY-MM-DD 格式
+            if (dateStr.includes('-')) {
+                const parts = dateStr.split('-');
+                if (parts.length === 3) {
+                    return new Date(parts[0], parts[1] - 1, parts[2]);
+                }
+            }
+            return new Date(dateStr);
+        }
     </script>
 </body>
 </html>
