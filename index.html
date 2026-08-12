@@ -8,6 +8,8 @@
     <link rel="icon" type="image/png" href="myweatherapp.png">
     <link rel="apple-touch-icon" href="myweatherapp.png">
 
+    <!-- 引入 Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
 
     <style>
@@ -156,6 +158,13 @@
             box-sizing: border-box;
         }
         .large-map-container iframe { width: 100%; height: 100%; border: none; }
+
+        /* 空氣質素地圖專屬樣式 */
+        #aqi-map {
+            height: 450px;
+            width: 100%;
+            border-radius: 8px;
+        }
 
         .photo-controls {
             display: flex;
@@ -610,22 +619,7 @@
             <div class="solar-term-info" id="vis-update-time" style="margin-top: 12px;">💡 能見度數據更新時間：讀取中...</div>
         </div>
 
-        <!-- 6. 本港地區天氣報告 (舊版詳細報告卡片，保留) -->
-        <div class="card" style="display: none;">
-            <div class="card-header">
-                <h2>本港地區天氣報告</h2>
-                <a href="https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc" class="btn-link" target="_blank">API 資料 ↗</a>
-            </div>
-            <div class="rhr-grid" id="rhr-container">
-                <div class="rhr-box"><h3>香港天文台</h3><div class="rhr-val" id="rhr-hko-temp">--°C</div></div>
-                <div class="rhr-box"><h3>九龍塘</h3><div class="rhr-val" id="rhr-kts-temp">--°C</div></div>
-                <div class="rhr-box"><h3>濕度 (天文台)</h3><div class="rhr-val" id="rhr-hko-hum">--%</div></div>
-                <div class="rhr-box"><h3>紫外線指數</h3><div class="rhr-val" id="rhr-uv">--</div></div>
-            </div>
-            <div class="solar-term-info" id="rhr-update-time" style="margin-top: 12px;">💡 報告更新時間：讀取中...</div>
-        </div>
-
-        <!-- 7. 紫外線指數 (uv_data.json) -->
+        <!-- 6. 即時紫外線指數 (uv_data.json) -->
         <div class="card">
             <div class="card-header">
                 <h2>即時紫外線指數</h2>
@@ -640,7 +634,7 @@
             <div class="solar-term-info" id="uv-update-time" style="margin-top: 12px;">💡 紫外線數據更新時間：讀取中...</div>
         </div>
 
-        <!-- 8. 尖鼻咀潮汐預測 -->
+        <!-- 7. 尖鼻咀潮汐預測 -->
         <div class="card">
             <div class="card-header">
                 <h2>尖鼻咀潮汐預測</h2>
@@ -649,6 +643,17 @@
             <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">今日與明日潮汐漲退預測</div>
             <div id="tide-container"><p style="text-align: center; color: #64748b;">正在載入潮汐資料...</p></div>
             <div class="solar-term-info" id="tide-update-time" style="margin-top: 12px;">💡 資料來源：tide_30days.json</div>
+        </div>
+
+        <!-- 8. 空氣質素即時地圖 (新插入的卡片，放在尖鼻咀潮汐預測之後) -->
+        <div class="card">
+            <div class="card-header">
+                <h2>香港空氣質素即時地圖</h2>
+                <a href="https://waqi.info/" class="btn-link" target="_blank">WAQI ↗</a>
+            </div>
+            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">AQICN 即時空氣質素監測</div>
+            <div id="aqi-map"></div>
+            <div class="solar-term-info" style="margin-top: 12px;">💡 資料來源：WAQI / USEPA AQI</div>
         </div>
 
         <!-- 9. 九天天氣預報 -->
@@ -689,6 +694,8 @@
         <div id="update-time" style="margin-top: 6px;">最後更新時間：載入中...</div>
     </footer>
 
+    <!-- 引入 Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         let userSunMode = 'auto';
         let userMoonMode = 'auto';
@@ -735,6 +742,22 @@
             if (val >= 247.5 && val < 292.5) return "西";
             if (val >= 292.5 && val < 337.5) return "西北";
             return "北";
+        }
+
+        // 初始化 AQI 空氣質素 Leaflet 地圖
+        function initAqiMap() {
+            const TOKEN = '430276c460fd69058de6f20acf54c04dbc3a1d96'; 
+            const aqiMap = L.map('aqi-map').setView([22.3193, 114.1694], 11);
+
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            }).addTo(aqiMap);
+
+            const waqiTileUrl = `https://tiles.waqi.info/tiles/usepa-aqi/{z}/{x}/{y}.png?token=${TOKEN}`;
+            L.tileLayer(waqiTileUrl, {
+                attribution: 'Air Quality Tile &copy; <a href="https://waqi.info">WAQI</a>',
+                maxZoom: 18
+            }).addTo(aqiMap);
         }
 
         async function fetchNineDayForecast() {
@@ -790,36 +813,7 @@
             }
         }
 
-        async function fetchWeatherWarnings() {
-            const warningBox = document.getElementById('summary-warning-box');
-            const warningText = document.getElementById('summary-warning-text');
-            
-            try {
-                const res = await fetch(`warnings_data.json?t=${Date.now()}`);
-                if (!res.ok) throw new Error();
-                const data = await res.json();
-                
-                if (data.warnings && data.warnings.length > 0) {
-                    let alertHtml = "";
-                    data.warnings.forEach(item => {
-                        // 組合標題與詳細描述
-                        alertHtml += `<div style="margin-bottom: 6px;"><strong>${item.title}</strong><br>${item.description}</div>`;
-                    });
-                    
-                    warningText.innerHTML = alertHtml;
-                    warningBox.style.display = "block"; // 顯示警告紅框
-                } else {
-                    warningBox.style.display = "none"; // 沒有警告時隱藏
-                }
-            } catch (err) {
-                // 若檔案尚不存在或載入失敗則隱藏
-                warningBox.style.display = "none";
-            }
-        }
-	
-fetchWeatherWarnings();
-
-	async function fetchTideData() {
+        async function fetchTideData() {
             const container = document.getElementById('tide-container');
             const now = new Date();
             const yyyy = now.getFullYear();
@@ -1199,6 +1193,8 @@ fetchWeatherWarnings();
             updateAstronomicalData();
         }
 
+        // 初始化所有數據與地圖
+        initAqiMap();
         fetchNineDayForecast();
         fetchTideData();
         fetchRhrReadData();
