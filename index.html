@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【觀天之道．賞天之雲】即時天氣資訊面板</title>
+    <title>【觀天之道．賞天之雲】即時天氣資訊</title>
     
     <link rel="icon" type="image/png" href="myweatherapp.png">
     <link rel="apple-touch-icon" href="myweatherapp.png">
@@ -40,30 +40,106 @@
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
             position: relative;
-        }
-        header h1 { margin: 0 0 10px 0; color: var(--primary-color); font-size: 1.6rem; }
-        
-        .menu-container {
             display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 12px;
-            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
         }
-        .menu-btn {
-            background-color: #f1f5f9;
+        header h1 { margin: 0 auto; color: var(--primary-color); font-size: 1.5rem; }
+
+        /* 導覽抽屜按鈕 (漢堡選單) */
+        .menu-toggle-btn {
+            background: #f1f5f9;
             border: 1px solid #cbd5e1;
             color: #0284c7;
-            padding: 6px 14px;
-            font-size: 1.0rem; 
+            font-size: 1.2rem;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
             font-weight: bold;
-            border-radius: 6px;
-            text-decoration: none;
-            transition: all 0.2s;
-            box-sizing: border-box;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            transition: background 0.2s;
         }
-        .menu-btn:hover { background-color: #e0f2fe; border-color: #0284c7; }
+        .menu-toggle-btn:hover { background: #e0f2fe; }
+
+        /* 側邊隱藏式抽屜樣式 */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .drawer-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .drawer-menu {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100%;
+            background: #0f172a;
+            color: #f8fafc;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+            z-index: 1001;
+            transition: left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            padding: 20px;
+        }
+        .drawer-menu.active {
+            left: 0;
+        }
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .drawer-header h2 { font-size: 1.2rem; margin: 0; color: #38bdf8; }
+        .drawer-close-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .drawer-close-btn:hover { color: #fff; }
+        
+        .drawer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .drawer-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #f1f5f9;
+            padding: 12px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.0rem;
+            transition: all 0.2s;
+        }
+        .drawer-item:hover {
+            background: rgba(2, 132, 199, 0.3);
+            border-color: #0284c7;
+            color: #38bdf8;
+            transform: translateX(4px);
+        }
 
         .refresh-btn {
             background-color: #0284c7;
@@ -425,18 +501,26 @@
 </head>
 <body>
 
-    <header>
-        <h1>【觀天之道．賞天之雲】即時天氣資訊面板</h1>
-        <div class="menu-container">
-  	        <a href="photo.html" class="menu-btn" target="_blank">📷 天氣相片</a>
-	        <a href="satellite.html" class="menu-btn" target="_blank">🛰️ 衛星與雷達</a>
-	        <a href="highlowtide.html" class="menu-btn" target="_blank">🌊 潮汐漲退 (30日)</a>
-	        <a href="weather_report.html" class="menu-btn" target="_blank">📄 天氣報告 RSS</a>
-	        <a href="calendar.html" class="menu-btn" target="_blank">📅 風景攝影曆</a>
-	    </div>
-        <div style="margin-top: 15px;">
-            <button class="refresh-btn" onclick="location.reload();">🔄 重新整理頁面</button>
+    <!-- 側邊隱藏式目錄 (Drawer Menu) -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
+    <div class="drawer-menu" id="drawerMenu">
+        <div class="drawer-header">
+            <h2>☀️ 導覽選單</h2>
+            <button class="drawer-close-btn" onclick="toggleDrawer()">✕</button>
         </div>
+        <div class="drawer-links">
+            <a href="photo.html" class="drawer-item" target="_blank">📷 天氣相片</a>
+            <a href="satellite.html" class="drawer-item" target="_blank">🛰️ 衛星與雷達</a>
+            <a href="highlowtide.html" class="drawer-item" target="_blank">🌊 潮汐漲退 (30日)</a>
+            <a href="calendar.html" class="drawer-item" target="_blank">📅 風景攝影曆</a>
+        </div>
+    </div>
+
+    <header>
+        <!-- 漢堡選單按鈕 -->
+        <button class="menu-toggle-btn" onclick="toggleDrawer()">☰ 導覽</button>
+        <h1>【觀天之道．賞天之雲】即時天氣資訊面板[cite: 1]</h1>
+        <button class="refresh-btn" onclick="location.reload();">🔄 重新整理</button>
     </header>
 
     <div class="dashboard">
@@ -704,6 +788,14 @@
     <!-- 引入 Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // 側邊欄開關控制
+        function toggleDrawer() {
+            const drawer = document.getElementById('drawerMenu');
+            const overlay = document.getElementById('drawerOverlay');
+            drawer.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
         let userSunMode = 'auto';
         let userMoonMode = 'auto';
 
@@ -1178,10 +1270,10 @@
         // 地點切換與天氣報告邏輯
         const targetStations = [
             "香港天文台", 
-            "大美督", 
-            "打鼓嶺", 
+            "九龍塘", 
+            "中環", 
             "赤鱲角", 
-            "赤柱", 
+            "沙田", 
             "屯門", 
             "將軍澳", 
             "西貢"
