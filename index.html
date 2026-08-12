@@ -32,8 +32,6 @@
             min-height: 100vh;
             font-size: var(--font-size-base);
         }
-        
-        /* 響應式 Header：手機版垂直排列，桌面版左右橫向排列 */
         header { 
             text-align: center; 
             margin: 0 auto 20px auto; 
@@ -59,7 +57,6 @@
             line-height: 1.3;
         }
 
-        /* 導覽抽屜按鈕 */
         .menu-toggle-btn {
             background: #f1f5f9;
             border: 1px solid #cbd5e1;
@@ -74,7 +71,6 @@
         }
         .menu-toggle-btn:hover { background: #e0f2fe; }
 
-        /* 重新整理按鈕：適合手機與桌面 */
         .refresh-btn {
             background-color: #0284c7;
             color: white;
@@ -91,7 +87,6 @@
         }
         .refresh-btn:hover { background-color: #0369a1; }
 
-        /* 側邊隱藏式抽屜樣式 */
         .drawer-overlay {
             position: fixed;
             top: 0;
@@ -252,7 +247,6 @@
         }
         .large-map-container iframe { width: 100%; height: 100%; border: none; }
 
-        /* 空氣質素地圖專屬樣式 */
         #aqi-map {
             height: 450px;
             width: 100%;
@@ -390,11 +384,6 @@
         .tide-row { display: flex; justify-content: space-between; align-items: center; background: #f0f9ff; border: 1px solid #bae6fd; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; font-size: 0.95rem; }
         .tide-type-up { color: #0284c7; font-weight: bold; }
         .tide-type-down { color: #d97706; font-weight: bold; }
-
-        .rhr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-        .rhr-box { background: #f8fafc; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; text-align: center; }
-        .rhr-box h3 { font-size: 0.9rem; color: #475569; margin: 0 0 4px 0; }
-        .rhr-box .rhr-val { font-size: 1.1rem; font-weight: bold; color: #0f172a; }
 
         .sunrise-viz-container {
             margin-top: 12px;
@@ -983,10 +972,12 @@
                     document.getElementById('flw-desc').innerText = flw.forecastDesc || "--";
                     document.getElementById('flw-outlook').innerText = flw.outlook || "--";
 
-                    if (flw.forecastPeriod) {
+                    // 💡 直接讀取 API 中的 updateTime 並格式化顯示
+                    if (flw.updateTime) {
+                        let formattedTime = flw.updateTime.replace('T', ' ').substring(0, 19);
+                        document.getElementById('flw-update-time').innerHTML = `💡 預報發布時間：<strong>${formattedTime}</strong>`;
+                    } else if (flw.forecastPeriod) {
                         document.getElementById('flw-update-time').innerHTML = `💡 預報發布時間：<strong>${flw.forecastPeriod}</strong>`;
-                    } else if (flw.updateTime) {
-                        document.getElementById('flw-update-time').innerHTML = `💡 預報發布時間：<strong>${flw.updateTime.replace('T', ' ').substring(0, 16)}</strong>`;
                     } else {
                         document.getElementById('flw-update-time').innerHTML = `💡 本港地區天氣預報 (香港天文台)`;
                     }
