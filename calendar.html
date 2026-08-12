@@ -122,62 +122,21 @@
         資料來源：Google Sheets 風景攝影曆
     </footer>
 
-   <script>
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT61-FX0_mqbtsfcV6gzu6cpL6VPmCITC6dk_DcU6TknUDtdPEFe3XNC3e_fBn_jvVVvw8syaYSu1uA/pubhtml?gid=0&single=true'; // 記得改成你的 CSV 網址
+<script>
+        // 替換成你的 SheetDB API 網址
+        const SHEETDB_URL = 'https://sheetdb.io/api/v1/YOUR_SHEETDB_API_URL';
 
-        async function fetchGoogleSheetData() {
+        async function fetchSheetDbData() {
             const container = document.getElementById('calendar-container');
             try {
-                const res = await fetch(CSV_URL);
-                if (!res.ok) throw new Error('無法讀取試算表');
-                const csvText = await res.text();
+                const res = await fetch(SHEETDB_URL);
+                if (!res.ok) throw new Error('無法讀取 SheetDB 資料');
+                const events = await res.json();
                 
-                const events = parseCSV(csvText);
-                console.log("成功解析出的事件清單：", events); // 👈 可以在瀏覽器 F12 檢查
                 renderCalendar(events);
             } catch (err) {
                 container.innerHTML = `<p style="text-align: center; color: red;">載入失敗：${err.message}</p>`;
             }
-        }
-
-        // 更穩健的 CSV 解析器
-        function parseCSV(text) {
-            const lines = text.split('\n');
-            const result = [];
-            
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line) continue;
-                
-                const cols = [];
-                let current = '';
-                let inQuotes = false;
-                
-                for (let char of line) {
-                    if (char === '"') {
-                        inQuotes = !inQuotes;
-                    } else if (char === ',' && !inQuotes) {
-                        cols.push(current.trim());
-                        current = '';
-                    } else {
-                        current += char;
-                    }
-                }
-                cols.push(current.trim());
-
-                if (cols.length >= 3 && cols[0]) {
-                    result.push({
-                        startDate: cols[0],
-                        endDate: cols[1] || cols[0],
-                        title: cols[2] || '未命名事件',
-                        location: cols[3] || '--',
-                        composition: cols[4] || '--',
-                        time: cols[5] || '--',
-                        desc: cols[6] || '--'
-                    });
-                }
-            }
-            return result;
         }
 
         function parseDate(dateStr) {
@@ -239,12 +198,11 @@
             const oneYearLater = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
             const oneMonthLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-            // 💡 調整篩選：顯示今天以後到未來一年內的事件（包含今天）
+            // SheetDB 回傳的 JSON 鍵值會對應你的 Google Sheets 標題列名稱
             const filteredEvents = events.filter(ev => {
-                const evDate = parseDate(ev.startDate);
-                console.log(`事件: ${ev.title}, 解析日期:`, evDate); // 檢查每個事件的日期解析結果
+                const evDate = parseDate(ev.開始日期);
                 return evDate && !isNaN(evDate) && evDate >= now && evDate <= oneYearLater;
-            }).sort((a, b) => parseDate(a.startDate) - parseDate(b.startDate));
+            }).sort((a, b) => parseDate(a.開始日期) - parseDate(b.開始日期));
 
             if (filteredEvents.length === 0) {
                 container.innerHTML = `<p style="text-align: center; color: #64748b;">未來一年暫無登錄的攝影行程。</p>`;
@@ -252,25 +210,25 @@
             }
 
             filteredEvents.forEach(ev => {
-                const evDate = parseDate(ev.startDate);
+                const evDate = parseDate(ev.開始日期);
                 const isWithinOneMonth = evDate >= now && evDate <= oneMonthLater;
 
                 const cardClass = isWithinOneMonth ? "cal-card highlight-card" : "cal-card";
                 const dateClass = isWithinOneMonth ? "cal-date-box highlight-date" : "cal-date-box";
                 
-                const countdown = getCountdownText(ev.startDate);
+                const countdown = getCountdownText(ev.開始日期);
 
-                let dateDisplay = ev.startDate;
-                if (ev.endDate && ev.endDate !== ev.startDate) {
-                    dateDisplay += ` ~ ${ev.endDate}`;
+                let dateDisplay = ev.開始日期;
+                if (ev.結束日期 && ev.結束日期 !== ev.開始日期) {
+                    dateDisplay += ` ~ ${ev.結束日期}`;
                 }
 
                 container.innerHTML += `
                     <div class="${cardClass}">
                         <div class="cal-info">
-                            <h3>${ev.title}</h3>
-                            <p>📍 <strong>地點：</strong>${ev.location} | 📷 <strong>構圖：</strong>${ev.composition}</p>
-                            <p>⏰ <strong>時間：</strong>${ev.time} | 📝 <strong>備註：</strong>${ev.desc}</p>
+                            <h3>${ev.事件名稱 || '未命名事件'}</h3>
+                            <p>📍 <strong>地點：</strong>${ev.拍攝地點 || '--'} | 📷 <strong>構圖：</strong>${ev.拍攝構圖 || '--'}</p>
+                            <p>⏰ <strong>時間：</strong>${ev.拍攝時間 || '--'} | 📝 <strong>備註：</strong>${ev.備註 || '--'}</p>
                             <div><span class="countdown-badge ${countdown.class}">⏳ ${countdown.text}</span></div>
                         </div>
                         <div class="${dateClass}">
@@ -281,7 +239,7 @@
             });
         }
 
-        fetchGoogleSheetData();
+        fetchSheetDbData();
     </script>
 </body>
 </html>
