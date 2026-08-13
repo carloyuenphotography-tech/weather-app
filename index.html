@@ -997,14 +997,39 @@
                         visJson.data.forEach(row => {
                             let station = row[1], valStr = row[2];
                             function updateVis(valId, statId) {
-                                document.getElementById(valId).innerText = valStr;
-                                const statEl = document.getElementById(statId);
-                                let km = parseFloat(valStr);
-                                if (valStr.includes('米') && !valStr.includes('公里')) km /= 1000;
-                                if (km >= 10) { statEl.innerText = "極佳"; statEl.className = "vis-status status-good"; }
-                                else if (km >= 6) { statEl.innerText = "良好"; statEl.className = "vis-status status-normal"; }
-                                else { statEl.innerText = "薄霧"; statEl.className = "vis-status status-fair"; }
-                            }
+    document.getElementById(valId).innerText = valStr;
+    const statEl = document.getElementById(statId);
+    
+    // 檢查如果數值是 N/A 或空值，直接處理，不套用顏色標籤
+    if (!valStr || valStr.toUpperCase() === 'N/A') {
+        statEl.innerText = "N/A"; 
+        statEl.className = "vis-status"; 
+        return;
+    }
+
+    let km = parseFloat(valStr);
+    
+    // 如果單位是米，換算成公里
+    if (valStr.includes('米') && !valStr.includes('公里')) km /= 1000;
+
+    // 依照你要求的最新標準判斷等級
+    if (km >= 40) { 
+        statEl.innerText = "極佳"; 
+        statEl.className = "vis-status status-good"; // 綠色
+    } 
+    else if (km >= 25) { 
+        statEl.innerText = "良好"; 
+        statEl.className = "vis-status status-normal"; // 藍色
+    } 
+    else if (km >= 1) { 
+        statEl.innerText = "一般"; 
+        statEl.className = "vis-status status-fair"; // 黃色
+    } 
+    else { 
+        statEl.innerText = "霧 / 惡劣"; 
+        statEl.className = "vis-status status-poor"; // 紅色
+    }
+}
                             if (station.includes('中環')) updateVis('vis-central', 'status-central');
                             if (station.includes('赤鱲角')) updateVis('vis-airport', 'status-airport');
                             if (station.includes('西灣河')) updateVis('vis-swh', 'status-swh');
