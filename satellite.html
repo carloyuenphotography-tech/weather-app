@@ -3,151 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>香港天氣多維度即時與預測地圖</title>
+    <title>【觀天之道．賞天之雲】香港天氣多維度即時與預測地圖</title>
+    
+    <link rel="icon" type="image/png" href="myweatherapp.png">
+    <link rel="apple-touch-icon" href="myweatherapp.png">
+
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
+            --primary-color: #0284c7;
+            --bg-color: #e2e8f0;      
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
         }
-
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 15px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* 頂部導覽列 */
+        header { 
+            text-align: center; 
+            margin: 0 auto 20px auto; 
+            background: #ffffff;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1400px;
+            width: 100%;
+            box-sizing: border-box;
+            gap: 15px;
+        }
+        header h1 { 
+            margin: 0; 
+            color: var(--primary-color); 
+            font-size: 1.3rem; 
+            flex-grow: 1;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .menu-toggle-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #0284c7;
+            font-size: 1.2rem;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .menu-toggle-btn:hover { background: #e0f2fe; }
+
+        .refresh-btn {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            font-size: 0.95rem; 
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .refresh-btn:hover { background-color: #0369a1; }
+
+        /* 側邊隱藏式目錄 (Drawer Menu) */
+        .drawer-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            z-index: 1000;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .drawer-overlay.active { opacity: 1; visibility: visible; }
+        .drawer-menu {
+            position: fixed;
+            top: 0; left: -300px;
+            width: 280px; height: 100%;
+            background: #0f172a; color: #f8fafc;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+            z-index: 1001;
+            transition: left 0.3s ease;
+            display: flex; flex-direction: column;
+            box-sizing: border-box; padding: 20px;
+        }
+        .drawer-menu.active { left: 0; }
+        .drawer-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            padding-bottom: 15px; margin-bottom: 20px;
+        }
+        .drawer-header h2 { font-size: 1.2rem; margin: 0; color: #38bdf8; }
+        .drawer-close-btn { background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; }
+        .drawer-close-btn:hover { color: #fff; }
+        .drawer-links { display: flex; flex-direction: column; gap: 12px; }
+        .drawer-item {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: #f1f5f9; padding: 12px 15px; border-radius: 8px;
+            text-decoration: none; font-weight: bold; font-size: 1.0rem;
+            transition: all 0.2s;
+        }
+        .drawer-item:hover {
+            background: rgba(2, 132, 199, 0.3); border-color: #0284c7;
+            color: #38bdf8; transform: translateX(4px);
+        }
+
+        /* 主容器與格狀佈局 */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); 
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            box-sizing: border-box;
+            width: 100%;
+            flex-grow: 1;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            border: 1px solid #cbd5e1;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
-            /* 允許網頁整體垂直滾動 */
-            overflow-y: auto;
-            overflow-x: hidden;
+            width: 100%;
+            overflow: hidden;
         }
 
-        header {
+        .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 20px;
-            background: rgba(30, 41, 59, 0.9);
-            border-bottom: 1px solid #334155;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            gap: 10px;
         }
+        .card-header h2 { font-size: 1.15rem; margin: 0; color: #334155; } 
 
-        header a {
-            color: #38bdf8;
-            text-decoration: none;
+        .btn-link {
             font-size: 0.9rem;
-            font-weight: bold;
-            background: #0284c720;
-            padding: 6px 12px;
+            background-color: #e0f2fe;
+            color: #0284c7;
+            padding: 4px 10px;
             border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
+        .btn-link:hover { background-color: #bae6fd; }
 
-        header a:hover {
-            background: #0284c740;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        /* 主容器：右側預留 40px 的空間供手指上下滾動 */
-        .page-wrapper {
-            display: flex;
+        .large-map-container {
+            position: relative;
             width: 100%;
-            flex-grow: 1;
-            box-sizing: border-box;
-            padding-right: 40px; /* 右側保留專屬觸控邊條 */
-        }
-
-        /* 2x2 格狀佈局 */
-        .container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            padding: 15px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .pane {
-            background: var(--card-bg);
+            height: 450px;
+            background: #f1f5f9;
             border-radius: 8px;
             overflow: hidden;
             display: flex;
-            flex-direction: column;
-            border: 1px solid #334155;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
-            height: 450px; /* 固定的地圖高度，確保能往下滾動 */
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
         }
+        .large-map-container iframe { width: 100%; height: 100%; border: none; }
 
-        .pane h2 {
-            margin: 0;
-            font-size: 0.85rem;
-            padding: 8px 12px;
-            background: #334155;
-            color: #e2e8f0;
-            border-bottom: 1px solid #475569;
+        footer {
+            text-align: center;
+            margin-top: 25px;
+            padding: 15px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.05);
+            font-size: 0.9rem; 
+            color: #64748b;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
         }
+        footer a { color: #0284c7; text-decoration: none; font-weight: bold; }
+        footer a:hover { text-decoration: underline; }
+        footer div { margin-top: 4px; }
 
-        .pane iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            flex-grow: 1;
-        }
-
-        /* 螢幕較小時改為單欄，右側同樣保留邊條 */
-        @media (max-width: 1024px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
+        /* 📱 手機版專屬響應優化 */
+        @media screen and (max-width: 768px) {
+            body { padding: 10px; }
+            header { padding: 10px 12px; }
+            header h1 { font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .menu-toggle-btn, .refresh-btn { padding: 6px 10px; font-size: 0.85rem; }
+            .dashboard { grid-template-columns: 1fr; }
+            .large-map-container { height: 350px; }
         }
     </style>
 </head>
 <body>
 
+    <!-- 側邊隱藏式目錄 (Drawer Menu) -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
+    <div class="drawer-menu" id="drawerMenu">
+        <div class="drawer-header">
+            <h2>☀️ 導覽選單</h2>
+            <button class="drawer-close-btn" onclick="toggleDrawer()">✕</button>
+        </div>
+        <div class="drawer-links">
+            <a href="index.html" class="drawer-item">🏠 主面板</a>
+            <a href="photo.html" class="drawer-item" target="_blank">📷 天氣相片</a>
+            <a href="satellite.html" class="drawer-item" style="background: rgba(2, 132, 199, 0.3); border-color: #0284c7; color: #38bdf8;">🛰️ 衛星與雷達</a>
+            <a href="highlowtide.html" class="drawer-item" target="_blank">🌊 潮汐漲退 (30日)</a>
+            <a href="calendar.html" class="drawer-item" target="_blank">📅 風景攝影曆</a>
+            <a href="aviation.html" class="drawer-item" target="_blank">✈️ 航空天氣專頁</a>
+        </div>
+    </div>
+
     <header>
-        <a href="index.html">← 主面板</a>
-        <h3>衛星、雷達、雲量與風速</h3>
-        <div style="width: 80px;"></div>
+        <button class="menu-toggle-btn" onclick="toggleDrawer()">☰</button>
+        <h1>🛰️ 衛星、雷達、雲量與風速</h1>
+        <button class="refresh-btn" onclick="location.reload();">🔄 重新整理</button>
     </header>
 
-    <div class="page-wrapper">
-        <div class="container">
-            <!-- 第一格：衛星雲圖 -->
-            <div class="pane">
-                <h2>1. 衛星雲圖 (Satellite)</h2>
+    <div class="dashboard">
+        <!-- 第一格：衛星雲圖 -->
+        <div class="card">
+            <div class="card-header">
+                <h2>衛星雲圖 (Satellite)</h2>
+                <a href="https://www.windy.com/?22.300,114.170,6,i:satellite" class="btn-link" target="_blank">全螢幕 ↗</a>
+            </div>
+            <div class="large-map-container">
                 <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=6&level=surface&overlay=satellite&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1" title="Satellite"></iframe>
             </div>
+        </div>
 
-            <!-- 第二格：雷達圖 -->
-            <div class="pane">
-                <h2>2. 雷達圖 (Radar)</h2>
+        <!-- 第二格：雷達圖 -->
+        <div class="card">
+            <div class="card-header">
+                <h2>雷達圖 (Radar)</h2>
+                <a href="https://www.windy.com/?22.300,114.170,8,i:radar" class="btn-link" target="_blank">全螢幕 ↗</a>
+            </div>
+            <div class="large-map-container">
                 <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=8&level=surface&overlay=radar&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1" title="Radar"></iframe>
             </div>
+        </div>
 
-            <!-- 第三格：雲量預測 -->
-            <div class="pane">
-                <h2>3. 雲量預測 (Clouds)</h2>
+        <!-- 第三格：雲量預測 -->
+        <div class="card">
+            <div class="card-header">
+                <h2>雲量預測 (Clouds)</h2>
+                <a href="https://www.windy.com/?22.300,114.170,7,i:clouds" class="btn-link" target="_blank">全螢幕 ↗</a>
+            </div>
+            <div class="large-map-container">
                 <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=7&level=surface&overlay=clouds&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1" title="Clouds"></iframe>
             </div>
+        </div>
 
-            <!-- 第四格：風速預測 -->
-            <div class="pane">
-                <h2>4. 風速預測 (Wind)</h2>
+        <!-- 第四格：風速預測 -->
+        <div class="card">
+            <div class="card-header">
+                <h2>風速預測 (Wind)</h2>
+                <a href="https://www.windy.com/?22.300,114.170,7,i:wind" class="btn-link" target="_blank">全螢幕 ↗</a>
+            </div>
+            <div class="large-map-container">
                 <iframe src="https://embed.windy.com/embed2.html?lat=22.300&lon=114.170&zoom=7&level=surface&overlay=wind&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=default&radarRange=-1" title="Wind"></iframe>
             </div>
         </div>
     </div>
 
+    <footer>
+        <div>版本號碼：v2.20.1 | 作者：<a href="https://www.instagram.com/_852.carlo" target="_blank">@_852.carlo</a></div>
+        <div id="update-time" style="margin-top: 6px;">最後更新時間：載入中...</div>
+    </footer>
+
+    <script>
+        function toggleDrawer() {
+            const drawer = document.getElementById('drawerMenu');
+            const overlay = document.getElementById('drawerOverlay');
+            drawer.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function updateTimestamp() {
+            document.getElementById('update-time').innerText = `最後更新時間：${new Date().toLocaleString('zh-HK', { hour12: false }).replace(/\//g, '-')}`;
+        }
+        updateTimestamp();
+        setInterval(updateTimestamp, 1000);
+    </script>
 </body>
 </html>

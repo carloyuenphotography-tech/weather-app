@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【尖鼻咀】未來30日潮汐漲退預測</title>
+    <title>【觀天之道．賞天之雲】尖鼻咀未來 30 日潮汐漲退預測</title>
+    
+    <link rel="icon" type="image/png" href="myweatherapp.png">
+    <link rel="apple-touch-icon" href="myweatherapp.png">
+
     <style>
         :root {
             --primary-color: #0284c7;
@@ -16,45 +20,131 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
+
+        /* 頂部導覽列 */
         header { 
             text-align: center; 
-            margin-bottom: 25px; 
+            margin: 0 auto 20px auto; 
             background: #ffffff;
-            padding: 20px;
+            padding: 15px 20px;
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1400px;
+            width: 100%;
+            box-sizing: border-box;
+            gap: 15px;
         }
-        header h1 { margin: 0 0 10px 0; color: var(--primary-color); font-size: 1.5rem; }
-        .back-btn {
-            display: inline-block;
-            background-color: #f1f5f9;
+        header h1 { 
+            margin: 0; 
+            color: var(--primary-color); 
+            font-size: 1.3rem; 
+            flex-grow: 1;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .menu-toggle-btn {
+            background: #f1f5f9;
             border: 1px solid #cbd5e1;
             color: #0284c7;
-            padding: 6px 14px;
+            font-size: 1.2rem;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .menu-toggle-btn:hover { background: #e0f2fe; }
+
+        .refresh-btn {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            padding: 8px 14px;
             font-size: 0.95rem; 
             font-weight: bold;
-            border-radius: 6px;
-            text-decoration: none;
-            margin-top: 10px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: background-color 0.2s;
+            flex-shrink: 0;
+            white-space: nowrap;
         }
-        .back-btn:hover { background-color: #e0f2fe; }
+        .refresh-btn:hover { background-color: #0369a1; }
+
+        /* 側邊隱藏式目錄 (Drawer Menu) */
+        .drawer-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            z-index: 1000;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .drawer-overlay.active { opacity: 1; visibility: visible; }
+        .drawer-menu {
+            position: fixed;
+            top: 0; left: -300px;
+            width: 280px; height: 100%;
+            background: #0f172a; color: #f8fafc;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+            z-index: 1001;
+            transition: left 0.3s ease;
+            display: flex; flex-direction: column;
+            box-sizing: border-box; padding: 20px;
+        }
+        .drawer-menu.active { left: 0; }
+        .drawer-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            padding-bottom: 15px; margin-bottom: 20px;
+        }
+        .drawer-header h2 { font-size: 1.2rem; margin: 0; color: #38bdf8; }
+        .drawer-close-btn { background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; }
+        .drawer-close-btn:hover { color: #fff; }
+        .drawer-links { display: flex; flex-direction: column; gap: 12px; }
+        .drawer-item {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: #f1f5f9; padding: 12px 15px; border-radius: 8px;
+            text-decoration: none; font-weight: bold; font-size: 1.0rem;
+            transition: all 0.2s;
+        }
+        .drawer-item:hover {
+            background: rgba(2, 132, 199, 0.3); border-color: #0284c7;
+            color: #38bdf8; transform: translateX(4px);
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            box-sizing: border-box;
+            width: 100%;
+            flex-grow: 1;
+        }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
+            gap: 20px;
         }
         .day-card {
             background-color: var(--card-bg);
-            border-radius: 10px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
             border: 1px solid #cbd5e1;
             padding: 15px;
             box-sizing: border-box;
@@ -64,15 +154,15 @@
             font-weight: bold;
             color: #0369a1;
             border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 6px;
-            margin-bottom: 10px;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
             text-align: center;
         }
         .tide-row {
             display: flex;
             justify-content: space-between;
-            padding: 6px 8px;
-            margin-bottom: 5px;
+            padding: 8px 10px;
+            margin-bottom: 6px;
             background: #f8fafc;
             border-radius: 6px;
             font-size: 0.95rem;
@@ -85,30 +175,84 @@
             color: #64748b;
             padding: 40px;
             background: #fff;
-            border-radius: 10px;
+            border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
         }
         .error-text { color: #dc2626; }
+
+        footer {
+            text-align: center;
+            margin-top: 25px;
+            padding: 15px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.05);
+            font-size: 0.9rem; 
+            color: #64748b;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
+        }
+        footer a { color: #0284c7; text-decoration: none; font-weight: bold; }
+        footer a:hover { text-decoration: underline; }
+        footer div { margin-top: 4px; }
+
+        @media screen and (max-width: 768px) {
+            body { padding: 10px; }
+            header { padding: 10px 12px; }
+            header h1 { font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .menu-toggle-btn, .refresh-btn { padding: 6px 10px; font-size: 0.85rem; }
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>🌊 尖鼻咀未來 30 日潮汐漲退預測</h1>
-        <div style="font-size: 0.9rem; color: #64748b;">自動讀取 tide_30days.json 數據</div>
-        <a href="index.html" class="back-btn">⬅ 返回即時天氣面板</a>
-    </header>
-
-    <div class="container" id="tide-30days-container">
-        <div class="loading-text">正在載入未來 30 日潮汐預測資料，請稍候...</div>
+    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
+    <div class="drawer-menu" id="drawerMenu">
+        <div class="drawer-header">
+            <h2>☀️ 導覽選單</h2>
+            <button class="drawer-close-btn" onclick="toggleDrawer()">✕</button>
+        </div>
+        <div class="drawer-links">
+            <a href="index.html" class="drawer-item">🏠 主面板</a>
+            <a href="photo.html" class="drawer-item" target="_blank">📷 天氣相片</a>
+            <a href="satellite.html" class="drawer-item" target="_blank">🛰️ 衛星與雷達</a>
+            <a href="highlowtide.html" class="drawer-item" style="background: rgba(2, 132, 199, 0.3); border-color: #0284c7; color: #38bdf8;" target="_blank">🌊 潮汐漲退 (30日)</a>
+            <a href="calendar.html" class="drawer-item" target="_blank">📅 風景攝影曆</a>
+            <a href="aviation.html" class="drawer-item" target="_blank">✈️ 航空天氣專頁</a>
+        </div>
     </div>
 
+    <header>
+        <button class="menu-toggle-btn" onclick="toggleDrawer()">☰</button>
+        <h1>🌊 尖鼻咀未來 30 日潮汐漲退預測</h1>
+        <button class="refresh-btn" onclick="location.reload();">🔄 重新整理</button>
+    </header>
+
+    <div class="dashboard">
+        <div class="container" id="tide-30days-container">
+            <div class="loading-text">正在載入未來 30 日潮汐預測資料，請稍候...</div>
+        </div>
+    </div>
+
+    <footer>
+        <div>版本號碼：v2.20.1 | 作者：<a href="https://www.instagram.com/_852.carlo" target="_blank">@_852.carlo</a></div>
+        <div id="update-time" style="margin-top: 6px;">最後更新時間：載入中...</div>
+    </footer>
+
     <script>
+        function toggleDrawer() {
+            const drawer = document.getElementById('drawerMenu');
+            const overlay = document.getElementById('drawerOverlay');
+            drawer.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
         async function load30DaysTide() {
             const container = document.getElementById('tide-30days-container');
 
             try {
-                // 讀取 Python 生成好的 JSON 檔案
                 const res = await fetch('tide_30days.json');
                 if (!res.ok) throw new Error('無法讀取 tide_30days.json 檔案');
 
@@ -149,7 +293,13 @@
             }
         }
 
+        function updateTimestamp() {
+            document.getElementById('update-time').innerText = `最後更新時間：${new Date().toLocaleString('zh-HK', { hour12: false }).replace(/\//g, '-')}`;
+        }
+
         load30DaysTide();
+        updateTimestamp();
+        setInterval(updateTimestamp, 1000);
     </script>
 </body>
 </html>
