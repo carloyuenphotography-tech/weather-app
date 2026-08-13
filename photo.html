@@ -3,336 +3,456 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>香港天文台 - 即時天氣照片監控</title>
+    <title>【觀天之道．賞天之雲】即時天氣相片總覽</title>
+    
+    <link rel="icon" type="image/png" href="myweatherapp.png">
+    <link rel="apple-touch-icon" href="myweatherapp.png">
+
     <style>
         :root {
             --primary-color: #0284c7;
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
+            --bg-color: #e2e8f0;      
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 15px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header { 
+            text-align: center; 
+            margin: 0 auto 20px auto; 
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1400px;
+            width: 100%;
+            box-sizing: border-box;
+            gap: 10px;
+        }
+        header h1 { 
+            margin: 0; 
+            color: var(--primary-color); 
+            font-size: 1.3rem; 
+            flex-grow: 1;
+            text-align: center;
+            line-height: 1.3;
         }
 
-        header {
+        .menu-toggle-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #0284c7;
+            font-size: 1.1rem;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .menu-toggle-btn:hover { background: #e0f2fe; }
+
+        .refresh-btn {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 0.9rem; 
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .refresh-btn:hover { background-color: #0369a1; }
+
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .drawer-overlay.active { opacity: 1; visibility: visible; }
+        .drawer-menu {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100%;
+            background: #0f172a;
+            color: #f8fafc;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+            z-index: 1001;
+            transition: left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            padding: 20px;
+        }
+        .drawer-menu.active { left: 0; }
+        .drawer-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            padding-bottom: 15px;
             margin-bottom: 20px;
-            background: rgba(30, 41, 59, 0.9);
-            padding: 15px 20px;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            position: sticky;
-            top: 20px;
-            z-index: 100;
-            backdrop-filter: blur(5px);
         }
-
-        header a {
-            color: #38bdf8;
+        .drawer-header h2 { font-size: 1.2rem; margin: 0; color: #38bdf8; }
+        .drawer-close-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .drawer-close-btn:hover { color: #fff; }
+        
+        .drawer-links { display: flex; flex-direction: column; gap: 12px; }
+        .drawer-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #f1f5f9;
+            padding: 12px 15px;
+            border-radius: 8px;
             text-decoration: none;
-            font-size: 0.9rem;
             font-weight: bold;
-            background: #0284c720;
-            padding: 6px 12px;
-            border-radius: 6px;
+            font-size: 1.0rem;
+            transition: all 0.2s;
+        }
+        .drawer-item:hover {
+            background: rgba(2, 132, 199, 0.3);
+            border-color: #0284c7;
+            color: #38bdf8;
+            transform: translateX(4px);
         }
 
-        header a:hover {
-            background: #0284c740;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 1.2rem;
-            color: var(--text-color);
-            text-align: center;
-        }
-
-        /* 網格佈局：每列固定 3 欄 */
         .dashboard {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
             max-width: 1400px;
             margin: 0 auto;
+            box-sizing: border-box;
+            width: 100%;
+            flex-grow: 1;
         }
 
-        .card {
+        .filter-bar {
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+            border: 1px solid #cbd5e1;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .filter-bar label {
+            font-weight: bold;
+            color: #334155;
+        }
+        .category-select {
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background-color: #f8fafc;
+            color: #0284c7;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        /* 區域分隔標題樣式 */
+        .section-title {
+            grid-column: 1 / -1;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #0369a1;
+            background: #e0f2fe;
+            border-left: 5px solid #0284c7;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+
+        .photo-card {
             background-color: var(--card-bg);
             border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
-            border: 1px solid #334155;
-            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            border: 1px solid #cbd5e1;
+            padding: 15px;
             display: flex;
             flex-direction: column;
+            box-sizing: border-box;
         }
 
-        .card h2 {
-            font-size: 1rem;
-            margin: 0;
-            padding: 12px 15px;
-            background: #334155;
-            color: #e2e8f0;
-            border-bottom: 1px solid #475569;
+        .photo-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
         }
+        .photo-card-header h3 { font-size: 1.05rem; margin: 0; color: #334155; } 
 
-        /* 嚴格對應原圖尺寸 720x405 px (16:9 比例) */
-        .img-container {
+        .btn-link {
+            font-size: 0.85rem;
+            background-color: #e0f2fe;
+            color: #0284c7;
+            padding: 4px 8px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .btn-link:hover { background-color: #bae6fd; }
+        
+        .media-container {
+            position: relative;
             width: 100%;
-            aspect-ratio: 720 / 405;
+            height: 220px;
             background: #000;
+            border-radius: 8px;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            box-sizing: border-box;
+        }
+        .media-container img {
+            width: 100%; height: 100%; border: none; object-fit: contain;
+            box-sizing: border-box;
         }
 
-        .img-container a {
-            width: 100%;
-            height: 100%;
-            display: block;
+        footer {
+            text-align: center;
+            margin-top: 25px;
+            padding: 15px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: -4px 6px -1px rgb(0 0 0 / 0.05);
+            font-size: 0.9rem; 
+            color: #64748b;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
         }
-
-        .img-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            transition: transform 0.2s ease;
-        }
-
-        .img-container img:hover {
-            transform: scale(1.02);
-        }
-
-        /* 響應式設計：平板或手機螢幕小於 1024px 時自動變為單欄 */
-        @media (max-width: 1024px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-        }
+        footer a { color: #0284c7; text-decoration: none; font-weight: bold; }
+        footer a:hover { text-decoration: underline; }
+        footer div { margin-top: 4px; }
     </style>
 </head>
 <body>
 
+    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
+    <div class="drawer-menu" id="drawerMenu">
+        <div class="drawer-header">
+            <h2>☀️ 導覽選單</h2>
+            <button class="drawer-close-btn" onclick="toggleDrawer()">✕</button>
+        </div>
+        <div class="drawer-links">
+            <a href="index.html" class="drawer-item">🏠 主面板</a>
+            <a href="photo.html" class="drawer-item" style="background: rgba(2, 132, 199, 0.3); border-color: #0284c7; color: #38bdf8;">📷 天氣相片</a>
+            <a href="satellite.html" class="drawer-item">🛰️ 衛星與雷達</a>
+            <a href="highlowtide.html" class="drawer-item">🌊 潮汐漲退 (30日)</a>
+            <a href="calendar.html" class="drawer-item">📅 風景攝影曆</a>
+            <a href="aviation.html" class="drawer-item">✈️ 航空天氣專頁</a>
+        </div>
+    </div>
+
     <header>
-        <a href="index.html">← 主頁</a>
-        <h1>天文台天氣照片</h1>
-        <div style="width: 80px;"></div>
+        <button class="menu-toggle-btn" onclick="toggleDrawer()">☰</button>
+        <h1>📷 即時天氣相片總覽</h1>
+        <button class="refresh-btn" onclick="location.reload();">🔄 重新整理</button>
     </header>
 
     <div class="dashboard">
-
-        <!-- 1. 太平山(望向東面) -->
-        <div class="card">
-            <h2>1. 太平山 (望向東面)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPA_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg" alt="太平山(望向東面)">
-                </a>
-            </div>
+        <div class="filter-bar">
+            <label for="categorySelect">📁 選擇地區分類篩選：</label>
+            <select id="categorySelect" class="category-select" onchange="filterPhotos()">
+                <option value="all">全部分類 (顯示所有區域分隔)</option>
+            </select>
         </div>
 
-        <!-- 2. 太平山(望向東北偏北面) -->
-        <div class="card">
-            <h2>2. 太平山 (望向東北偏北面)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPB_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg" alt="太平山(望向東北偏北面)">
-                </a>
-            </div>
-        </div>
-
-        <!-- 3. 環球貿易廣場（望向東南面） -->
-        <div class="card">
-            <h2>3. 環球貿易廣場 (望向東南面)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC1_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic1/latest_IC1.jpg" alt="環球貿易廣場（望向東南面）">
-                </a>
-            </div>
-        </div>
-
-        <!-- 4. 環球貿易廣場（西南面） -->
-        <div class="card">
-            <h2>4. 環球貿易廣場 (西南面)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC2_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic2/latest_IC2.jpg" alt="環球貿易廣場（西南面）">
-                </a>
-            </div>
-        </div>
-
-        <!-- 5. 清水灣（向東） -->
-        <div class="card">
-            <h2>5. 清水灣 (向東)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CWB_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwb/latest_CWB.jpg" alt="清水灣（向東）">
-                </a>
-            </div>
-        </div>
-
-        <!-- 6. 中環（維多利亞港） -->
-        <div class="card">
-            <h2>6. 中環 (維多利亞港)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CP1_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg" alt="中環（維多利亞港）">
-                </a>
-            </div>
-        </div>
-
-        <!-- 7. 流浮山(望向西面) -->
-        <div class="card">
-            <h2>7. 流浮山 (望向西面)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/LFS_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/lfs/latest_LFS.jpg" alt="流浮山(望向西面)">
-                </a>
-            </div>
-        </div>
-
-        <!-- 8. 大帽山(望向西北面) -->
-        <div class="card">
-            <h2>8. 大帽山 (望向西北面)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TM2_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm2/latest_TM2.jpg" alt="大帽山(望向西南面)">
-                </a>
-            </div>
-        </div>
-
-        <!-- 9. 大帽山(望向東北面) -->
-        <div class="card">
-            <h2>9. 大帽山 (望向東北面)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TM3_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm3/latest_TM3.jpg" alt="大帽山(望向東北面)">
-                </a>
-            </div>
-        </div>
-
-        <!-- 10. 坪洲（遠眺維多利亞港） -->
-        <div class="card">
-            <h2>10. 坪洲 (遠眺維多利亞港)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/PE2_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg" alt="坪洲（遠眺維多利亞港）">
-                </a>
-            </div>
-        </div>
-
-        <!-- 11. 滘西洲（望向西北偏西面） -->
-        <div class="card">
-            <h2>11. 滘西洲 (望向西北偏西面)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/KS2_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/ks2/latest_KS2.jpg" alt="滘西洲（望向西北偏西面）">
-                </a>
-            </div>
-        </div>
-
-        <!-- 12. 橫瀾島（望向西北偏北面） -->
-        <div class="card">
-            <h2>12. 橫瀾島 (望向西北偏北面)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WL2_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/wl2/latest_WL2.jpg" alt="橫瀾島（望向西北偏北面）">
-                </a>
-            </div>
-        </div>
-
-        <!-- 13. 橫瀾島（望向西面） -->
-        <div class="card">
-            <h2>13. 橫瀾島 (望向西面)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WGL_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/wgl/latest_WGL.jpg" alt="橫瀾島（望向西面）">
-                </a>
-            </div>
-        </div>
-
-        <!-- 14. 南丫島（望向西北面） -->
-        <div class="card">
-            <h2>14. 南丫島 (望向西北面)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/LAM_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/lam/latest_LAM.jpg" alt="南丫島（望向西北面）">
-                </a>
-            </div>
-        </div>
-
-        <!-- 15. 長洲（望向北面） -->
-        <div class="card">
-            <h2>15. 長洲 (望向北面)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CS2_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/cs2/latest_CS2.jpg" alt="長洲（望向北面）">
-                </a>
-            </div>
-        </div>
-
-        <!-- 16. 德瑞國際學校（遠眺海洋公園及香港仔） -->
-        <div class="card">
-            <h2>16. 德瑞國際學校 (遠眺海洋公園及香港仔)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/GSI_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/gsi/latest_GSI.jpg" alt="德瑞國際學校（遠眺海洋公園及香港仔）">
-                </a>
-            </div>
-        </div>
-
-        <!-- 17. 尖沙咀（望向西面） -->
-        <div class="card">
-            <h2>17. 尖沙咀 (望向西面)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/HK2_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/hk2/latest_HK2.jpg" alt="尖沙咀（望向西面）">
-                </a>
-            </div>
-        </div>
-
-        <!-- 18. 大欖涌（遠眺大嶼山北部） -->
-        <div class="card">
-            <h2>18. 大欖涌 (遠眺大嶼山北部)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TLC_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/tlc/latest_TLC.jpg" alt="大欖涌（遠眺大嶼山北部）">
-                </a>
-            </div>
-        </div>
-
-        <!-- 19. 西貢水警東警署（望向東北面） -->
-        <div class="card">
-            <h2>19. 西貢水警東警署 (望向東北面)</h2>
-            <div class="img-container">
-                <a href="https://www.hko.gov.hk/tc/wxinfo/ts/webcam/SKG_photo.htm" target="_blank">
-                    <img class="hko-img" src="https://www.hko.gov.hk/wxinfo/aws/hko_mica/skg/latest_SKG.jpg" alt="西貢水警東警署（望向東北面）">
-                </a>
-            </div>
-        </div>
-
+        <div id="photoGridContainer"></div>
     </div>
 
-    <script>
-        setInterval(() => {
-            const timestamp = new Date().getTime();
-            const imgs = document.querySelectorAll('.hko-img');
-            imgs.forEach(img => {
-                const currentSrc = img.src.split('?')[0];
-                img.src = `${currentSrc}?t=${timestamp}`;
-            });
-        }, 600000);
-    </script>
+    <footer>
+        <div>版本號碼：v2.20.1 | 作者：<a href="https://www.instagram.com/_852.carlo" target="_blank">@_852.carlo</a></div>
+        <div id="update-time" style="margin-top: 6px;">最後更新時間：載入中...</div>
+    </footer>
 
+    <script>
+        function toggleDrawer() {
+            const drawer = document.getElementById('drawerMenu');
+            const overlay = document.getElementById('drawerOverlay');
+            drawer.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        const allPhotos = [
+            { name: "流浮山 (望向西面)", category: "新界", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lfs/latest_LFS.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/LFS_photo.htm" },
+            { name: "濕地公園 (望向東北面)", category: "新界", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wlp/latest_WLP.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WLP_photo.htm" },
+            { name: "上水風采中學 (望向西北面)", category: "新界", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/elc/latest_ELC.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/ELC_photo.htm" },
+            { name: "嘉道理農場暨植物園 (遠眺新界西部)", category: "新界", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/kfb/latest_KFB.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/KFB_photo.htm" },
+            { name: "大埔滘 (望向東北面)", category: "新界", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tpk/latest_TPK.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TPK_photo.htm" },
+            { name: "大帽山 (望向西南面)", category: "新界", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm2/latest_TM2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TM2_photo.htm" },
+            { name: "大帽山 (望向東北面)", category: "新界", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tm3/latest_TM3.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TM3_photo.htm" },
+            { name: "大欖涌 (遠眺大嶼山北部)", category: "新界", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/tlc/latest_TLC.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/TLC_photo.htm" },
+            { name: "西貢水警東警署 (望向東北面)", category: "新界", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/sk2/latest_SK2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/SK2_photo.htm" },
+            { name: "西貢水警東警署 (望向東南面)", category: "新界", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/skg/latest_SKG.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/SKG_photo.htm" },
+            { name: "清水灣 (望向西南面)", category: "新界", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwb/latest_CWB.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CWB_photo.htm" },
+            { name: "清水灣 (望向東面)", category: "新界", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cwa/latest_CWA.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CWA_photo.htm" },
+            { name: "滘西洲 (望向西北偏西面)", category: "新界", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ks2/latest_KS2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/KS2_photo.htm" },
+            { name: "九龍城 (望向東九龍及港島東部)", category: "九龍", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/klt/latest_KLT.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/KLT_photo.htm" },
+            { name: "尖沙咀 (望向西面)", category: "九龍", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/hk2/latest_HK2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/HK2_photo.htm" },
+            { name: "尖沙咀 (望向東面)", category: "九龍", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/hko/latest_HKO.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/HKO_photo.htm" },
+            { name: "環球貿易廣場 (望向西南面)", category: "九龍", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic2/latest_IC2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC2_photo.htm" },
+            { name: "環球貿易廣場 (望向東南面)", category: "九龍", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/ic1/latest_IC1.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/IC1_photo.htm" },
+            { name: "中環碼頭 (望向維多利亞港)", category: "香港島", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cp1/latest_CP1.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CP1_photo.htm" },
+            { name: "香港海事博物館 (望向維多利亞港)", category: "香港島", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/hmm/latest_HMM.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/HMM_photo.htm" },
+            { name: "太平山 (望向東北偏北面)", category: "香港島", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpb/latest_VPB.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPB_photo.htm" },
+            { name: "太平山 (望向東面)", category: "香港島", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/vpa/latest_VPA.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/VPA_photo.htm" },
+            { name: "德瑞國際學校 (遠眺海洋公園及香港仔)", category: "香港島", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/gsi/latest_GSI.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/GSI_photo.htm" },
+            { name: "西灣河 (望向東面)", category: "香港島", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/swh/latest_SWH.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/SWH_photo.htm" },
+            { name: "沙螺灣 (遠眺香港國際機場)", category: "大嶼山及離島", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/slw/latest_SLW.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/SLW_photo.htm" },
+            { name: "坪洲 (遠眺竹篙灣)", category: "大嶼山及離島", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/dnl/latest_DNL.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/DNL_photo.htm" },
+            { name: "坪洲 (遠眺維多利亞港)", category: "大嶼山及離島", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/pe2/latest_PE2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/PE2_photo.htm" },
+            { name: "長沙 (望向西北面)", category: "大嶼山及離島", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cs1/latest_CS1.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CS1_photo.htm" },
+            { name: "長沙 (望向北面)", category: "大嶼山及離島", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cs2/latest_CS2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CS2_photo.htm" },
+            { name: "長洲 (望向北面)", category: "大嶼山及離島", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cch/latest_CCH.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CCH_photo.htm" },
+            { name: "長洲東灣 (望向東面)", category: "大嶼山及離島", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/cce/latest_CCE.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/CCE_photo.htm" },
+            { name: "南丫島 (望向西北面)", category: "大嶼山及離島", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/lam/latest_LAM.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/LAM_photo.htm" },
+            { name: "橫瀾島 (望向西北偏北面)", category: "大嶼山及離島", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wl2/latest_WL2.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WL2_photo.htm" },
+            { name: "橫瀾島 (望向西面)", category: "大嶼山及離島", img: "https://www.hko.gov.hk/wxinfo/aws/hko_mica/wgl/latest_WGL.jpg", link: "https://www.hko.gov.hk/tc/wxinfo/ts/webcam/WGL_photo.htm" }
+        ];
+
+        function initCategoryDropdown() {
+            const selectEl = document.getElementById('categorySelect');
+            let categories = [...new Set(allPhotos.map(p => p.category))];
+            
+            categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.innerText = cat;
+                selectEl.appendChild(opt);
+            });
+        }
+
+        function renderPhotos(photosToRender, groupByCategory = false) {
+            const container = document.getElementById('photoGridContainer');
+            container.innerHTML = '';
+
+            if (photosToRender.length === 0) {
+                container.innerHTML = `<p style="text-align: center; color: #64748b;">此分類暫無相片。</p>`;
+                return;
+            }
+
+            if (groupByCategory) {
+                // 依照資料順序抓出不重複的分類
+                const categories = [...new Set(photosToRender.map(p => p.category))];
+                
+                categories.forEach(cat => {
+                    // 加入區域分隔大標題
+                    const titleEl = document.createElement('div');
+                    titleEl.className = 'section-title';
+                    titleEl.innerText = `📍 ${cat}地區`;
+                    container.appendChild(titleEl);
+
+                    // 建立該區域的網格
+                    const gridEl = document.createElement('div');
+                    gridEl.className = 'photo-grid';
+
+                    const groupPhotos = photosToRender.filter(p => p.category === cat);
+                    groupPhotos.forEach(photo => {
+                        gridEl.appendChild(createPhotoCard(photo));
+                    });
+
+                    container.appendChild(gridEl);
+                });
+            } else {
+                // 單一分類模式（不分區，直接列出）
+                const gridEl = document.createElement('div');
+                gridEl.className = 'photo-grid';
+                photosToRender.forEach(photo => {
+                    gridEl.appendChild(createPhotoCard(photo));
+                });
+                container.appendChild(gridEl);
+            }
+        }
+
+        function createPhotoCard(photo) {
+            const card = document.createElement('div');
+            card.className = 'photo-card';
+            card.innerHTML = `
+                <div class="photo-card-header">
+                    <h3>${photo.name}</h3>
+                    <a href="${photo.link}" class="btn-link" target="_blank">原網 ↗</a>
+                </div>
+                <div class="media-container">
+                    <img src="${photo.img}?t=${Date.now()}" alt="${photo.name}" loading="lazy">
+                </div>
+            `;
+            return card;
+        }
+
+        function filterPhotos() {
+            const selectedCat = document.getElementById('categorySelect').value;
+            if (selectedCat === 'all') {
+                renderPhotos(allPhotos, true); // 全部分類：啟用區域群組與分隔標題
+            } else {
+                const filtered = allPhotos.filter(p => p.category === selectedCat);
+                renderPhotos(filtered, false); // 特定分類：單純列出該分類相片
+            }
+        }
+
+        function updateTimestamp() {
+            document.getElementById('update-time').innerText = `最後更新時間：${new Date().toLocaleString('zh-HK', { hour12: false }).replace(/\//g, '-')}`;
+        }
+
+        // 初始化
+        initCategoryDropdown();
+        renderPhotos(allPhotos, true); // 預設進入全部分類並帶有區域分隔
+        updateTimestamp();
+        setInterval(updateTimestamp, 1000);
+    </script>
 </body>
 </html>
-.hk/tc
