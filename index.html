@@ -18,7 +18,6 @@
             --bg-color: #e2e8f0;      
             --card-bg: #ffffff;
             --text-color: #1e293b;
-            --font-size-base: 16px;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -30,13 +29,14 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            font-size: var(--font-size-base);
         }
+
+        /* 頂部導覽列：完美兼顧電腦與手機 */
         header { 
             text-align: center; 
             margin: 0 auto 20px auto; 
             background: #ffffff;
-            padding: 15px;
+            padding: 15px 20px;
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
             position: relative;
@@ -46,12 +46,12 @@
             max-width: 1400px;
             width: 100%;
             box-sizing: border-box;
-            gap: 10px;
+            gap: 15px;
         }
         header h1 { 
             margin: 0; 
             color: var(--primary-color); 
-            font-size: 1.3rem; 
+            font-size: 1.4rem; 
             flex-grow: 1;
             text-align: center;
             line-height: 1.3;
@@ -62,7 +62,7 @@
             border: 1px solid #cbd5e1;
             color: #0284c7;
             font-size: 1.2rem;
-            padding: 6px 12px;
+            padding: 8px 14px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
@@ -75,8 +75,8 @@
             background-color: #0284c7;
             color: white;
             border: none;
-            padding: 6px 12px;
-            font-size: 0.9rem; 
+            padding: 8px 14px;
+            font-size: 0.95rem; 
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
@@ -87,80 +87,54 @@
         }
         .refresh-btn:hover { background-color: #0369a1; }
 
+        /* 側邊隱藏式目錄 (Drawer Menu) */
         .drawer-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(3px);
             z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
+            opacity: 0; visibility: hidden;
             transition: opacity 0.3s, visibility 0.3s;
         }
         .drawer-overlay.active { opacity: 1; visibility: visible; }
         .drawer-menu {
             position: fixed;
-            top: 0;
-            left: -300px;
-            width: 280px;
-            height: 100%;
-            background: #0f172a;
-            color: #f8fafc;
+            top: 0; left: -300px;
+            width: 280px; height: 100%;
+            background: #0f172a; color: #f8fafc;
             box-shadow: 4px 0 15px rgba(0,0,0,0.3);
             z-index: 1001;
             transition: left 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-            padding: 20px;
+            display: flex; flex-direction: column;
+            box-sizing: border-box; padding: 20px;
         }
         .drawer-menu.active { left: 0; }
         .drawer-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid rgba(255,255,255,0.15);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            padding-bottom: 15px; margin-bottom: 20px;
         }
         .drawer-header h2 { font-size: 1.2rem; margin: 0; color: #38bdf8; }
-        .drawer-close-btn {
-            background: none;
-            border: none;
-            color: #94a3b8;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
+        .drawer-close-btn { background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; }
         .drawer-close-btn:hover { color: #fff; }
-        
         .drawer-links { display: flex; flex-direction: column; gap: 12px; }
         .drawer-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #f1f5f9;
-            padding: 12px 15px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1.0rem;
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: #f1f5f9; padding: 12px 15px; border-radius: 8px;
+            text-decoration: none; font-weight: bold; font-size: 1.0rem;
             transition: all 0.2s;
         }
         .drawer-item:hover {
-            background: rgba(2, 132, 199, 0.3);
-            border-color: #0284c7;
-            color: #38bdf8;
-            transform: translateX(4px);
+            background: rgba(2, 132, 199, 0.3); border-color: #0284c7;
+            color: #38bdf8; transform: translateX(4px);
         }
 
         .dashboard {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); 
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); 
             gap: 20px;
             max-width: 1400px;
             margin: 0 auto;
@@ -173,13 +147,12 @@
             border-radius: 12px;
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
             border: 1px solid #cbd5e1;
-            padding: 15px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
             width: 100%;
             overflow: hidden;
-            font-size: 1.0rem; 
         }
 
         .large-card { grid-column: 1 / -1; }
@@ -189,27 +162,29 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            gap: 10px;
         }
         .card-header h2 { font-size: 1.2rem; margin: 0; color: #334155; } 
         .btn-link {
             font-size: 0.9rem;
             background-color: #e0f2fe;
             color: #0284c7;
-            padding: 4px 8px;
+            padding: 4px 10px;
             border-radius: 6px;
             text-decoration: none;
             font-weight: bold;
             white-space: nowrap;
+            flex-shrink: 0;
         }
         .btn-link:hover { background-color: #bae6fd; }
         
+        /* 圖片容器：電腦版與手機版完美自動適應 */
         .media-container {
             position: relative;
             width: 100%;
-            flex-grow: 1;
-            min-height: 260px;
+            height: 280px; /* 電腦版適中高度，避免過扁 */
             background: #000;
             border-radius: 8px;
             overflow: hidden;
@@ -218,7 +193,6 @@
             justify-content: center;
             box-sizing: border-box;
         }
-        .media-container a { width: 100%; height: 100%; display: block; }
         .media-container img, .media-container iframe {
             width: 100%; height: 100%; border: none; object-fit: contain;
             box-sizing: border-box;
@@ -227,7 +201,7 @@
         .large-map-container {
             position: relative;
             width: 100%;
-            height: 550px;
+            height: 450px;
             background: #f1f5f9;
             border-radius: 8px;
             overflow: hidden;
@@ -239,7 +213,7 @@
         .large-map-container iframe { width: 100%; height: 100%; border: none; }
 
         #aqi-map {
-            height: 450px;
+            height: 400px;
             width: 100%;
             border-radius: 8px;
         }
@@ -248,14 +222,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 10px;
-            gap: 8px;
+            margin-top: 15px;
+            gap: 10px;
         }
         .photo-nav-btn {
             background-color: #f1f5f9;
             border: 1px solid #cbd5e1;
             color: #334155;
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 1.0rem; 
@@ -269,9 +243,9 @@
             font-size: 1.1rem; 
             font-weight: bold;
             color: #1e293b;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             background: #f1f5f9;
-            padding: 6px;
+            padding: 8px;
             border-radius: 6px;
         }
         .sun-info-grid {
@@ -284,20 +258,20 @@
             background: #f0f9ff;
             border: 1px solid #bae6fd;
             border-radius: 8px;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
         }
         .sun-box:hover { background: #e0f2fe; border-color: #0284c7; }
-        .sun-box h3 { margin: 0 0 6px 0; font-size: 1.1rem; color: #0369a1; }
-        .sun-box .time { font-size: 1.3rem; font-weight: bold; color: #0c4a6e; margin-bottom: 2px; }
+        .sun-box h3 { margin: 0 0 6px 0; font-size: 1.0rem; color: #0369a1; }
+        .sun-box .time { font-size: 1.3rem; font-weight: bold; color: #0c4a6e; margin-bottom: 4px; }
         .sun-box .countdown { font-size: 0.9rem; font-weight: bold; color: #0284c7; margin-bottom: 4px; }
         .sub-lunar-tag { font-size: 0.8rem; color: #64748b; font-weight: normal; margin-top: 2px; }
         
         .sun-altitude-banner {
-            margin-top: 10px;
-            padding: 8px 12px;
+            margin-top: 12px;
+            padding: 10px 15px;
             background: #e0f2fe;
             border: 1px solid #bae6fd;
             border-radius: 8px;
@@ -308,8 +282,8 @@
         }
 
         .solar-term-info {
-            margin-top: 8px;
-            padding: 8px 10px;
+            margin-top: 10px;
+            padding: 10px 12px;
             background: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
@@ -321,23 +295,23 @@
         .visibility-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 12px;
             box-sizing: border-box;
         }
         .visibility-box {
             background: #f8fafc;
             border: 1px solid #cbd5e1;
             border-radius: 8px;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
         }
-        .visibility-box h3 { margin: 0 0 4px 0; font-size: 0.95rem; color: #475569; }
+        .visibility-box h3 { margin: 0 0 6px 0; font-size: 1.0rem; color: #475569; }
         .visibility-box .vis-value { font-size: 1.2rem; font-weight: bold; color: #0f172a; }
         .visibility-box .vis-status {
             font-size: 0.8rem;
-            margin-top: 2px;
+            margin-top: 4px;
             font-weight: bold;
-            padding: 2px 6px;
+            padding: 2px 8px;
             border-radius: 4px;
             display: inline-block;
         }
@@ -351,28 +325,28 @@
             border: 1px solid #cbd5e1;
             border-radius: 8px;
             padding: 12px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             font-size: 0.95rem;
             color: #334155;
             line-height: 1.5;
         }
         .forecast-content-box h4 {
-            margin: 0 0 6px 0;
+            margin: 0 0 8px 0;
             color: #0369a1;
             font-size: 1.0rem;
             border-bottom: 1px dashed #cbd5e1;
             padding-bottom: 4px;
         }
 
-        .forecast-general { background: #f0f9ff; border: 1px solid #bae6fd; padding: 10px 12px; border-radius: 8px; font-size: 0.95rem; margin-bottom: 12px; line-height: 1.4; color: #0369a1; }
+        .forecast-general { background: #f0f9ff; border: 1px solid #bae6fd; padding: 12px; border-radius: 8px; font-size: 0.95rem; margin-bottom: 15px; line-height: 1.5; color: #0369a1; }
         .fnd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
         .fnd-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
-        .fnd-date { font-weight: bold; font-size: 0.9rem; color: #0f172a; margin-bottom: 4px; }
-        .fnd-temp { font-size: 0.95rem; font-weight: bold; color: #0284c7; margin: 6px 0; }
+        .fnd-date { font-weight: bold; font-size: 0.9rem; color: #0f172a; margin-bottom: 6px; }
+        .fnd-temp { font-size: 0.95rem; font-weight: bold; color: #0284c7; margin: 4px 0; }
         .fnd-hum { font-size: 0.8rem; color: #475569; }
 
-        .tide-section-title { font-size: 0.95rem; font-weight: bold; color: #0369a1; margin: 10px 0 6px 0; border-bottom: 1px dashed #bae6fd; padding-bottom: 3px; }
-        .tide-row { display: flex; justify-content: space-between; align-items: center; background: #f0f9ff; border: 1px solid #bae6fd; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; font-size: 0.95rem; }
+        .tide-section-title { font-size: 0.95rem; font-weight: bold; color: #0369a1; margin: 12px 0 8px 0; border-bottom: 1px dashed #bae6fd; padding-bottom: 4px; }
+        .tide-row { display: flex; justify-content: space-between; align-items: center; background: #f0f9ff; border: 1px solid #bae6fd; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; font-size: 0.95rem; }
         .tide-type-up { color: #0284c7; font-weight: bold; }
         .tide-type-down { color: #d97706; font-weight: bold; }
 
@@ -396,7 +370,7 @@
             height: 8px;
             background: linear-gradient(to right, #fb923c, #38bdf8, #fb923c);
             border-radius: 4px;
-            margin: 20px 25px 32px 25px;
+            margin: 20px 20px 30px 20px;
         }
         .track-marker {
             position: absolute;
@@ -416,7 +390,7 @@
             position: absolute;
             top: 14px;
             transform: translateX(-50%);
-            font-size: 0.68rem;
+            font-size: 0.7rem;
             white-space: nowrap;
             text-align: center;
             line-height: 1.2;
@@ -425,29 +399,27 @@
             position: absolute;
             top: 50%;
             transform: translate(-50%, -50%);
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             background: #e11d48;
             border-radius: 50%;
             border: 2px solid #ffffff;
             box-shadow: 0 0 6px rgba(225, 29, 72, 0.6);
             z-index: 2;
-            transition: left 0.5s ease;
         }
         .today-label {
             position: absolute;
-            bottom: 18px;
+            bottom: 16px;
             transform: translateX(-50%);
             font-size: 0.75rem;
             font-weight: bold;
             color: #e11d48;
             white-space: nowrap;
             background: #fff1f2;
-            padding: 1px 4px;
+            padding: 1px 6px;
             border-radius: 4px;
             border: 1px solid #fecdd3;
             z-index: 3;
-            transition: left 0.5s ease;
         }
 
         .moon-header-flex {
@@ -456,18 +428,18 @@
             background: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
-            padding: 10px 15px;
-            margin-bottom: 10px;
+            padding: 12px 15px;
+            margin-bottom: 12px;
             gap: 15px;
         }
-        .moon-svg-box { width: 48px; height: 48px; flex-shrink: 0; }
+        .moon-svg-box { width: 45px; height: 45px; flex-shrink: 0; }
         .moon-svg-box svg { width: 100%; height: 100%; }
         .moon-details-text { flex-grow: 1; font-size: 1.0rem; color: #334155; line-height: 1.4; }
         .moon-details-text strong { color: #0284c7; }
 
         .next-fullmoon-banner {
-            margin-top: 10px;
-            padding: 8px 10px;
+            margin-top: 12px;
+            padding: 10px;
             background: #f0f9ff;
             border: 1px solid #bae6fd;
             border-radius: 8px;
@@ -494,6 +466,16 @@
         footer a { color: #0284c7; text-decoration: none; font-weight: bold; }
         footer a:hover { text-decoration: underline; }
         footer div { margin-top: 4px; }
+
+        /* 📱 手機版專屬自動響應優化 (螢幕寬度小於 768px 時生效) */
+        @media screen and (max-width: 768px) {
+            body { padding: 10px; }
+            header { padding: 10px 12px; }
+            header h1 { font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .menu-toggle-btn, .refresh-btn { padding: 6px 10px; font-size: 0.85rem; }
+            .card { padding: 15px; }
+            .media-container { height: auto; aspect-ratio: 4 / 3; } /* 手機上完美呈現 4:3 完整照片 */
+        }
     </style>
 </head>
 <body>
@@ -515,26 +497,24 @@
     </div>
 
     <header>
-        <!-- 漢堡選單按鈕 (僅 ☰) -->
         <button class="menu-toggle-btn" onclick="toggleDrawer()">☰</button>
         <h1>【觀天之道．賞天之雲】即時天氣資訊</h1>
         <button class="refresh-btn" onclick="location.reload();">🔄 重新整理</button>
     </header>
 
     <div class="dashboard">
-        <!-- 即時天氣摘要卡片（帶地點切換功能與特別天氣提示） -->
+        <!-- 即時天氣報告卡片 -->
         <div class="card" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border: none;">
             <div class="card-header" style="border-bottom-color: rgba(255,255,255,0.2);">
                 <h2 style="color: #f8fafc;">天氣報告</h2>
                 <span id="summary-update-time" style="font-size: 0.85rem; color: #94a3b8;">--:-- 更新</span>
             </div>
             
-            <div style="padding: 10px 0;">
-                <!-- 地點切換控制器 -->
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 6px;">
-                    <button onclick="prevStation()" style="background: none; border: none; color: #38bdf8; font-size: 1.1rem; cursor: pointer; font-weight: bold;">◀</button>
+            <div style="padding: 5px 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; background: rgba(255,255,255,0.08); padding: 6px 10px; border-radius: 6px;">
+                    <button onclick="prevStation()" style="background: none; border: none; color: #38bdf8; font-size: 1.2rem; cursor: pointer; font-weight: bold;">◀</button>
                     <div style="font-size: 0.95rem; color: #f1f5f9; font-weight: bold;" id="summary-station-name">香港天文台 (尖沙咀)</div>
-                    <button onclick="nextStation()" style="background: none; border: none; color: #38bdf8; font-size: 1.1rem; cursor: pointer; font-weight: bold;">▶</button>
+                    <button onclick="nextStation()" style="background: none; border: none; color: #38bdf8; font-size: 1.2rem; cursor: pointer; font-weight: bold;">▶</button>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -544,11 +524,11 @@
                     <div style="font-size: 1.8rem;" id="summary-weather-icon">🌤️</div>
                 </div>
                 
-                <div style="font-size: 3.2rem; font-weight: bold; line-height: 1.1; margin-bottom: 5px; color: #ffffff;" id="summary-current-temp">
+                <div style="font-size: 3.0rem; font-weight: bold; line-height: 1.1; margin-bottom: 6px; color: #ffffff;" id="summary-current-temp">
                     --°C
                 </div>
                 
-                <div style="font-size: 2.2rem; font-weight: bold; color: #e2e8f0; margin-bottom: 15px;" id="summary-current-hum">
+                <div style="font-size: 2.0rem; font-weight: bold; color: #e2e8f0; margin-bottom: 15px;" id="summary-current-hum">
                     --%
                 </div>
                 
@@ -557,15 +537,14 @@
                     <span id="summary-uv-text">紫外線指數: --</span>
                 </div>
 
-                <!-- 特別天氣提示區塊 -->
                 <div id="summary-warning-box" style="display: none; background: rgba(225, 29, 72, 0.2); border: 1px solid rgba(244, 63, 94, 0.4); padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #fecdd3; line-height: 1.4;">
-                    <div style="font-weight: bold; margin-bottom: 2px; color: #fb7185;">⚠️ 特別天氣提示</div>
+                    <div style="font-weight: bold; margin-bottom: 4px; color: #fb7185;">⚠️ 特別天氣提示</div>
                     <div id="summary-warning-text">--</div>
                 </div>
             </div>
         </div>
 
-        <!-- 1. 天氣照片 (中間) -->
+        <!-- 1. 天氣照片 -->
         <div class="card">
             <div class="card-header">
                 <h2><span id="photo-title">天文台天氣照片</span></h2>
@@ -576,12 +555,12 @@
             </div>
             <div class="photo-controls">
                 <button class="photo-nav-btn" onclick="prevPhoto()">◀ 上一張</button>
-                <button class="photo-nav-btn" onclick="refreshCurrentPhoto()" style="background-color: #e0f2fe; color: #0284c7;">🔄 刷新照片</button>
+                <button class="photo-nav-btn" onclick="refreshCurrentPhoto()" style="background-color: #e0f2fe; color: #0284c7;">🔄 刷新</button>
                 <button class="photo-nav-btn" onclick="nextPhoto()">下一張 ▶</button>
             </div>
         </div>
 
-        <!-- 2. 本港天氣預報 (右側) -->
+        <!-- 2. 本港天氣預報 -->
         <div class="card">
             <div class="card-header">
                 <h2>本港地區天氣預報</h2>
@@ -599,11 +578,7 @@
                 <h4>📈 隨後展望</h4>
                 <div id="flw-outlook">讀取中...</div>
             </div>
-            <div class="forecast-content-box" id="flw-tc-box" style="display: none;">
-                <h4>🌀 熱帶氣旋消息</h4>
-                <div id="flw-tc">--</div>
-            </div>
-            <div class="solar-term-info" id="flw-update-time" style="margin-top: 4px;">💡 預報發布時間：讀取中...</div>
+            <div class="solar-term-info" id="flw-update-time" style="margin-top: 6px;">💡 預報發布時間：讀取中...</div>
         </div>
 
         <!-- 3. 日出/日落 -->
@@ -678,8 +653,8 @@
                 </div>
             </div>
             <div class="sunrise-viz-container">
-                <div class="sunrise-viz-title" id="moon-viz-title">🌕 月出方位動態基準 (0° ~ 360°)</div>
-                <div class="sunrise-track" style="background: linear-gradient(to right, #38bdf8, #cbd5e1, #fb923c); margin: 20px 25px 25px 25px;">
+                <div class="sunrise-viz-title" id="moon-viz-title">🌕 月出方位動態基準</div>
+                <div class="sunrise-track" style="background: linear-gradient(to right, #38bdf8, #cbd5e1, #fb923c); margin: 20px 20px 25px 20px;">
                     <div class="track-marker" style="left: 0%;"></div><div class="track-label" style="left: 0%;">北</div>
                     <div class="track-marker" style="left: 25%;"></div><div class="track-label" style="left: 25%;">東</div>
                     <div class="track-marker" style="left: 50%;"></div><div class="track-label" style="left: 50%;">南</div>
@@ -698,7 +673,7 @@
                 <h2>尖鼻咀潮汐預測</h2>
                 <a href="https://www.hko.gov.hk/tc/tide/predtide.htm?s=TBT" class="btn-link" target="_blank">天文台數據 ↗</a>
             </div>
-            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">今日與明日潮汐漲退預測</div>
+            <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 12px; text-align: center;">今日與明日潮汐漲退預測</div>
             <div id="tide-container"><p style="text-align: center; color: #64748b;">正在載入潮汐資料...</p></div>
             <div class="solar-term-info" id="tide-update-time" style="margin-top: 12px;">💡 資料來源：tide_30days.json</div>
         </div>
@@ -709,7 +684,7 @@
                 <h2>香港空氣質素即時地圖</h2>
                 <a href="https://waqi.info/#/c/23.143/112.923/7.7z" class="btn-link" target="_blank">WAQI ↗</a>
             </div>
-            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">AQICN 即時空氣質素監測</div>
+            <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 12px; text-align: center;">AQICN 即時空氣質素監測</div>
             <div id="aqi-map"></div>
             <div class="solar-term-info" style="margin-top: 12px;">💡 資料來源：WAQI / USEPA AQI</div>
         </div>
@@ -720,7 +695,7 @@
                 <h2>香港水域能見度</h2>
                 <a href="https://www.hko.gov.hk/tc/wxinfo/awsgis/regional_portal.html?ele=visibility" class="btn-link" target="_blank">分區平台 ↗</a>
             </div>
-            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">天文台各主要觀測點 10 分鐘即時能見度</div>
+            <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 12px; text-align: center;">天文台各主要觀測點 10 分鐘即時能見度</div>
             <div class="visibility-grid">
                 <div class="visibility-box"><h3>中環</h3><div class="vis-value" id="vis-central">--</div><div class="vis-status status-good" id="status-central">--</div></div>
                 <div class="visibility-box"><h3>赤鱲角</h3><div class="vis-value" id="vis-airport">--</div><div class="vis-status status-good" id="status-airport">--</div></div>
@@ -877,7 +852,7 @@
                                 <div class="fnd-box">
                                     <div>
                                         <div class="fnd-date">${formattedDate} (${day.week})</div>
-                                        <div style="font-size: 0.8rem; color: #0284c7; font-weight: bold; margin-bottom: 4px;">${day.forecastWeather}</div>
+                                        <div style="font-size: 0.8rem; color: #0284c7; font-weight: bold; margin-bottom: 2px;">${day.forecastWeather}</div>
                                     </div>
                                     <div>
                                         <div class="fnd-temp">${minTemp} - ${maxTemp}</div>
@@ -911,7 +886,7 @@
                 container.innerHTML = '';
 
                 function renderDayTides(records) {
-                    if (!records || records.length === 0) return `<p style="font-size: 0.85rem; color: #64748b; text-align: center; margin: 4px 0;">暫無紀錄</p>`;
+                    if (!records || records.length === 0) return `<p style="font-size: 0.9rem; color: #64748b; text-align: center; margin: 4px 0;">暫無紀錄</p>`;
                     let html = '';
                     
                     for (let i = 0; i < records.length; i++) {
@@ -997,39 +972,23 @@
                         visJson.data.forEach(row => {
                             let station = row[1], valStr = row[2];
                             function updateVis(valId, statId) {
-    document.getElementById(valId).innerText = valStr;
-    const statEl = document.getElementById(statId);
-    
-    // 檢查如果數值是 N/A 或空值，直接處理，不套用顏色標籤
-    if (!valStr || valStr.toUpperCase() === 'N/A') {
-        statEl.innerText = "N/A"; 
-        statEl.className = "vis-status"; 
-        return;
-    }
+                                document.getElementById(valId).innerText = valStr;
+                                const statEl = document.getElementById(statId);
+                                
+                                if (!valStr || valStr.toUpperCase() === 'N/A') {
+                                    statEl.innerText = "N/A";
+                                    statEl.className = "vis-status";
+                                    return;
+                                }
 
-    let km = parseFloat(valStr);
-    
-    // 如果單位是米，換算成公里
-    if (valStr.includes('米') && !valStr.includes('公里')) km /= 1000;
+                                let km = parseFloat(valStr);
+                                if (valStr.includes('米') && !valStr.includes('公里')) km /= 1000;
 
-    // 依照你要求的最新標準判斷等級
-    if (km >= 40) { 
-        statEl.innerText = "極佳"; 
-        statEl.className = "vis-status status-good"; // 綠色
-    } 
-    else if (km >= 25) { 
-        statEl.innerText = "良好"; 
-        statEl.className = "vis-status status-normal"; // 藍色
-    } 
-    else if (km >= 1) { 
-        statEl.innerText = "一般"; 
-        statEl.className = "vis-status status-fair"; // 黃色
-    } 
-    else { 
-        statEl.innerText = "霧 / 惡劣"; 
-        statEl.className = "vis-status status-poor"; // 紅色
-    }
-}
+                                if (km >= 40) { statEl.innerText = "極佳"; statEl.className = "vis-status status-good"; }
+                                else if (km >= 25) { statEl.innerText = "良好"; statEl.className = "vis-status status-normal"; }
+                                else if (km >= 1) { statEl.innerText = "一般"; statEl.className = "vis-status status-fair"; }
+                                else { statEl.innerText = "霧 / 惡劣"; statEl.className = "vis-status status-poor"; }
+                            }
                             if (station.includes('中環')) updateVis('vis-central', 'status-central');
                             if (station.includes('赤鱲角')) updateVis('vis-airport', 'status-airport');
                             if (station.includes('西灣河')) updateVis('vis-swh', 'status-swh');
@@ -1185,14 +1144,14 @@
             let activeMoonMode = userMoonMode === 'auto' ? (isAfterMoonriseBeforeMoonset ? 'moonset' : 'moonrise') : userMoonMode;
 
             if (activeMoonMode === 'moonset') {
-                document.getElementById('moon-viz-title').innerText = "🌘 月落方位動態基準 (0° ~ 360°)";
+                document.getElementById('moon-viz-title').innerText = "🌘 月落方位動態基準";
                 let moonSetPct = Math.max(0, Math.min(100, (moonsetAzimuthDeg / 360.0) * 100));
                 document.getElementById('today-moon-marker').style.left = `${moonSetPct}%`;
                 const mLabel = document.getElementById('today-moon-label');
                 mLabel.style.left = `${moonSetPct}%`;
                 mLabel.innerText = `今日月落 ${Math.round(moonsetAzimuthDeg)}° (${getAzimuthDirection(moonsetAzimuthDeg)})`;
             } else {
-                document.getElementById('moon-viz-title').innerText = "🌕 月出方位動態基準 (0° ~ 360°)";
+                document.getElementById('moon-viz-title').innerText = "🌕 月出方位動態基準";
                 let moonRisePct = Math.max(0, Math.min(100, (moonriseAzimuthDeg / 360.0) * 100));
                 document.getElementById('today-moon-marker').style.left = `${moonRisePct}%`;
                 const mLabel = document.getElementById('today-moon-label');
@@ -1328,13 +1287,11 @@
                         }
                     }
 
-                    // 💡 強固的紫外線數據讀取邏輯
                     let uvDisplay = "--";
                     if (data.uvindex) {
                         if (typeof data.uvindex === 'string') {
                             uvDisplay = data.uvindex;
                         } else if (data.uvindex.data && data.uvindex.data.length > 0) {
-                            // 支援各種常見的天文台 API 結構 (value 或 desc)
                             const firstUv = data.uvindex.data[0];
                             uvDisplay = firstUv.value !== undefined ? firstUv.value : (firstUv.desc || "--");
                         } else if (data.uvindex.val) {
