@@ -12,7 +12,7 @@ CSDI_ZIP_URL = "https://static.csdi.gov.hk/csdi-webpage/download/04db0982a43f561
 
 @app.route('/')
 def home():
-    return "HKO Humidity API 正在運行中！"
+    return "HKO Weather API 正在運行中！"
 
 @app.route('/humidity', methods=['GET'])
 def get_humidity():
@@ -39,7 +39,6 @@ def get_humidity():
                     geometry = feature.get('geometry', {})
                     coords = geometry.get('coordinates', [])
                     
-                    # 提取經緯度 [lng, lat]
                     lng = coords[0] if len(coords) > 0 else None
                     lat = coords[1] if len(coords) > 1 else None
 
@@ -47,6 +46,7 @@ def get_humidity():
                     data_url = props.get('Data_url')
 
                     humidity = "資料未明"
+                    temperature = "資料未明"
                     timestamp = "即時"
 
                     if data_url:
@@ -59,15 +59,22 @@ def get_humidity():
                                 if rows:
                                     latest_row = rows[-1]
                                     for key, val in latest_row.items():
-                                        if key and ('humidity' in key.lower() or 'rh' in key.lower()) and val:
+                                        k_lower = key.lower() if key else ""
+                                        # 抓取濕度
+                                        if ('humidity' in k_lower or 'rh' in k_lower) and val:
                                             humidity = f"{val}%"
-                                        if key and ('time' in key.lower() or 'date' in key.lower()) and val:
+                                        # 抓取氣溫
+                                        elif ('temp' in k_lower or 'temperature' in k_lower) and val:
+                                            temperature = f"{val}°C"
+                                        # 抓取時間
+                                        if ('time' in k_lower or 'date' in k_lower) and val:
                                             timestamp = val
                         except Exception:
                             pass
 
                     stations_data.append({
                         "station": station_name,
+                        "temperature": temperature,
                         "humidity": humidity,
                         "time": timestamp,
                         "lat": lat,
