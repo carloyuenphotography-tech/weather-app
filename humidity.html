@@ -67,17 +67,18 @@
             
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
                 
-                <!-- 1. 全港平均濕度與最高 5 站 -->
+                <!-- 1. 全港平均濕度與最高 5 站 (改為 wrap 佈局，不被截斷) -->
                 <div id="cloud-sea-card" class="bg-blue-50/70 border border-blue-200 rounded-lg p-2.5 sm:p-3 shadow-sm transition-all duration-500 flex flex-col justify-between">
                     <div>
                         <div class="text-[11px] text-blue-600 font-semibold">全港平均濕度</div>
                         <div class="text-base sm:text-lg font-bold text-blue-900 mt-0.5" id="stat-avg-humid">--</div>
                         <div class="text-[10px] sm:text-[11px] text-blue-700 mt-0.5 truncate" id="stat-cloud-sea">評估中...</div>
                     </div>
-                    <!-- 💡 新增：濕度最高 5 站清單 -->
-                    <div class="mt-2 pt-2 border-t border-blue-200/60">
-                        <div class="text-[10px] text-blue-600 font-semibold">濕度最高 5 站：</div>
-                        <div class="text-[10px] text-blue-900 font-medium truncate mt-0.5" id="stat-top-humid">載入中...</div>
+                    <div class="mt-2 pt-2 border-t border-blue-200/65">
+                        <div class="text-[10px] text-blue-600 font-semibold mb-1">濕度最高 5 站：</div>
+                        <div class="flex flex-wrap gap-1" id="stat-top-humid">
+                            <span class="text-[10px] text-blue-800">載入中...</span>
+                        </div>
                     </div>
                 </div>
 
@@ -137,10 +138,20 @@
                 document.getElementById('stat-avg-humid').textContent = `${stats.avg_humidity || 0}% (${stats.count_95 || 0}站≥95%)`;
                 document.getElementById('stat-cloud-sea').textContent = stats.cloud_sea_status || '未知';
                 
-                // 💡 渲染濕度最高 5 站文字
+                // 💡 完整渲染濕度最高 5 站（方塊標籤）
                 const topStations = stats.top_humid_stations || [];
-                const topText = topStations.map(s => `${s.station} (${s.humidity}%)`).join(', ');
-                document.getElementById('stat-top-humid').textContent = topText || '暫無數據';
+                const topContainer = document.getElementById('stat-top-humid');
+                topContainer.innerHTML = '';
+                if (topStations.length > 0) {
+                    topStations.forEach(s => {
+                        const tag = document.createElement('span');
+                        tag.className = 'bg-blue-100/90 text-blue-900 text-[10px] px-1.5 py-0.5 rounded font-medium shadow-2xs';
+                        tag.textContent = `${s.station} ${s.humidity}%`;
+                        topContainer.appendChild(tag);
+                    });
+                } else {
+                    topContainer.textContent = '暫無數據';
+                }
 
                 document.getElementById('stat-tms').textContent = stats.tms_diff || '暫無';
                 document.getElementById('stat-tc').textContent = stats.tc_diff || '暫無';
@@ -185,11 +196,13 @@
                         
                         let tempPopup = item.temperature ? `氣溫：<span style="color: #dc2626; font-weight: bold;">${item.temperature}</span><br>` : '';
                         let humidPopup = item.humidity ? `相對濕度：<span style="color: #2563eb; font-weight: bold;">${item.humidity}</span><br>` : '';
+                        let windPopup = item.wind_direction ? `風向：<strong>${item.wind_direction}</strong><br>` : '';
+                        let gustPopup = item.max_gust ? `最高陣風：<strong style="color: #d97706;">${item.max_gust}</strong><br>` : '';
 
                         marker.bindPopup(`
-                            <div style="font-family: sans-serif;">
+                            <div style="font-family: sans-serif; line-height: 1.4;">
                                 <strong style="font-size: 14px;">${item.station}</strong><br>
-                                ${tempPopup}${humidPopup}
+                                ${tempPopup}${humidPopup}${windPopup}${gustPopup}
                                 <span style="font-size: 11px; color: #6b7280;">時間：${item.time}</span>
                             </div>
                         `);
