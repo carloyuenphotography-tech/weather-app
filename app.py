@@ -12,6 +12,7 @@ CORS(app)
 TEMP_ZIP_URL = "https://static.csdi.gov.hk/csdi-webpage/download/f8e1bd259b4d58218b8ea5a07b874472/geojson"
 HUMIDITY_ZIP_URL = "https://static.csdi.gov.hk/csdi-webpage/download/04db0982a43f561db9e922cd082b09f9/geojson"
 
+# 🎯 精選核心氣象站對應表（鍵是您想要的標準繁體中文名，值是可能出現的關鍵字）
 TARGET_STATIONS = [
     "香港天文台", "HK Observatory",
     "大帽山", "Tai Mo Shan",
@@ -46,10 +47,16 @@ def fetch_single_station(feature, val_type):
 
         station_name_tc = props.get('AutomaticWeatherStation_tc') or ''
         station_name_en = props.get('AutomaticWeatherStation_en') or ''
-        station_name = station_name_tc or station_name_en or '未知站點'
+        raw_name = f"{station_name_tc} {station_name_en}"
 
-        is_target = any(target.lower() in station_name.lower() for target in TARGET_STATIONS)
-        if not is_target:
+        # 匹配標準繁體中文站名
+        matched_station_name = None
+        for cn_name, keywords in TARGET_STATIONS.items():
+            if any(kw.lower() in raw_name.lower() for kw in keywords):
+                matched_station_name = cn_name
+                break
+
+        if not matched_station_name:
             return None, None
 
         data_url = props.get('Data_url')
@@ -82,7 +89,7 @@ def fetch_single_station(feature, val_type):
             except Exception:
                 pass
 
-        return station_name_tc or station_name_en, {
+        return matched_station_name, {
             "value": val_str,
             "time": timestamp,
             "lat": lat,
@@ -130,7 +137,7 @@ def home():
 def get_weather():
     try:
         temp_data = fetch_station_data(TEMP_ZIP_URL, 'temp')
-        humid_data = fetch_station_data(HUMIDITY_ZIP_URL, 'humidity')
+        humid_data = fetch_station_data(HUMIDITY_ZIP_URL, 'geojson' if False else 'humidity')
 
         all_stations = set(list(temp_data.keys()) + list(humid_data.keys()))
         
@@ -160,7 +167,7 @@ def get_weather():
 
             if t_val is not None:
                 station_temps[station] = t_val
-                if "天文台" in station or "HK Observatory" in station:
+                if station == "香港天文台":
                     hko_temp = t_val
 
             combined_result.append({
@@ -176,7 +183,6 @@ def get_weather():
         count_95 = sum(1 for h in humidities if h >= 95)
         count_90 = sum(1 for h in humidities if h >= 90)
 
-        # 💡 依照濕度由高到低排序，並取前 5 名
         station_humid_list.sort(key=lambda x: x["humidity"], reverse=True)
         top_5_humid = station_humid_list[:5]
 
@@ -188,8 +194,8 @@ def get_weather():
 
         baseline_temp = hko_temp if hko_temp is not None else (sum(station_temps.values()) / len(station_temps) if station_temps else 20)
 
-        tai_mo_shan_temp = next((val for name, val in station_temps.items() if "大帽山" in name or "Tai Mo Shan" in name), None)
-        tate_cairn_temp = next((val for name, val in station_temps.items() if "大老山" in name or "Tate's Cairn" in name), None)
+        tai_mo_shan_temp = station_temps.get("大帽山")
+        tate_cairn_temp = station_temps.get("大老山")
 
         tms_diff_str = ""
         tc_diff_str = ""
@@ -210,8 +216,8 @@ def get_weather():
         inversion_status = "⚠️ 探測到逆溫現象（高地氣溫異常偏高）" if inversion_detected else "正常垂直遞減（未見逆溫）"
 
         rc_status = "未明顯出現"
-        inland_stations = ["打鼓嶺", "石崗", "Ta Kwu Ling", "Shek Kong"]
-        inland_temps = [val for name, val in station_temps.items() if any(i in name for i in inland_stations)]
+        inland_stations = ["打鼓嶺", "石崗"]
+        inland_temps = [val for name, val in station_temps.items() if name in inland_stations]
         
         if inland_temps and hko_temp is not None:
             min_inland = min(inland_temps)
@@ -227,7 +233,7 @@ def get_weather():
                 "avg_humidity": round(avg_humid, 1),
                 "count_95": count_95,
                 "cloud_sea_status": cloud_sea_status,
-                "top_humid_stations": top_5_humid,  # 傳遞最高 5 站資料
+                "top_humid_stations": top_5_humid,
                 "tms_diff": tms_diff_str,
                 "tc_diff": tc_diff_str,
                 "inversion_status": inversion_status,
