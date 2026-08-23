@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>香港日出日落視線與 Windy 衛星圖</title>
+  <title>香港霞光預測：真實衛星與雙視角分析</title>
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
@@ -22,73 +22,92 @@
     
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      margin: 0; padding: 12px;
+      margin: 0; padding: 10px;
       background-color: var(--bg-color);
       color: var(--text-main);
       display: flex; flex-direction: column; align-items: center;
     }
 
     .app-container {
-      width: 100%; max-width: 420px;
+      width: 100%; max-width: 440px;
       display: flex; flex-direction: column; gap: 12px;
+      padding-bottom: 30px;
     }
 
-    h2 { font-size: 1.15rem; margin: 4px 0; text-align: center; }
+    h2 { font-size: 1.1rem; margin: 2px 0; text-align: center; }
 
-    .tab-group { display: flex; background: #252535; padding: 4px; border-radius: 12px; }
+    .tab-group { display: flex; background: #252535; padding: 4px; border-radius: 10px; }
     .tab-btn {
-      flex: 1; padding: 10px; border: none; background: transparent;
-      color: var(--text-sub); font-weight: 600; font-size: 0.95rem;
-      border-radius: 8px; cursor: pointer; transition: all 0.2s;
+      flex: 1; padding: 8px; border: none; background: transparent;
+      color: var(--text-sub); font-weight: 600; font-size: 0.9rem;
+      border-radius: 6px; cursor: pointer; transition: all 0.2s;
     }
     .tab-btn.active-sunrise { background: var(--accent-blue); color: #fff; }
     .tab-btn.active-sunset { background: var(--accent-orange); color: #fff; }
 
     .card {
-      background: var(--card-bg); border-radius: 14px;
-      padding: 14px; border: 1px solid #2a2a3a;
+      background: var(--card-bg); border-radius: 12px;
+      padding: 12px; border: 1px solid #2a2a3a;
     }
 
     .data-row {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 6px 0; border-bottom: 1px solid #2a2a3a; font-size: 0.88rem;
+      padding: 5px 0; border-bottom: 1px solid #2a2a3a; font-size: 0.85rem;
     }
     .data-row:last-child { border-bottom: none; }
 
-    #windy-map { height: 350px; width: 100%; border-radius: 10px; margin-top: 6px; }
-    .chart-container { position: relative; height: 180px; width: 100%; margin-top: 8px; }
+    .map-micro { height: 180px; width: 100%; border-radius: 8px; margin-top: 6px; }
+    .map-macro { height: 210px; width: 100%; border-radius: 8px; margin-top: 6px; }
+    .chart-container { position: relative; height: 140px; width: 100%; margin-top: 8px; }
+
+    .section-title { font-weight: bold; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center;}
+    .badge-macro { background: #333; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; color: #ddd; }
+
+    /* 衛星即時數據專屬卡片樣式 */
+    .satellite-box {
+      background: rgba(0, 180, 216, 0.08);
+      border: 1px solid var(--accent-blue);
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 8px;
+    }
+
+    .notice-box {
+      background: rgba(255, 165, 0, 0.08);
+      border-left: 3px solid #ffa500;
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      color: #d1d1d6;
+      margin-top: 10px;
+      line-height: 1.4;
+    }
 
     .action-btn {
-      width: 100%; padding: 12px; border: none; border-radius: 10px;
-      font-weight: bold; font-size: 1rem; cursor: pointer; color: #fff;
+      width: 100%; padding: 10px; border: none; border-radius: 8px;
+      font-weight: bold; font-size: 0.95rem; cursor: pointer; color: #fff;
     }
     .btn-sunset { background: var(--accent-orange); }
     .btn-sunrise { background: var(--accent-blue); }
 
-    /* 純淨無箭頭標籤 */
     .pin-label-clean {
-      background: rgba(15, 15, 18, 0.9) !important;
-      border: 1px solid var(--accent-color, #ff6b35) !important;
+      background: rgba(15, 15, 18, 0.92) !important;
+      border: 1.5px solid var(--accent-color, #ff6b35) !important;
       color: var(--accent-color, #ff6b35) !important;
-      font-size: 12px !important;
-      font-weight: 800 !important;
-      padding: 3px 8px !important;
-      border-radius: 20px !important;
-      white-space: nowrap !important;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.6) !important;
-      text-align: center;
-      line-height: 1;
-    }
-
-    .pin-label-hk {
-      background: #ffffff !important;
-      color: #000000 !important;
       font-size: 11px !important;
       font-weight: 800 !important;
       padding: 2px 6px !important;
-      border-radius: 4px !important;
+      border-radius: 12px !important;
       white-space: nowrap !important;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.5) !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.7) !important;
+      text-align: center; line-height: 1;
+    }
+
+    .pin-label-hk {
+      background: #ffffff !important; color: #000000 !important;
+      font-size: 10px !important; font-weight: 800 !important;
+      padding: 1px 4px !important; border-radius: 3px !important;
+      white-space: nowrap !important; box-shadow: 0 2px 4px rgba(0,0,0,0.5) !important;
       line-height: 1;
     }
   </style>
@@ -96,7 +115,7 @@
 <body>
 
 <div class="app-container">
-  <h2>🌅 視線 0-1000km 與 Windy 衛星圖</h2>
+  <h2>🌅 霞光預測：真實衛星與雙視角分析</h2>
 
   <div class="tab-group">
     <button id="btn-tab-sunset" class="tab-btn active-sunset" onclick="switchMode('sunset')">🌇 今日日落</button>
@@ -104,23 +123,51 @@
   </div>
 
   <div class="card">
-    <button id="calc-btn" class="action-btn btn-sunset" onclick="calculateKProfile()">🔍 繪製視線與 Windy 衛星地圖</button>
-    <div id="astro-info" style="margin-top: 8px;"></div>
-  </div>
-
-  <div class="card" style="padding: 10px;">
-    <div style="font-weight: bold; font-size: 0.88rem; color: var(--text-sub);">
-      🗺️ Windy 衛星雲圖 + 視線標記
+    <button id="calc-btn" class="action-btn btn-sunset" onclick="calculateAll()">🔍 讀取即時衛星與預測視角</button>
+    
+    <!-- 🛰️ 來自 Render 後端的真實衛星數據顯示專區 -->
+    <div class="satellite-box">
+      <div style="font-weight: bold; font-size: 0.85rem; color: var(--accent-blue); margin-bottom: 4px;">
+        🛰️ 葵花 9 號真實衛星即時觀測 (香港點)
+      </div>
+      <div id="sat-info" style="font-size: 0.8rem; color: var(--text-sub);">正在連線 Render 後端取得衛星數據...</div>
     </div>
-    <div id="windy-map"></div>
+
+    <div id="astro-info" style="margin-top: 6px;"></div>
   </div>
 
-  <div class="card">
-    <div style="font-weight: bold; font-size: 0.95rem;">📈 視線 0-1000 km K 值趨勢剖面</div>
+  <!-- 近場微觀區 (0-150km) -->
+  <div class="card" style="border: 1px solid var(--accent-color);">
+    <div class="section-title">
+      <span>🔎 近場前景分析 (0-150km)</span>
+      <span class="badge-macro">每 15km 採樣</span>
+    </div>
+    <div style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;">決定陽光是否會在近距離被低層厚雲遮擋</div>
+    <div id="windy-map-micro" class="map-micro"></div>
     <div class="chart-container">
-      <canvas id="kProfileChart"></canvas>
+      <canvas id="kProfileChartMicro"></canvas>
+    </div>
+    <div class="notice-box">
+      💡 <b>注意事項：</b>底圖結合 Windy 即時衛星圖。近場數值基於預報模型換算，可用於與上方「真實衛星觀測點」互相交叉比對。
     </div>
   </div>
+
+  <!-- 遠場宏觀區 (0-1000km) -->
+  <div class="card">
+    <div class="section-title">
+      <span>🔭 遠場背景分析 (0-1000km)</span>
+      <span class="badge-macro">每 50km 採樣</span>
+    </div>
+    <div style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;">決定遠方是否有高層對流冰晶雲承接霞光</div>
+    <div id="windy-map-macro" class="map-macro"></div>
+    <div class="chart-container">
+      <canvas id="kProfileChartMacro"></canvas>
+    </div>
+    <div class="notice-box">
+      💡 <b>注意事項：</b>遠距離數值存在空間平滑化誤差，主要用來觀察遠端雲系與破口的相對趨勢。
+    </div>
+  </div>
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
@@ -131,28 +178,33 @@
   const HK_LAT = 22.3193;
   const HK_LON = 114.1694;
   let currentMode = 'sunset';
-  let kChart = null;
-  let map, layerGroup;
-
-  map = L.map('windy-map', { zoomControl: true }).setView([HK_LAT, HK_LON], 6);
   
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap'
-  }).addTo(map);
+  let mapMacro, layerGroupMacro;
+  let mapMicro, layerGroupMicro;
 
-  L.tileLayer('https://tiles.windy.com/tiles/v10.0/satellite/{z}/{x}/{y}.png', {
-    opacity: 0.65,
-    attribution: '&copy; Windy.com'
-  }).addTo(map);
+  // ⚠️ 請將下方網址替換為你在 Render 得到的真實後端網址
+  const RENDER_API_URL = "https://myweatherapp-whej.onrender.com/api/satellite-k";
 
-  layerGroup = L.layerGroup().addTo(map);
+  function initMaps() {
+    mapMacro = L.map('windy-map-macro', { zoomControl: true, attributionControl: false }).setView([HK_LAT, HK_LON], 5);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(mapMacro);
+    L.tileLayer('https://tiles.windy.com/tiles/v10.0/satellite/{z}/{x}/{y}.png', { opacity: 0.65 }).addTo(mapMacro);
+    layerGroupMacro = L.layerGroup().addTo(mapMacro);
+
+    mapMicro = L.map('windy-map-micro', { zoomControl: true, attributionControl: false }).setView([HK_LAT, HK_LON], 8);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(mapMicro);
+    L.tileLayer('https://tiles.windy.com/tiles/v10.0/satellite/{z}/{x}/{y}.png', { opacity: 0.75 }).addTo(mapMicro);
+    layerGroupMicro = L.layerGroup().addTo(mapMicro);
+  }
+  
+  initMaps();
 
   function switchMode(mode) {
     currentMode = mode;
     document.getElementById('btn-tab-sunset').className = mode === 'sunset' ? "tab-btn active-sunset" : "tab-btn";
     document.getElementById('btn-tab-sunrise').className = mode === 'sunrise' ? "tab-btn active-sunrise" : "tab-btn";
     document.getElementById('calc-btn').className = `action-btn ${mode === 'sunset' ? 'btn-sunset' : 'btn-sunrise'}`;
-    calculateKProfile();
+    calculateAll();
   }
 
   function getDestinationPoint(lat, lon, brng, distKm) {
@@ -163,24 +215,56 @@
     return [lat2 / rad, lon2 / rad];
   }
 
-  async function fetchKValue(lat, lon) {
+  // 異步呼叫 Render 後端取得真實 NOAA 衛星數據
+  async function fetchRealSatelliteData() {
+    const satDiv = document.getElementById('sat-info');
     try {
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=cloud_cover&hourly=temperature_300hPa`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const cloud = data.current.cloud_cover;
-      const t300 = data.hourly.temperature_300hPa[0] + 273.15;
-
-      if (cloud < 15) return 298.5;
-      if (cloud > 70) return parseFloat((t300 - 5).toFixed(1));
-      return parseFloat((t300 + 15).toFixed(1));
+      const response = await fetch(RENDER_API_URL);
+      if (!response.ok) throw new Error('後端連線失敗');
+      const data = await response.json();
+      
+      if (data.status === "Success") {
+        satDiv.innerHTML = `
+          <div style="display: flex; justify-content: space-between;">
+            <span>衛星時間: <b>${data.timestamp}</b></span>
+            <span>實測 K 值: <b style="color:var(--accent-blue); font-size:0.95rem;">${data.k_value.toFixed(1)} K</b> (${data.celsius} °C)</span>
+          </div>
+        `;
+      } else {
+        satDiv.innerHTML = `<span style="color: #ff6b35;">衛星數據暫時未能在 AWS 生成，請稍後再試</span>`;
+      }
     } catch (e) {
-      return 290.0;
+      satDiv.innerHTML = `<span style="color: #ff6b35;">無法連線至 Render 後端 API (請檢查網址或伺服器是否在休眠)</span>`;
     }
   }
 
-  async function calculateKProfile() {
-    layerGroup.clearLayers();
+  async function fetchKValue(lat, lon) {
+    try {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,cloud_cover`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('API failed');
+      const data = await res.json();
+      const curr = data.current;
+
+      const groundK = (curr && curr.temperature_2m !== undefined) ? curr.temperature_2m + 273.15 : 295.0;
+      const cloudCover = (curr && curr.cloud_cover !== undefined) ? curr.cloud_cover : 0;
+
+      let kVal = groundK - (cloudCover * 0.15);
+      if (kVal < 230) kVal = 230;
+
+      return parseFloat(kVal.toFixed(1));
+    } catch (e) {
+      return 282.0;
+    }
+  }
+
+  async function calculateAll() {
+    layerGroupMacro.clearLayers();
+    layerGroupMicro.clearLayers();
+
+    // 觸發真實衛星 API 讀取
+    fetchRealSatelliteData();
+
     const now = new Date();
     let targetTime, azimuthDeg;
 
@@ -198,106 +282,124 @@
     const lineStyle = currentMode === 'sunset' ? '#ff6b35' : '#00b4d8';
     document.documentElement.style.setProperty('--accent-color', lineStyle);
 
+    const fetchTimeString = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+
     document.getElementById('astro-info').innerHTML = `
-      <div class="data-row"><span>時間:</span> <b>${targetTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</b></div>
+      <div class="data-row"><span>目標時間:</span> <b>${targetTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</b></div>
       <div class="data-row"><span>視線方位角:</span> <b>${azimuthDeg.toFixed(1)}°</b></div>
+      <div class="data-row" style="color: var(--text-sub);"><span>模型讀取時間:</span> <b>${fetchTimeString}</b></div>
     `;
 
-    // 1. 香港起點標記 (將標籤移至圓點南方/下方)
-    L.circleMarker([HK_LAT, HK_LON], { color: '#ffffff', fillColor: '#ff0000', fillOpacity: 1, radius: 4 }).addTo(layerGroup);
-    L.marker([HK_LAT, HK_LON], {
-      icon: L.divIcon({ 
-        className: 'pin-label-hk', 
-        html: '香港', 
-        iconSize: [36, 18], 
-        iconAnchor: [18, -8]  // 正數代表向下方 (南) 偏移，遠離上方視線與 150km 點
-      })
-    }).addTo(layerGroup);
+    [layerGroupMacro, layerGroupMicro].forEach(layer => {
+      L.circleMarker([HK_LAT, HK_LON], { color: '#ffffff', fillColor: '#ff0000', fillOpacity: 1, radius: 4 }).addTo(layer);
+      L.marker([HK_LAT, HK_LON], { icon: L.divIcon({ className: 'pin-label-hk', html: '香港', iconSize: [32, 16], iconAnchor: [16, -6] }) }).addTo(layer);
+    });
 
-    // 2. 視線與剖面圖採樣
-    const profileDistances = [];
-    for (let d = 0; d <= 1000; d += 50) profileDistances.push(d);
+    // 1. 微觀區 (0-150km)
+    const microDistances = [];
+    for (let d = 0; d <= 150; d += 15) microDistances.push(d);
+    
+    const kValuesMicro = [];
+    const polylinePointsMicro = [[HK_LAT, HK_LON]];
 
-    const kValues = [];
-    const polylinePoints = [[HK_LAT, HK_LON]];
+    for (let d of microDistances) {
+      const point = getDestinationPoint(HK_LAT, HK_LON, azimuthDeg, d);
+      if (d > 0) polylinePointsMicro.push(point);
+      const kVal = await fetchKValue(point[0], point[1]);
+      kValuesMicro.push(kVal);
 
-    for (let d of profileDistances) {
-      const target = getDestinationPoint(HK_LAT, HK_LON, azimuthDeg, d);
-      if (d > 0) polylinePoints.push(target);
-      const k = await fetchKValue(target[0], target[1]);
-      kValues.push(k);
+      if ([30, 60, 90, 120, 150].includes(d)) {
+        L.circleMarker(point, { color: lineStyle, fillColor: '#ffffff', fillOpacity: 1, radius: 4, weight: 2 }).addTo(layerGroupMicro);
+        L.marker(point, {
+          icon: L.divIcon({
+            className: 'pin-label-clean',
+            html: `${d}km | ${kVal.toFixed(1)} K`,
+            iconSize: [80, 18],
+            iconAnchor: [40, 22]
+          })
+        }).addTo(layerGroupMicro);
+      }
+    }
+    L.polyline(polylinePointsMicro, { color: lineStyle, weight: 3, dashArray: '5, 8' }).addTo(layerGroupMicro);
+    mapMicro.invalidateSize();
+    mapMicro.fitBounds(L.polyline(polylinePointsMicro).getBounds(), { padding: [25, 25] });
+    renderChart('kProfileChartMicro', microDistances, kValuesMicro, lineStyle, 250, 310);
+
+    // 2. 宏觀區 (0-1000km)
+    const macroDistances = [];
+    for (let d = 0; d <= 1000; d += 50) macroDistances.push(d);
+    
+    const kValuesMacro = [];
+    const polylinePointsMacro = [[HK_LAT, HK_LON]];
+
+    for (let d of macroDistances) {
+      const point = getDestinationPoint(HK_LAT, HK_LON, azimuthDeg, d);
+      if (d > 0) polylinePointsMacro.push(point);
+      const kVal = await fetchKValue(point[0], point[1]);
+      kValuesMacro.push(kVal);
     }
 
-    // 畫出視線軸
-    L.polyline(polylinePoints, { color: lineStyle, weight: 3.5, dashArray: '6, 8' }).addTo(layerGroup);
+    L.polyline(polylinePointsMacro, { color: lineStyle, weight: 3.5, dashArray: '6, 8' }).addTo(layerGroupMacro);
 
-    // 3. 關鍵 K 值標籤定位 (150km 移到上方/北面，徹底避開香港標籤)
-    const keyTargets = [
-      { dist: 150, anchor: [20, 25] },  // 150km 膠囊移至北面/上方
-      { dist: 500, anchor: [20, -12] }, // 500km 膠囊移至南面/下方
-      { dist: 1000, anchor: [20, -12] } // 1000km 膠囊移至南面/下方
+    const macroKeyTargets = [
+      { dist: 150, anchor: [20, 22] },
+      { dist: 500, anchor: [20, -10] },
+      { dist: 1000, anchor: [20, -10] }
     ];
 
-    for (let item of keyTargets) {
+    for (let item of macroKeyTargets) {
       const point = getDestinationPoint(HK_LAT, HK_LON, azimuthDeg, item.dist);
       const kVal = await fetchKValue(point[0], point[1]);
 
-      // 白點標記
-      L.circleMarker(point, {
-        color: lineStyle,
-        fillColor: '#ffffff',
-        fillOpacity: 1,
-        radius: 5,
-        weight: 2
-      }).addTo(layerGroup);
-
-      // K 值數字標籤
+      L.circleMarker(point, { color: lineStyle, fillColor: '#ffffff', fillOpacity: 1, radius: 5, weight: 2 }).addTo(layerGroupMacro);
       L.marker(point, {
         icon: L.divIcon({
           className: 'pin-label-clean',
-          html: `${kVal}K`,
-          iconSize: [50, 20],
+          html: `${kVal.toFixed(1)} K`,
+          iconSize: [60, 18],
           iconAnchor: item.anchor
         })
-      }).addTo(layerGroup);
+      }).addTo(layerGroupMacro);
     }
 
-    map.fitBounds(L.polyline(polylinePoints).getBounds(), { padding: [35, 35] });
-    renderChart(profileDistances, kValues);
+    mapMacro.invalidateSize();
+    mapMacro.fitBounds(L.polyline(polylinePointsMacro).getBounds(), { padding: [30, 30] });
+    renderChart('kProfileChartMacro', macroDistances, kValuesMacro, lineStyle, 240, 310);
   }
 
-  function renderChart(labels, dataPoints) {
-    const ctx = document.getElementById('kProfileChart').getContext('2d');
-    const accentColor = currentMode === 'sunset' ? '#ff6b35' : '#00b4d8';
+  function renderChart(canvasId, labels, dataPoints, color, yMin, yMax) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    let chartInstance = Chart.getChart(canvasId);
+    if (chartInstance) chartInstance.destroy();
 
-    if (kChart) kChart.destroy();
-
-    kChart = new Chart(ctx, {
+    new Chart(ctx, {
       type: 'line',
       data: {
         labels: labels.map(d => d + 'km'),
         datasets: [{
           data: dataPoints,
-          borderColor: accentColor,
-          backgroundColor: currentMode === 'sunset' ? 'rgba(255, 107, 53, 0.15)' : 'rgba(0, 184, 216, 0.15)',
+          borderColor: color,
+          backgroundColor: currentMode === 'sunset' ? 'rgba(255, 107, 53, 0.12)' : 'rgba(0, 184, 216, 0.12)',
           borderWidth: 2,
           fill: true,
-          tension: 0.3
+          tension: 0.3,
+          pointRadius: 2
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          x: { ticks: { color: '#a0a0b0', font: { size: 10 } }, grid: { color: '#2a2a3a' } },
-          y: { min: 210, max: 310, ticks: { color: '#a0a0b0', font: { size: 10 } }, grid: { color: '#2a2a3a' } }
+          x: { ticks: { color: '#a0a0b0', font: { size: 8 }, maxRotation: 45, minRotation: 45 }, grid: { color: '#2a2a3a' } },
+          y: { min: yMin, max: yMax, ticks: { color: '#a0a0b0', font: { size: 8 } }, grid: { color: '#2a2a3a' } }
         },
         plugins: { legend: { display: false } }
       }
     });
   }
 
-  calculateKProfile();
+  // 頁面載入後自動執行
+  setTimeout(calculateAll, 300);
 </script>
 </body>
 </html>
