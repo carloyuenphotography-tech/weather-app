@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>香港霞光預測：光通道與曙暮光分析</title>
   
+  <!-- 網頁瀏覽器標籤圖示 (Favicon) -->
+  <link rel="icon" type="image/png" href="magic_k_ico.png">
+  <!-- iPhone 桌面捷徑圖示 (Apple Touch Icon) -->
+  <link rel="apple-touch-icon" href="magic_k_ico.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="magic_k_ico.png">
+
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
@@ -138,7 +144,7 @@
       <span>🔎 近場前景分析 (0-150km)</span>
       <span class="badge-macro">每 15km 採樣</span>
     </div>
-    <div id="micro-subtitle" style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;">決定黃金時刻 (Golden Hour) 直射光是否被阻擋</div>
+    <div id="micro-subtitle" style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;">決定日落前黃金時刻 (Golden Hour) 直射光是否被阻擋</div>
     <div id="windy-map-micro" class="map-micro"></div>
     <div class="chart-container">
       <canvas id="kProfileChartMicro"></canvas>
@@ -201,7 +207,6 @@
     document.getElementById('btn-tab-sunrise').className = mode === 'sunrise' ? "tab-btn active-sunrise" : "tab-btn";
     document.getElementById('calc-btn').className = `action-btn ${mode === 'sunset' ? 'btn-sunset' : 'btn-sunrise'}`;
     
-    // 動態切換副標題用字
     if (mode === 'sunset') {
       document.getElementById('micro-subtitle').innerText = "決定日落前黃金時刻 (Golden Hour) 直射光是否被阻擋";
       document.getElementById('macro-subtitle').innerText = "決定黃昏後光輝 (Afterglow) 與各階段 Twilight 表現";
@@ -333,7 +338,6 @@
     mapMicro.fitBounds(L.polyline(polylinePointsMicro).getBounds(), { padding: [25, 25] });
     renderChart('kProfileChartMicro', microDistances, kValuesMicro, lineStyle, 250, 310);
 
-    // 動態產生近場分析文字 (區分日落與日出)
     let avgMicro = microSum / kValuesMicro.length;
     let microText = "";
     const isSunset = (currentMode === 'sunset');
@@ -389,7 +393,6 @@
     mapMacro.fitBounds(L.polyline(polylinePointsMacro).getBounds(), { padding: [30, 30] });
     renderChart('kProfileChartMacro', macroDistances, kValuesMacro, lineStyle, 240, 310);
 
-    // 動態產生遠場分析文字 (區分日落與日出)
     let macroText = "";
     const twilightPhase = isSunset ? "黃昏後光輝（Afterglow）" : "黎明前曙暮光（Pre-sunrise Twilight）";
     const eventContext = isSunset ? "日落後" : "日出前";
