@@ -29,7 +29,7 @@ TARGET_STATIONS = [
     "九龍城", "Kowloon City",
     "橫瀾島", "Waglan Island",
     "滘西洲", "Kau Sai Chau",
-    "坪洲", "Ping Chau",
+    "坪洲", "Peng Chau",
     "昂坪", "Ngong Ping"
 ]
 
