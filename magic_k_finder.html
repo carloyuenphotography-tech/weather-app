@@ -38,9 +38,21 @@
       width: 100%; max-width: 440px;
       display: flex; flex-direction: column; gap: 10px;
       padding-bottom: 30px;
+      transition: max-width 0.3s ease;
     }
 
-    h2 { font-size: 1.1rem; margin: 2px 0; text-align: center; }
+    @media (min-width: 850px) {
+      .app-container { max-width: 900px; }
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .map-micro, .map-macro { height: 230px !important; }
+      .chart-container { height: 160px !important; }
+    }
+
+    h2 { font-size: 1.15rem; margin: 2px 0; text-align: center; }
 
     .tab-group { display: flex; background: #252535; padding: 4px; border-radius: 10px; gap: 4px; }
     .tab-btn {
@@ -96,7 +108,6 @@
     .btn-sunset { background: var(--accent-orange); }
     .btn-sunrise { background: var(--accent-blue); }
 
-    /* K值優先，寬度加大確保完整顯示 */
     .pin-label-clean {
       background: rgba(15, 15, 18, 0.95) !important;
       border: 1.5px solid var(--accent-color, #ff6b35) !important;
@@ -139,38 +150,42 @@
     <div id="astro-info" style="margin-top: 6px;"></div>
   </div>
 
-  <!-- 近場微觀區 (0-150km) -->
-  <div class="card" style="border: 1px solid var(--accent-color);">
-    <div class="section-title">
-      <span>🔎 近場前景分析 (0-150km)</span>
-      <span class="badge-macro">每 15km 採樣</span>
+  <div class="dashboard-grid">
+    
+    <!-- 近場微觀區 (0-150km) -->
+    <div class="card" style="border: 1px solid var(--accent-color);">
+      <div class="section-title">
+        <span>🔎 近場前景分析 (0-150km)</span>
+        <span class="badge-macro">每 15km 採樣</span>
+      </div>
+      <div id="micro-subtitle" style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;">評估日落前 Golden Hour 直射金光通道是否暢通</div>
+      <div id="windy-map-micro" class="map-micro"></div>
+      <div class="chart-container">
+        <canvas id="kProfileChartMicro"></canvas>
+      </div>
+      <div id="micro-analysis" class="analysis-box">
+        <div class="analysis-title">✨ Golden Hour（黃金時刻）通道評估</div>
+        <div id="micro-text">正在分析 0-150km 通道狀況...</div>
+      </div>
     </div>
-    <div id="micro-subtitle" style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;">評估 Golden Hour 直射金光通道是否暢通</div>
-    <div id="windy-map-micro" class="map-micro"></div>
-    <div class="chart-container">
-      <canvas id="kProfileChartMicro"></canvas>
-    </div>
-    <div id="micro-analysis" class="analysis-box">
-      <div class="analysis-title">✨ Golden Hour（黃金時刻）通道評估</div>
-      <div id="micro-text">正在分析 0-150km 通道狀況...</div>
-    </div>
-  </div>
 
-  <!-- 遠場宏觀區 (0-1000km) -->
-  <div class="card">
-    <div class="section-title">
-      <span>🔭 遠場背景分析 (0-1000km)</span>
-      <span class="badge-macro">每 50km 採樣</span>
+    <!-- 遠場宏觀區 (0-1000km) -->
+    <div class="card">
+      <div class="section-title">
+        <span>🔭 遠場背景分析 (0-1000km)</span>
+        <span class="badge-macro">每 50km 採樣</span>
+      </div>
+      <div id="macro-subtitle" style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;">評估民用與航海曙暮光霞光通道表現</div>
+      <div id="windy-map-macro" class="map-macro"></div>
+      <div class="chart-container">
+        <canvas id="kProfileChartMacro"></canvas>
+      </div>
+      <div id="macro-analysis" class="analysis-box">
+        <div class="analysis-title" id="macro-analysis-title">🌆 曙暮光（Civil & Nautical Twilight）通道評估</div>
+        <div id="macro-text">正在分析各階段曙暮光反射狀況...</div>
+      </div>
     </div>
-    <div id="macro-subtitle" style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;">評估民用與航海曙暮光霞光通道表現</div>
-    <div id="windy-map-macro" class="map-macro"></div>
-    <div class="chart-container">
-      <canvas id="kProfileChartMacro"></canvas>
-    </div>
-    <div id="macro-analysis" class="analysis-box">
-      <div class="analysis-title">🌆 曙暮光（Civil & Nautical Twilight）通道評估</div>
-      <div id="macro-text">正在分析各階段曙暮光反射狀況...</div>
-    </div>
+
   </div>
 
 </div>
@@ -187,6 +202,105 @@
   
   let mapMacro, layerGroupMacro;
   let mapMicro, layerGroupMicro;
+
+  // 1. 近場圖表插件（單一 290K 基準線、背景色與頂層文字）
+  const microZonesPlugin = {
+    id: 'microZones',
+    beforeDraw(chart) {
+      if (chart.canvas.id !== 'kProfileChartMicro') return;
+      const { ctx, chartArea: { top, bottom, left, right }, scales: { y } } = chart;
+      ctx.save();
+      
+      ctx.fillStyle = 'rgba(255, 107, 53, 0.07)';
+      ctx.fillRect(left, top, right - left, bottom - top);
+
+      // 單一 290K 基準線
+      const yVal = y.getPixelForValue(290);
+      if (yVal >= top && yVal <= bottom) {
+        ctx.strokeStyle = '#00b4d8';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(left, yVal);
+        ctx.lineTo(right, yVal);
+        ctx.stroke();
+      }
+      ctx.restore();
+    },
+    afterDatasetsDraw(chart) {
+      if (chart.canvas.id !== 'kProfileChartMicro') return;
+      const { ctx, chartArea: { top, left } } = chart;
+      ctx.save();
+      ctx.fillStyle = '#ff6b35';
+      ctx.font = '9px sans-serif';
+      ctx.fillText('Golden Hour (0-150km)', left + 6, top + 12);
+      ctx.restore();
+    }
+  };
+
+  // 2. 遠場圖表插件（單一 290K 基準線、三大區段背景色、分隔線與頂層文字）
+  const macroZonesPlugin = {
+    id: 'macroZones',
+    beforeDraw(chart) {
+      if (chart.canvas.id !== 'kProfileChartMacro') return;
+      const { ctx, chartArea: { top, bottom, left, right }, scales: { x, y } } = chart;
+      ctx.save();
+
+      const x0 = x.getPixelForTick(0) || left;
+      const x150 = x.getPixelForTick(3) || (left + (right - left) * 0.15);
+      const x500 = x.getPixelForTick(10) || (left + (right - left) * 0.5);
+      const x1000 = x.getPixelForTick(20) || right;
+
+      ctx.fillStyle = 'rgba(255, 107, 53, 0.07)';
+      ctx.fillRect(x0, top, x150 - x0, bottom - top);
+      ctx.fillStyle = 'rgba(0, 180, 216, 0.07)';
+      ctx.fillRect(x150, top, x500 - x150, bottom - top);
+      ctx.fillStyle = 'rgba(138, 43, 226, 0.07)';
+      ctx.fillRect(x500, top, x1000 - x500, bottom - top);
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 2]);
+      [x150, x500].forEach(xp => {
+        ctx.beginPath();
+        ctx.moveTo(xp, top);
+        ctx.lineTo(xp, bottom);
+        ctx.stroke();
+      });
+
+      // 單一 290K 基準線
+      const yVal = y.getPixelForValue(290);
+      if (yVal >= top && yVal <= bottom) {
+        ctx.strokeStyle = '#00b4d8';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(left, yVal);
+        ctx.lineTo(right, yVal);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    },
+    afterDatasetsDraw(chart) {
+      if (chart.canvas.id !== 'kProfileChartMacro') return;
+      const { ctx, chartArea: { top, left }, scales: { x } } = chart;
+      ctx.save();
+
+      const x0 = x.getPixelForTick(0) || left;
+      const x150 = x.getPixelForTick(3) || (left + (chart.chartArea.right - left) * 0.15);
+      const x500 = x.getPixelForTick(10) || (left + (chart.chartArea.right - left) * 0.5);
+
+      ctx.font = '9px sans-serif';
+      ctx.fillStyle = '#ff6b35';
+      ctx.fillText('Golden Hour', x0 + 4, top + 12);
+      ctx.fillStyle = '#00b4d8';
+      ctx.fillText('Civil Twilight', x150 + 4, top + 12);
+      ctx.fillStyle = '#b19cd9';
+      ctx.fillText('Nautical Twilight', x500 + 4, top + 12);
+      ctx.restore();
+    }
+  };
 
   function initMaps() {
     mapMacro = L.map('windy-map-macro', { zoomControl: true, attributionControl: false }).setView([HK_LAT, HK_LON], 5);
@@ -211,9 +325,11 @@
     if (mode === 'sunset') {
       document.getElementById('micro-subtitle').innerText = "評估日落前 Golden Hour 直射金光通道是否暢通";
       document.getElementById('macro-subtitle').innerText = "評估民用與航海曙暮光（Afterglow）霞光通道表現";
+      document.getElementById('macro-analysis-title').innerText = "🌆 曙暮光（Civil & Nautical Twilight）通道評估";
     } else {
       document.getElementById('micro-subtitle').innerText = "評估日出前 Golden Hour 直射金光通道是否暢通";
       document.getElementById('macro-subtitle').innerText = "評估民用與航海曙暮光（Pre-sunrise Twilight）霞光通道表現";
+      document.getElementById('macro-analysis-title').innerText = "🌅 黎明曙暮光（Civil & Nautical Twilight）通道評估";
     }
 
     calculateAll();
@@ -312,7 +428,7 @@
     const microDistances = [];
     for (let d = 0; d <= 150; d += 15) microDistances.push(d);
     
-    let kValuesMicro = [], k150 = 290;
+    let kValuesMicro = [], k150 = 290, microIdx = 0;
     const polylinePointsMicro = [[HK_LAT, HK_LON]];
 
     for (let d of microDistances) {
@@ -323,28 +439,39 @@
       if (d === 150) k150 = res.k;
 
       if ([30, 60, 90, 120, 150].includes(d)) {
+        let isEven = (microIdx % 2 === 0);
+        let anchorY = isEven ? 48 : -14;
+
         L.circleMarker(point, { color: lineStyle, fillColor: '#ffffff', fillOpacity: 1, radius: 4, weight: 2 }).addTo(layerGroupMicro);
         L.marker(point, {
           icon: L.divIcon({
             className: 'pin-label-clean',
-            html: `${res.k.toFixed(1)} K | ${d}km`, // 先顯示 K 值，再顯示距離
+            html: `${res.k.toFixed(1)} K | ${d}km`,
             iconSize: [100, 22],
-            iconAnchor: [50, 26]
+            iconAnchor: [50, anchorY]
           })
         }).addTo(layerGroupMicro);
+        microIdx++;
       }
     }
     L.polyline(polylinePointsMicro, { color: lineStyle, weight: 3, dashArray: '5, 8' }).addTo(layerGroupMicro);
     mapMicro.invalidateSize();
     mapMicro.fitBounds(L.polyline(polylinePointsMicro).getBounds(), { padding: [25, 25] });
-    renderChart('kProfileChartMicro', microDistances, kValuesMicro, lineStyle, 250, 310);
+    renderChart('kProfileChartMicro', microDistances, kValuesMicro, lineStyle, 280, 305, [microZonesPlugin]);
 
-    // Golden Hour 評估 (以 292K 為界)[cite: 1]
     let microText = "";
-    if (k150 >= 292 || (kValuesMicro.reduce((a,b)=>a+b,0)/kValuesMicro.length) >= 292) {
-      microText = `✅ <b>Golden Hour（黃金時刻）通道暢通（≥ 292 K）</b>：150公里內大氣通透無低層厚雲阻擋，直射金光可以順利推進，黃金時刻金光燦爛[cite: 1]。`;
+    if (currentMode === 'sunset') {
+      if (k150 >= 290 || (kValuesMicro.reduce((a,b)=>a+b,0)/kValuesMicro.length) >= 290) {
+        microText = `✅ <b>Golden Hour 通道暢通（≥ 290 K）</b>：150公里內大氣通透，直射金光順利推進。`;
+      } else {
+        microText = `⚠️ <b>Golden Hour 通道阻塞（< 290 K）</b>：150公里內低層厚雲或水氣偏多。`;
+      }
     } else {
-      microText = `⚠️ <b>Golden Hour（黃金時刻）通道阻塞（< 292 K）</b>：150公里內低層厚雲或水氣偏多，直射金光可能受阻[cite: 1]。`;
+      if (k150 >= 290 || (kValuesMicro.reduce((a,b)=>a+b,0)/kValuesMicro.length) >= 290) {
+        microText = `✅ <b>日出前 Golden Hour 通道暢通（≥ 290 K）</b>：150公里內大氣通透，晨光直射順利。`;
+      } else {
+        microText = `⚠️ <b>日出前 Golden Hour 通道阻塞（< 290 K）</b>：150公里內低層水氣或雲層較多。`;
+      }
     }
     document.getElementById('micro-text').innerHTML = microText;
 
@@ -367,9 +494,9 @@
     L.polyline(polylinePointsMacro, { color: lineStyle, weight: 3.5, dashArray: '6, 8' }).addTo(layerGroupMacro);
 
     const macroKeyTargets = [
-      { dist: 150, anchor: [20, 22] },
-      { dist: 500, anchor: [20, -10] },
-      { dist: 1000, anchor: [20, -10] }
+      { dist: 150, anchorY: 48 },
+      { dist: 500, anchorY: -14 },
+      { dist: 1000, anchorY: 34 }
     ];
 
     for (let item of macroKeyTargets) {
@@ -380,32 +507,41 @@
       L.marker(point, {
         icon: L.divIcon({
           className: 'pin-label-clean',
-          html: `${res.k.toFixed(1)} K | ${item.dist}km`, // 先顯示 K 值，再顯示距離
+          html: `${res.k.toFixed(1)} K | ${item.dist}km`,
           iconSize: [100, 22],
-          iconAnchor: [50, 26]
+          iconAnchor: [50, item.anchorY]
         })
       }).addTo(layerGroupMacro);
     }
 
     mapMacro.invalidateSize();
     mapMacro.fitBounds(L.polyline(polylinePointsMacro).getBounds(), { padding: [30, 30] });
-    renderChart('kProfileChartMacro', macroDistances, kValuesMacro, lineStyle, 240, 310);
+    renderChart('kProfileChartMacro', macroDistances, kValuesMacro, lineStyle, 280, 305, [macroZonesPlugin]);
 
-    // Civil Twilight (民用曙暮光 ~400km) 與 Nautical Twilight (航海曙暮光 ~1000km) 評估
     let macroText = "";
-    let civilStatus = k400 >= 292 ? "暢通 (有機會迎來核心霞光/火燒雲)" : "阻塞 (雲層較厚，霞光可能較弱)";
-    let nauticalStatus = k1000 >= 292 ? "暢通 (高空通透，餘光/Afterglow 可延續)" : "阻塞 (光線難以傳遞，天色迅速黯淡)";
-
-    macroText = `
-      🌆 <b>民用曙暮光（Civil Twilight / 約 400km）通道：<b>${civilStatus}</b><br>
-      &nbsp;&nbsp;&nbsp;&nbsp;➔ 決定日落後/日出前第一波核心霞光反射條件（K值: ${k400.toFixed(1)} K）[cite: 1]。<br>
-      ⛵ <b>航海曙暮光（Nautical Twilight / 約 1000km）通道：<b>${nauticalStatus}</b><br>
-      &nbsp;&nbsp;&nbsp;&nbsp;➔ 決定遠端深藍時段與黃昏後光輝（Afterglow）表現（K值: ${k1000.toFixed(1)} K）[cite: 1]。
-    `;
+    if (currentMode === 'sunset') {
+      let civilStatus = k400 >= 290 ? "暢通 (有機會迎來核心霞光)" : "阻塞 (雲層較厚)";
+      let nauticalStatus = k1000 >= 290 ? "暢通 (高空通透，餘光可延續)" : "阻塞 (天色迅速黯淡)";
+      macroText = `
+        🌆 <b>民用曙暮光（Civil / 約 400km）：<b>${civilStatus}</b><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;➔ 核心霞光反射條件（K值: ${k400.toFixed(1)} K）。<br>
+        ⛵ <b>航海曙暮光（Nautical / 約 1000km）：<b>${nauticalStatus}</b><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;➔ 黃昏後光輝表現（K值: ${k1000.toFixed(1)} K）。
+      `;
+    } else {
+      let civilStatus = k400 >= 290 ? "暢通 (黎明前核心霞光條件良好)" : "阻塞 (雲層較厚)";
+      let nauticalStatus = k1000 >= 290 ? "暢通 (高空通透，晨光輝映延續)" : "阻塞 (天色偏暗)";
+      macroText = `
+        🌅 <b>民用曙暮光（Civil / 約 400km）：<b>${civilStatus}</b><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;➔ 黎明前核心霞光反射條件（K值: ${k400.toFixed(1)} K）。<br>
+        ⛵ <b>航海曙暮光（Nautical / 約 1000km）：<b>${nauticalStatus}</b><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;➔ 黎明前晨光輝映表現（K值: ${k1000.toFixed(1)} K）。
+      `;
+    }
     document.getElementById('macro-text').innerHTML = macroText;
   }
 
-  function renderChart(canvasId, labels, dataPoints, color, yMin, yMax) {
+  function renderChart(canvasId, labels, dataPoints, color, yMin, yMax, customPlugins = []) {
     const ctx = document.getElementById(canvasId).getContext('2d');
     let chartInstance = Chart.getChart(canvasId);
     if (chartInstance) chartInstance.destroy();
@@ -432,7 +568,8 @@
           y: { min: yMin, max: yMax, ticks: { color: '#a0a0b0', font: { size: 8 } }, grid: { color: '#2a2a3a' } }
         },
         plugins: { legend: { display: false } }
-      }
+      },
+      plugins: customPlugins
     });
   }
 
