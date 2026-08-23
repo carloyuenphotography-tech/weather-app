@@ -30,7 +30,8 @@ TARGET_STATIONS = [
     "橫瀾島", "Waglan Island",
     "滘西洲", "Kau Sai Chau",
     "坪洲", "Peng Chau",
-    "昂坪", "Ngong Ping"
+    "昂坪", "Ngong Ping",
+    "北潭涌", "Pak Tam Chung"
 ]
 
 def fetch_single_station(feature, val_type):
