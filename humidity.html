@@ -3,23 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>香港各區實測溫濕度地形地圖</title>
+    <title>香港各區實測溫濕度衛星地圖</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 引入 Leaflet 地圖 CSS 與 JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        #map { height: 550px; }
-        .weather-badge {
-            background: white;
-            border: 1px solid #cbd5e1;
+        #map { height: 600px; }
+        /* 仿造第二張圖質感的懸浮針標設計 */
+        .weather-pin {
+            position: relative;
+            background: #0f172a; /* 深色沉穩質感 */
+            color: white;
             border-radius: 6px;
-            padding: 3px 6px;
+            padding: 4px 8px;
             font-size: 11px;
             font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-            white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
             text-align: center;
+            white-space: nowrap;
+        }
+        /* 針標下方的指向小三角 */
+        .weather-pin::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px 6px 0;
+            border-style: solid;
+            border-color: #0f172a transparent;
+            display: block;
+            width: 0;
         }
     </style>
 </head>
@@ -29,8 +44,8 @@
         
         <!-- 地圖卡片區域 -->
         <div class="bg-white shadow-md rounded-lg overflow-hidden p-4">
-            <h1 class="text-xl font-bold text-gray-900 mb-1">香港各區實測氣溫與相對濕度 - 地形地圖</h1>
-            <p class="text-xs text-gray-500 mb-4" id="loading-status">正在載入地形圖與實時溫濕度數據...</p>
+            <h1 class="text-xl font-bold text-gray-900 mb-1">香港各區實測溫濕度 - 衛星即時地圖</h1>
+            <p class="text-xs text-gray-500 mb-4" id="loading-status">正在載入衛星圖與實時溫濕度數據...</p>
             <div id="map" class="rounded-lg shadow-inner"></div>
         </div>
 
@@ -57,16 +72,17 @@
         </div>
 
         <div class="text-center text-xs text-gray-500 py-2">
-            數據來源：香港天文台 / 空間數據共享入門網站 (CSDI) | 地圖風格：OpenTopoMap
+            數據來源：香港天文台 / 空間數據共享入門網站 (CSDI) | 地圖圖資：Esri World Imagery 衛星影像
         </div>
     </div>
 
     <script>
         const map = L.map('map').setView([22.3193, 114.1694], 11);
 
-        L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        // 使用 Esri World Imagery 衛星影像地圖（與第二張圖風格一致）
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             maxZoom: 17,
-            attribution: 'Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap (CC-BY-SA)'
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
         }).addTo(map);
 
         async function fetchWeatherData() {
@@ -101,19 +117,19 @@
                     `;
                     tbody.appendChild(tr);
 
-                    // 2. 在地圖上顯示溫濕度標籤
+                    // 2. 在衛星地圖上顯示精美針標
                     if (item.lat && item.lng) {
                         const customIcon = L.divIcon({
                             className: 'custom-div-icon',
-                            html: `<div class="weather-badge">
-                                     <div class="text-gray-800 text-[10px] truncate max-w-[100px]">${item.station}</div>
+                            html: `<div class="weather-pin">
+                                     <div class="text-[10px] text-gray-300 truncate max-w-[100px]">${item.station}</div>
                                      <div>
-                                        <span class="text-red-600">${item.temperature}</span> | 
-                                        <span class="text-blue-600">${item.humidity}</span>
+                                        <span class="text-red-400">${item.temperature}</span> | 
+                                        <span class="text-blue-400">${item.humidity}</span>
                                      </div>
                                    </div>`,
-                            iconSize: [100, 38],
-                            iconAnchor: [50, 19]
+                            iconSize: [110, 42],
+                            iconAnchor: [55, 48]
                         });
 
                         const marker = L.marker([item.lat, item.lng], { icon: customIcon }).addTo(map);
@@ -130,7 +146,7 @@
                     }
                 });
 
-                statusEl.textContent = `成功載入 ${stations.length} 個站點，已在地形圖上標註 ${markerCount} 個氣象站的實時溫濕度`;
+                statusEl.textContent = `成功載入 ${stations.length} 個站點，已在衛星地圖上標註 ${markerCount} 個氣象站的實時溫濕度`;
 
             } catch (error) {
                 console.error(error);
