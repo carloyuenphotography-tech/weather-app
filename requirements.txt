@@ -1,6 +1,2 @@
 flask
-flask-cors
-xarray
-netCDF4
 requests
-gunicorn
