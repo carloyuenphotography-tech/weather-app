@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>香港日出日落視線與 Windy 衛星圖</title>
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    :root {
+      --bg-color: #0f0f12;
+      --card-bg: #1a1a24;
+      --accent-orange: #ff6b35;
+      --accent-blue: #00b4d8;
+      --text-main: #f0f0f5;
+      --text-sub: #a0a0b0;
+      --accent-color: #ff6b35;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0; padding: 12px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex; flex-direction: column; align-items: center;
+    }
+
+    .app-container {
+      width: 100%; max-width: 420px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    h2 { font-size: 1.15rem; margin: 4px 0; text-align: center; }
+
+    .tab-group { display: flex; background: #252535; padding: 4px; border-radius: 12px; }
+    .tab-btn {
+      flex: 1; padding: 10px; border: none; background: transparent;
+      color: var(--text-sub); font-weight: 600; font-size: 0.95rem;
+      border-radius: 8px; cursor: pointer; transition: all 0.2s;
+    }
+    .tab-btn.active-sunrise { background: var(--accent-blue); color: #fff; }
+    .tab-btn.active-sunset { background: var(--accent-orange); color: #fff; }
+
+    .card {
+      background: var(--card-bg); border-radius: 14px;
+      padding: 14px; border: 1px solid #2a2a3a;
+    }
+
+    .data-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 6px 0; border-bottom: 1px solid #2a2a3a; font-size: 0.88rem;
+    }
+    .data-row:last-child { border-bottom: none; }
+
+    #windy-map { height: 350px; width: 100%; border-radius: 10px; margin-top: 6px; }
+    .chart-container { position: relative; height: 180px; width: 100%; margin-top: 8px; }
+
+    .action-btn {
+      width: 100%; padding: 12px; border: none; border-radius: 10px;
+      font-weight: bold; font-size: 1rem; cursor: pointer; color: #fff;
+    }
+    .btn-sunset { background: var(--accent-orange); }
+    .btn-sunrise { background: var(--accent-blue); }
+
+    /* 純淨無箭頭標籤 */
+    .pin-label-clean {
+      background: rgba(15, 15, 18, 0.9) !important;
+      border: 1px solid var(--accent-color, #ff6b35) !important;
+      color: var(--accent-color, #ff6b35) !important;
+      font-size: 12px !important;
+      font-weight: 800 !important;
+      padding: 3px 8px !important;
+      border-radius: 20px !important;
+      white-space: nowrap !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.6) !important;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .pin-label-hk {
+      background: #ffffff !important;
+      color: #000000 !important;
+      font-size: 11px !important;
+      font-weight: 800 !important;
+      padding: 2px 6px !important;
+      border-radius: 4px !important;
+      white-space: nowrap !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5) !important;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <h2>🌅 視線 0-1000km 與 Windy 衛星圖</h2>
+
+  <div class="tab-group">
+    <button id="btn-tab-sunset" class="tab-btn active-sunset" onclick="switchMode('sunset')">🌇 今日日落</button>
+    <button id="btn-tab-sunrise" class="tab-btn" onclick="switchMode('sunrise')">🌅 明日日出</button>
+  </div>
+
+  <div class="card">
+    <button id="calc-btn" class="action-btn btn-sunset" onclick="calculateKProfile()">🔍 繪製視線與 Windy 衛星地圖</button>
+    <div id="astro-info" style="margin-top: 8px;"></div>
+  </div>
+
+  <div class="card" style="padding: 10px;">
+    <div style="font-weight: bold; font-size: 0.88rem; color: var(--text-sub);">
+      🗺️ Windy 衛星雲圖 + 視線標記
+    </div>
+    <div id="windy-map"></div>
+  </div>
+
+  <div class="card">
+    <div style="font-weight: bold; font-size: 0.95rem;">📈 視線 0-1000 km K 值趨勢剖面</div>
+    <div class="chart-container">
+      <canvas id="kProfileChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const HK_LAT = 22.3193;
+  const HK_LON = 114.1694;
+  let currentMode = 'sunset';
+  let kChart = null;
+  let map, layerGroup;
+
+  map = L.map('windy-map', { zoomControl: true }).setView([HK_LAT, HK_LON], 6);
+  
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+
+  L.tileLayer('https://tiles.windy.com/tiles/v10.0/satellite/{z}/{x}/{y}.png', {
+    opacity: 0.65,
+    attribution: '&copy; Windy.com'
+  }).addTo(map);
+
+  layerGroup = L.layerGroup().addTo(map);
+
+  function switchMode(mode) {
+    currentMode = mode;
+    document.getElementById('btn-tab-sunset').className = mode === 'sunset' ? "tab-btn active-sunset" : "tab-btn";
+    document.getElementById('btn-tab-sunrise').className = mode === 'sunrise' ? "tab-btn active-sunrise" : "tab-btn";
+    document.getElementById('calc-btn').className = `action-btn ${mode === 'sunset' ? 'btn-sunset' : 'btn-sunrise'}`;
+    calculateKProfile();
+  }
+
+  function getDestinationPoint(lat, lon, brng, distKm) {
+    const R = 6371, rad = Math.PI / 180;
+    const lat1 = lat * rad, lon1 = lon * rad, brngRad = brng * rad, dDivR = distKm / R;
+    const lat2 = Math.asin(Math.sin(lat1) * Math.cos(dDivR) + Math.cos(lat1) * Math.sin(dDivR) * Math.cos(brngRad));
+    const lon2 = lon1 + Math.atan2(Math.sin(brngRad) * Math.sin(dDivR) * Math.cos(lat1), Math.cos(dDivR) - Math.sin(lat1) * Math.sin(lat2));
+    return [lat2 / rad, lon2 / rad];
+  }
+
+  async function fetchKValue(lat, lon) {
+    try {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=cloud_cover&hourly=temperature_300hPa`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const cloud = data.current.cloud_cover;
+      const t300 = data.hourly.temperature_300hPa[0] + 273.15;
+
+      if (cloud < 15) return 298.5;
+      if (cloud > 70) return parseFloat((t300 - 5).toFixed(1));
+      return parseFloat((t300 + 15).toFixed(1));
+    } catch (e) {
+      return 290.0;
+    }
+  }
+
+  async function calculateKProfile() {
+    layerGroup.clearLayers();
+    const now = new Date();
+    let targetTime, azimuthDeg;
+
+    if (currentMode === 'sunset') {
+      const times = SunCalc.getTimes(now, HK_LAT, HK_LON);
+      targetTime = times.sunset;
+      azimuthDeg = ((SunCalc.getPosition(targetTime, HK_LAT, HK_LON).azimuth * 180 / Math.PI) + 180) % 360;
+    } else {
+      const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1);
+      const times = SunCalc.getTimes(tomorrow, HK_LAT, HK_LON);
+      targetTime = times.sunrise;
+      azimuthDeg = ((SunCalc.getPosition(targetTime, HK_LAT, HK_LON).azimuth * 180 / Math.PI) + 180) % 360;
+    }
+
+    const lineStyle = currentMode === 'sunset' ? '#ff6b35' : '#00b4d8';
+    document.documentElement.style.setProperty('--accent-color', lineStyle);
+
+    document.getElementById('astro-info').innerHTML = `
+      <div class="data-row"><span>時間:</span> <b>${targetTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</b></div>
+      <div class="data-row"><span>視線方位角:</span> <b>${azimuthDeg.toFixed(1)}°</b></div>
+    `;
+
+    // 1. 香港起點標記 (將標籤移至圓點南方/下方)
+    L.circleMarker([HK_LAT, HK_LON], { color: '#ffffff', fillColor: '#ff0000', fillOpacity: 1, radius: 4 }).addTo(layerGroup);
+    L.marker([HK_LAT, HK_LON], {
+      icon: L.divIcon({ 
+        className: 'pin-label-hk', 
+        html: '香港', 
+        iconSize: [36, 18], 
+        iconAnchor: [18, -8]  // 正數代表向下方 (南) 偏移，遠離上方視線與 150km 點
+      })
+    }).addTo(layerGroup);
+
+    // 2. 視線與剖面圖採樣
+    const profileDistances = [];
+    for (let d = 0; d <= 1000; d += 50) profileDistances.push(d);
+
+    const kValues = [];
+    const polylinePoints = [[HK_LAT, HK_LON]];
+
+    for (let d of profileDistances) {
+      const target = getDestinationPoint(HK_LAT, HK_LON, azimuthDeg, d);
+      if (d > 0) polylinePoints.push(target);
+      const k = await fetchKValue(target[0], target[1]);
+      kValues.push(k);
+    }
+
+    // 畫出視線軸
+    L.polyline(polylinePoints, { color: lineStyle, weight: 3.5, dashArray: '6, 8' }).addTo(layerGroup);
+
+    // 3. 關鍵 K 值標籤定位 (150km 移到上方/北面，徹底避開香港標籤)
+    const keyTargets = [
+      { dist: 150, anchor: [20, 25] },  // 150km 膠囊移至北面/上方
+      { dist: 500, anchor: [20, -12] }, // 500km 膠囊移至南面/下方
+      { dist: 1000, anchor: [20, -12] } // 1000km 膠囊移至南面/下方
+    ];
+
+    for (let item of keyTargets) {
+      const point = getDestinationPoint(HK_LAT, HK_LON, azimuthDeg, item.dist);
+      const kVal = await fetchKValue(point[0], point[1]);
+
+      // 白點標記
+      L.circleMarker(point, {
+        color: lineStyle,
+        fillColor: '#ffffff',
+        fillOpacity: 1,
+        radius: 5,
+        weight: 2
+      }).addTo(layerGroup);
+
+      // K 值數字標籤
+      L.marker(point, {
+        icon: L.divIcon({
+          className: 'pin-label-clean',
+          html: `${kVal}K`,
+          iconSize: [50, 20],
+          iconAnchor: item.anchor
+        })
+      }).addTo(layerGroup);
+    }
+
+    map.fitBounds(L.polyline(polylinePoints).getBounds(), { padding: [35, 35] });
+    renderChart(profileDistances, kValues);
+  }
+
+  function renderChart(labels, dataPoints) {
+    const ctx = document.getElementById('kProfileChart').getContext('2d');
+    const accentColor = currentMode === 'sunset' ? '#ff6b35' : '#00b4d8';
+
+    if (kChart) kChart.destroy();
+
+    kChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels.map(d => d + 'km'),
+        datasets: [{
+          data: dataPoints,
+          borderColor: accentColor,
+          backgroundColor: currentMode === 'sunset' ? 'rgba(255, 107, 53, 0.15)' : 'rgba(0, 184, 216, 0.15)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { ticks: { color: '#a0a0b0', font: { size: 10 } }, grid: { color: '#2a2a3a' } },
+          y: { min: 210, max: 310, ticks: { color: '#a0a0b0', font: { size: 10 } }, grid: { color: '#2a2a3a' } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  calculateKProfile();
+</script>
+</body>
+</html>
