@@ -13,7 +13,7 @@ TEMP_ZIP_URL = "https://static.csdi.gov.hk/csdi-webpage/download/f8e1bd259b4d582
 HUMIDITY_ZIP_URL = "https://static.csdi.gov.hk/csdi-webpage/download/04db0982a43f561db9e922cd082b09f9/geojson"
 WIND_ZIP_URL = "https://static.csdi.gov.hk/csdi-webpage/download/9ec8faca33f750339941f5f01689f654/geojson"
 
-# 🎯 擴充後的站名中英文對照表
+# 🎯 站名中英文對照表
 STATION_NAME_MAP = {
     "HK Observatory": "香港天文台",
     "Tai Mo Shan": "大帽山",
@@ -32,7 +32,7 @@ STATION_NAME_MAP = {
     "Kau Sai Chau": "滘西洲",
     "King's Park": "京士柏",
     "Lau Fau Shan": "流浮山",
-    "Pak Tam Chung": "北潭涌",
+    "Pak Tam Chung": "北潭湧",
     "Peng Chau": "坪洲",
     "Shau Kei Wan": "筲箕灣",
     "Sheung Shui": "上水",
@@ -246,11 +246,11 @@ def get_weather():
         
         if inland_temps and hko_temp is not None:
             min_inland = min(inland_temps)
-            rc_diff = hko_temp - min_inland
+            rc_diff = round(hko_temp - min_inland, 1)
             if rc_diff >= 2.0:
-                rc_status = f"顯著！內陸比市區低 {rc_diff:.1f}°C（輻射冷卻）"
+                rc_status = f"顯著！內陸比市區低 {rc_diff}°C（輻射冷卻）"
             else:
-                rc_status = f"微弱（溫差 {rc_diff:.1f}°C）"
+                rc_status = f"微弱（溫差 {rc_diff}°C）"
 
         return jsonify({
             "stations": combined_result,
