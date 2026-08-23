@@ -2,69 +2,102 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <title>各區氣象站相對濕度</title>
-    <style>
-        .weather-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-        .station-card { border: 1px solid #ccc; padding: 15px; border-radius: 8px; background: #f9f9f9; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>香港各區實測相對濕度</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 font-sans text-gray-800 p-4 md:p-8">
 
-    <h1>各區自動氣象站相對濕度</h1>
-       </div>
-<h1>各區自動氣象站相對濕度</h1>
-    <div id="station-container" class="weather-grid">載入資料中...</div>
+    <div class="max-w-4xl mx-auto bg-white shadow-md rounded-lg overflow-hidden">
+        <!-- 標題欄 -->
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <h1 class="text-xl font-bold text-gray-900">香港各區實測相對濕度</h1>
+            <p class="text-xs text-gray-500 mt-1" id="loading-status">正在載入 CSDI 氣象站實時相對濕度數據...</p>
+        </div>
+
+        <!-- 表格區域 -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 text-gray-700 text-sm border-b border-gray-200">
+                        <th class="py-3 px-6 font-semibold">氣象站 / 地區</th>
+                        <th class="py-3 px-6 font-semibold">相對濕度</th>
+                        <th class="py-3 px-6 font-semibold">數據時間</th>
+                    </tr>
+                </thead>
+                <tbody id="humidity-tbody" class="divide-y divide-gray-200 text-sm">
+                    <!-- 數據將由 JavaScript 動態填入 -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 頁尾來源 -->
+        <div class="bg-gray-50 px-6 py-3 border-t border-gray-200 text-xs text-gray-500">
+            數據來源：香港天文台 / 空間數據共享入門網站 (CSDI) - latest_1min_humidity
+        </div>
+    </div>
 
     <script>
-        const TOKEN = 'patBE97pYHsTM2kuT';
-        const BASE_ID = 'appSQoxzwEaKHLidf';
-        const TABLE_NAME = 'HK_Weather_Logs';
+        async function fetchHumidityData() {
+            const statusEl = document.getElementById('loading-status');
+            const tbody = document.getElementById('humidity-tbody');
+            
+            // 提示：請將下方網址替換為您在 CSDI 該圖層取得的 ArcGIS REST 查詢網址（結尾加上 &f=geojson）
+            // 例如：https://portal.csdi.gov.hk/server/rest/services/.../MapServer/0/query?where=1%3D1&outFields=*&f=geojson
+            const csdiGeoJsonUrl = 'https://static.csdi.gov.hk/csdi-webpage/download/04db0982a43f561db9e922cd082b09f9/geojson';
 
-        async function fetchLatestWeather() {
-            // 抓取最近的記錄（確保涵蓋所有站點的最新一筆）
-            const url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}?maxRecords=50&sort[0][field]=Datetime&sort[0][direction]=desc`;
+            // 若您尚未填入真實網址，此處先以提示代替
+            if (csdiGeoJsonUrl.includes('請在此填入')) {
+                statusEl.textContent = '請先在程式碼中填入 CSDI 該圖層的 GeoJSON API 網址。';
+                tbody.innerHTML = `<tr><td colspan="3" class="py-6 px-6 text-center text-gray-400">請設定 API 網址以載入數據</td></tr>`;
+                return;
+            }
 
             try {
-                const response = await fetch(url, {
-                    headers: { 'Authorization': `Bearer ${TOKEN}` }
-                });
-                const data = await response.json();
-
-                // 用一個物件來儲存每個站點「最新」的那筆數據（避免重複顯示舊紀錄）
-                const latestDataByStation = {};
+                const response = await fetch(csdiGeoJsonUrl);
+                if (!response.ok) throw new Error('網絡請求失敗');
                 
-                data.records.forEach(record => {
-                    const station = record.fields['Automatic Weather Station'];
-                    const humidity = record.fields['Relative Humidity(percent)'];
-                    const time = record.fields['Datetime'];
-
-                    // 因為是以時間由新到舊排序，如果這個站還沒被存過，就記錄下來
-                    if (station && !latestDataByStation[station]) {
-                        latestDataByStation[station] = { humidity, time };
-                    }
-                });
-
-                // 渲染到網頁上
-                const container = document.getElementById('station-container');
-                container.innerHTML = '';
-
-                for (const [station, info] of Object.entries(latestDataByStation)) {
-                    container.innerHTML += `
-                        <div class="station-card">
-                            <h3>${station}</h3>
-                            <p>相對濕度：<strong>${info.humidity}%</strong></p>
-                            <small>更新時間：${info.time}</small>
-                        </div>
-                    `;
+                const data = await response.json();
+                
+                if (!data.features || data.features.length === 0) {
+                    statusEl.textContent = '未能取得有效的氣象站數據。';
+                    return;
                 }
 
+                tbody.innerHTML = '';
+                let count = 0;
+
+                // 遍歷每一個站點的特徵 (features)
+                data.features.forEach(feature => {
+                    const props = feature.properties;
+                    
+                    // 根據 CSDI 實際欄位名稱調整（通常包含 station_name / name 及 humidity / value）
+                    const stationName = props.EN_NAME || props.STATION_NAME || props.name || '未知站點';
+                    const humidityVal = props.HUMIDITY !== undefined ? `${props.HUMIDITY}%` : (props.value !== undefined ? `${props.value}%` : '-');
+                    const timeVal = props.DATETIME || props.time || new Date().toLocaleString();
+
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-gray-50 transition-colors';
+                    tr.innerHTML = `
+                        <td class="py-3 px-6 font-medium text-gray-900">${stationName}</td>
+                        <td class="py-3 px-6 text-blue-600 font-semibold">${humidityVal}</td>
+                        <td class="py-3 px-6 text-gray-500">${timeVal}</td>
+                    `;
+                    tbody.appendChild(tr);
+                    count++;
+                });
+
+                statusEl.textContent = `成功載入 ${count} 個氣象站的實時相對濕度數據`;
+
             } catch (error) {
-                console.error('讀取失敗:', error);
-                document.getElementById('station-container').innerHTML = '無法載入氣象資料。';
+                console.error(error);
+                statusEl.textContent = '無法載入數據，可能是因為 CORS 跨域限制或網址錯誤。';
             }
         }
 
-        fetchLatestWeather();
+        // 頁面載入時執行
+        fetchHumidityData();
     </script>
 </body>
 </html>
