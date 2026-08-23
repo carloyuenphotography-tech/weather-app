@@ -30,7 +30,9 @@ TARGET_STATIONS = [
     "滘西洲", "Kau Sai Chau",
     "坪洲", "Peng Chau",
     "昂坪", "Ngong Ping",
-    "北潭涌", "Pak Tam Chung"
+    "北潭涌", "Pak Tam Chung",
+    "香港公園", "HK Park",
+    "山頂", "The Peak"
 ]
 
 def fetch_single_station(feature, val_type):
