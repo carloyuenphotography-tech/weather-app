@@ -136,6 +136,7 @@ def get_weather():
         
         combined_result = []
         humidities = []
+        station_humid_list = []
         station_temps = {}
         hko_temp = None
 
@@ -150,12 +151,12 @@ def get_weather():
             t_val = t_info.get('value')
             h_val = h_info.get('value')
 
-            # 若無數據則回傳空字串，不顯示「資料未明」
             temp_str = f"{t_val}°C" if t_val is not None else ""
             humid_str = f"{h_val}%" if h_val is not None else ""
 
             if h_val is not None:
                 humidities.append(h_val)
+                station_humid_list.append({"station": station, "humidity": h_val})
 
             if t_val is not None:
                 station_temps[station] = t_val
@@ -174,6 +175,10 @@ def get_weather():
         avg_humid = sum(humidities) / len(humidities) if humidities else 0
         count_95 = sum(1 for h in humidities if h >= 95)
         count_90 = sum(1 for h in humidities if h >= 90)
+
+        # 💡 依照濕度由高到低排序，並取前 5 名
+        station_humid_list.sort(key=lambda x: x["humidity"], reverse=True)
+        top_5_humid = station_humid_list[:5]
 
         cloud_sea_status = "條件未成熟"
         if avg_humid >= 95 or count_95 >= 2:
@@ -222,6 +227,7 @@ def get_weather():
                 "avg_humidity": round(avg_humid, 1),
                 "count_95": count_95,
                 "cloud_sea_status": cloud_sea_status,
+                "top_humid_stations": top_5_humid,  # 傳遞最高 5 站資料
                 "tms_diff": tms_diff_str,
                 "tc_diff": tc_diff_str,
                 "inversion_status": inversion_status,
