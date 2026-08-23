@@ -12,29 +12,35 @@ CORS(app)
 TEMP_ZIP_URL = "https://static.csdi.gov.hk/csdi-webpage/download/f8e1bd259b4d58218b8ea5a07b874472/geojson"
 HUMIDITY_ZIP_URL = "https://static.csdi.gov.hk/csdi-webpage/download/04db0982a43f561db9e922cd082b09f9/geojson"
 
-# 🎯 精選核心氣象站對應表（鍵是您想要的標準繁體中文名，值是可能出現的關鍵字）
-TARGET_STATIONS = [
-    "香港天文台", "HK Observatory",
-    "大帽山", "Tai Mo Shan",
-    "大老山", "Tate's Cairn",
-    "打鼓嶺", "Ta Kwu Ling",
-    "石崗", "Shek Kong",
-    "西貢", "Sai Kung",
-    "濕地公園", "Wetland Park",
-    "沙田", "Sha Tin",
-    "屯門", "Tuen Mun",
-    "赤鱲角", "Chek Lap Kok",
-    "長洲", "Cheung Chau",
-    "將軍澳", "Tseung Kwan O",
-    "九龍城", "Kowloon City",
-    "橫瀾島", "Waglan Island",
-    "滘西洲", "Kau Sai Chau",
-    "坪洲", "Peng Chau",
-    "昂坪", "Ngong Ping",
-    "北潭涌", "Pak Tam Chung",
-    "香港公園", "HK Park",
-    "山頂", "The Peak"
-]
+# 🎯 英文站名與繁體中文顯示名稱的對照表（最穩定、絕對不會抓不到）
+STATION_NAME_MAP = {
+    "HK Observatory": "香港天文台",
+    "Tai Mo Shan": "大帽山",
+    "Tate's Cairn": "大老山",
+    "Ta Kwu Ling": "打鼓嶺",
+    "Shek Kong": "石崗",
+    "Sai Kung": "西貢",
+    "Wetland Park": "濕地公園",
+    "Sha Tin": "沙田",
+    "Tuen Mun": "屯門",
+    "Chek Lap Kok": "赤鱲角",
+    "Cheung Chau": "長洲",
+    "Tseung Kwan O": "將軍澳",
+    "Kowloon City": "九龍城",
+    "Waglan Island": "橫瀾島",
+    "Kau Sai Chau": "滘西洲",
+    "King's Park": "京士柏",
+    "Lau Fau Shan": "流浮山",
+    "Pak Tam Chung": "北潭湧",
+    "Peng Chau": "坪洲",
+    "Shau Kei Wan": "筲箕灣",
+    "Sheung Shui": "上水",
+    "Tai Po": "大埔",
+    "Tai Lung": "大龍",
+    "Clear Water Bay": "清水灣",
+    "Hong Kong Park": "香港公園",
+    "Kai Tak Runway Park": "啟德跑道公園"
+}
 
 def fetch_single_station(feature, val_type):
     try:
@@ -45,19 +51,18 @@ def fetch_single_station(feature, val_type):
         lng = coords[0] if len(coords) > 0 else None
         lat = coords[1] if len(coords) > 1 else None
 
-        station_name_tc = props.get('AutomaticWeatherStation_tc') or ''
-        station_name_en = props.get('AutomaticWeatherStation_en') or ''
-        raw_name = f"{station_name_tc} {station_name_en}"
-
-        # 匹配標準繁體中文站名
-        matched_station_name = None
-        for cn_name, keywords in TARGET_STATIONS.items():
-            if any(kw.lower() in raw_name.lower() for kw in keywords):
-                matched_station_name = cn_name
+        en_name = props.get('AutomaticWeatherStation_en') or props.get('STATION_NAME') or ''
+        
+        # 尋找對應的繁體中文名稱
+        matched_name = None
+        for eng_key, tc_val in STATION_NAME_MAP.items():
+            if eng_key.lower() in en_name.lower():
+                matched_name = tc_val
                 break
-
-        if not matched_station_name:
-            return None, None
+        
+        # 如果不在對應表內，就直接用英文原名
+        if not matched_name:
+            matched_name = en_name or props.get('name') or '未知站點'
 
         data_url = props.get('Data_url')
         val_str = None
@@ -89,7 +94,7 @@ def fetch_single_station(feature, val_type):
             except Exception:
                 pass
 
-        return matched_station_name, {
+        return matched_name, {
             "value": val_str,
             "time": timestamp,
             "lat": lat,
@@ -137,7 +142,7 @@ def home():
 def get_weather():
     try:
         temp_data = fetch_station_data(TEMP_ZIP_URL, 'temp')
-        humid_data = fetch_station_data(HUMIDITY_ZIP_URL, 'geojson' if False else 'humidity')
+        humid_data = fetch_station_data(HUMIDITY_ZIP_URL, 'humidity')
 
         all_stations = set(list(temp_data.keys()) + list(humid_data.keys()))
         
