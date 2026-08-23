@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>香港霞光預測：真實衛星與雙視角分析</title>
+  <title>香港霞光預測：光通道與曙暮光分析</title>
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
@@ -30,20 +30,28 @@
 
     .app-container {
       width: 100%; max-width: 440px;
-      display: flex; flex-direction: column; gap: 12px;
+      display: flex; flex-direction: column; gap: 10px;
       padding-bottom: 30px;
     }
 
     h2 { font-size: 1.1rem; margin: 2px 0; text-align: center; }
 
-    .tab-group { display: flex; background: #252535; padding: 4px; border-radius: 10px; }
+    .tab-group { display: flex; background: #252535; padding: 4px; border-radius: 10px; gap: 4px; }
     .tab-btn {
       flex: 1; padding: 8px; border: none; background: transparent;
-      color: var(--text-sub); font-weight: 600; font-size: 0.9rem;
+      color: var(--text-sub); font-weight: 600; font-size: 0.85rem;
       border-radius: 6px; cursor: pointer; transition: all 0.2s;
     }
     .tab-btn.active-sunrise { background: var(--accent-blue); color: #fff; }
     .tab-btn.active-sunset { background: var(--accent-orange); color: #fff; }
+
+    .mode-sub-group { display: flex; background: #1f1f2e; padding: 3px; border-radius: 8px; margin-top: 6px; }
+    .mode-sub-btn {
+      flex: 1; padding: 6px; border: none; background: transparent;
+      color: var(--text-sub); font-weight: 600; font-size: 0.8rem;
+      border-radius: 6px; cursor: pointer; transition: all 0.2s;
+    }
+    .mode-sub-btn.active { background: #3a3a52; color: #fff; }
 
     .card {
       background: var(--card-bg); border-radius: 12px;
@@ -63,29 +71,21 @@
     .section-title { font-weight: bold; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center;}
     .badge-macro { background: #333; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; color: #ddd; }
 
-    /* 衛星即時數據專屬卡片樣式 */
-    .satellite-box {
+    .analysis-box {
       background: rgba(0, 180, 216, 0.08);
-      border: 1px solid var(--accent-blue);
-      border-radius: 10px;
+      border-left: 3px solid var(--accent-blue);
       padding: 10px;
-      margin-top: 8px;
-    }
-
-    .notice-box {
-      background: rgba(255, 165, 0, 0.08);
-      border-left: 3px solid #ffa500;
-      padding: 8px 10px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      color: #d1d1d6;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: #e0e0e6;
       margin-top: 10px;
-      line-height: 1.4;
+      line-height: 1.5;
     }
+    .analysis-title { font-weight: bold; color: var(--accent-blue); margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
 
     .action-btn {
       width: 100%; padding: 10px; border: none; border-radius: 8px;
-      font-weight: bold; font-size: 0.95rem; cursor: pointer; color: #fff;
+      font-weight: bold; font-size: 0.95rem; cursor: pointer; color: #fff; margin-top: 6px;
     }
     .btn-sunset { background: var(--accent-orange); }
     .btn-sunrise { background: var(--accent-blue); }
@@ -115,24 +115,20 @@
 <body>
 
 <div class="app-container">
-  <h2>🌅 霞光預測：真實衛星與雙視角分析</h2>
+  <h2>🌅 霞光預測：光通道與曙暮光分析</h2>
 
   <div class="tab-group">
     <button id="btn-tab-sunset" class="tab-btn active-sunset" onclick="switchMode('sunset')">🌇 今日日落</button>
     <button id="btn-tab-sunrise" class="tab-btn" onclick="switchMode('sunrise')">🌅 明日日出</button>
   </div>
 
-  <div class="card">
-    <button id="calc-btn" class="action-btn btn-sunset" onclick="calculateAll()">🔍 讀取即時衛星與預測視角</button>
-    
-    <!-- 🛰️ 來自 Render 後端的真實衛星數據顯示專區 -->
-    <div class="satellite-box">
-      <div style="font-weight: bold; font-size: 0.85rem; color: var(--accent-blue); margin-bottom: 4px;">
-        🛰️ 葵花 9 號真實衛星即時觀測 (香港點)
-      </div>
-      <div id="sat-info" style="font-size: 0.8rem; color: var(--text-sub);">正在連線 Render 後端取得衛星數據...</div>
-    </div>
+  <div class="mode-sub-group">
+    <button id="mode-current" class="mode-sub-btn active" onclick="switchDataSource('current')">⚡ 即時模型雲況</button>
+    <button id="mode-forecast" class="mode-sub-btn" onclick="switchDataSource('forecast')">🎯 日落/日出時刻預報</button>
+  </div>
 
+  <div class="card">
+    <button id="calc-btn" class="action-btn btn-sunset" onclick="calculateAll()">🔍 執行光通道與雲況分析</button>
     <div id="astro-info" style="margin-top: 6px;"></div>
   </div>
 
@@ -142,13 +138,14 @@
       <span>🔎 近場前景分析 (0-150km)</span>
       <span class="badge-macro">每 15km 採樣</span>
     </div>
-    <div style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;">決定陽光是否會在近距離被低層厚雲遮擋</div>
+    <div id="micro-subtitle" style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;">決定黃金時刻 (Golden Hour) 直射光是否被阻擋</div>
     <div id="windy-map-micro" class="map-micro"></div>
     <div class="chart-container">
       <canvas id="kProfileChartMicro"></canvas>
     </div>
-    <div class="notice-box">
-      💡 <b>注意事項：</b>底圖結合 Windy 即時衛星圖。近場數值基於預報模型換算，可用於與上方「真實衛星觀測點」互相交叉比對。
+    <div id="micro-analysis" class="analysis-box">
+      <div class="analysis-title">📊 近場光通道評估</div>
+      <div id="micro-text">正在分析 0-150km 通道狀況...</div>
     </div>
   </div>
 
@@ -158,13 +155,14 @@
       <span>🔭 遠場背景分析 (0-1000km)</span>
       <span class="badge-macro">每 50km 採樣</span>
     </div>
-    <div style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;">決定遠方是否有高層對流冰晶雲承接霞光</div>
+    <div id="macro-subtitle" style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;">決定黃昏後光輝 (Afterglow) 與各階段 Twilight 表現</div>
     <div id="windy-map-macro" class="map-macro"></div>
     <div class="chart-container">
       <canvas id="kProfileChartMacro"></canvas>
     </div>
-    <div class="notice-box">
-      💡 <b>注意事項：</b>遠距離數值存在空間平滑化誤差，主要用來觀察遠端雲系與破口的相對趨勢。
+    <div id="macro-analysis" class="analysis-box">
+      <div class="analysis-title">✨ 曙暮光 (Twilight) 階段評估</div>
+      <div id="macro-text">正在分析 150-1000km 遠端反射狀況...</div>
     </div>
   </div>
 
@@ -178,12 +176,10 @@
   const HK_LAT = 22.3193;
   const HK_LON = 114.1694;
   let currentMode = 'sunset';
+  let dataSourceMode = 'current';
   
   let mapMacro, layerGroupMacro;
   let mapMicro, layerGroupMicro;
-
-  // ⚠️ 請將下方網址替換為你在 Render 得到的真實後端網址
-  const RENDER_API_URL = "https://myweatherapp-whej.onrender.com/api/satellite-k";
 
   function initMaps() {
     mapMacro = L.map('windy-map-macro', { zoomControl: true, attributionControl: false }).setView([HK_LAT, HK_LON], 5);
@@ -204,6 +200,23 @@
     document.getElementById('btn-tab-sunset').className = mode === 'sunset' ? "tab-btn active-sunset" : "tab-btn";
     document.getElementById('btn-tab-sunrise').className = mode === 'sunrise' ? "tab-btn active-sunrise" : "tab-btn";
     document.getElementById('calc-btn').className = `action-btn ${mode === 'sunset' ? 'btn-sunset' : 'btn-sunrise'}`;
+    
+    // 動態切換副標題用字
+    if (mode === 'sunset') {
+      document.getElementById('micro-subtitle').innerText = "決定日落前黃金時刻 (Golden Hour) 直射光是否被阻擋";
+      document.getElementById('macro-subtitle').innerText = "決定黃昏後光輝 (Afterglow) 與各階段 Twilight 表現";
+    } else {
+      document.getElementById('micro-subtitle').innerText = "決定日出前晨曦與黃金時刻 (Golden Hour) 直射光是否被阻擋";
+      document.getElementById('macro-subtitle').innerText = "決定黎明前曙暮光 (Pre-sunrise Twilight) 與高空雲反射表現";
+    }
+
+    calculateAll();
+  }
+
+  function switchDataSource(source) {
+    dataSourceMode = source;
+    document.getElementById('mode-current').className = source === 'current' ? "mode-sub-btn active" : "mode-sub-btn";
+    document.getElementById('mode-forecast').className = source === 'forecast' ? "mode-sub-btn active" : "mode-sub-btn";
     calculateAll();
   }
 
@@ -215,55 +228,47 @@
     return [lat2 / rad, lon2 / rad];
   }
 
-  // 異步呼叫 Render 後端取得真實 NOAA 衛星數據
-  async function fetchRealSatelliteData() {
-    const satDiv = document.getElementById('sat-info');
+  async function fetchKValue(lat, lon, targetDate) {
     try {
-      const response = await fetch(RENDER_API_URL);
-      if (!response.ok) throw new Error('後端連線失敗');
-      const data = await response.json();
-      
-      if (data.status === "Success") {
-        satDiv.innerHTML = `
-          <div style="display: flex; justify-content: space-between;">
-            <span>衛星時間: <b>${data.timestamp}</b></span>
-            <span>實測 K 值: <b style="color:var(--accent-blue); font-size:0.95rem;">${data.k_value.toFixed(1)} K</b> (${data.celsius} °C)</span>
-          </div>
-        `;
-      } else {
-        satDiv.innerHTML = `<span style="color: #ff6b35;">衛星數據暫時未能在 AWS 生成，請稍後再試</span>`;
-      }
-    } catch (e) {
-      satDiv.innerHTML = `<span style="color: #ff6b35;">無法連線至 Render 後端 API (請檢查網址或伺服器是否在休眠)</span>`;
-    }
-  }
+      let url = dataSourceMode === 'current' 
+        ? `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,cloud_cover`
+        : `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,cloud_cover`;
 
-  async function fetchKValue(lat, lon) {
-    try {
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,cloud_cover`;
       const res = await fetch(url);
       if (!res.ok) throw new Error('API failed');
       const data = await res.json();
-      const curr = data.current;
 
-      const groundK = (curr && curr.temperature_2m !== undefined) ? curr.temperature_2m + 273.15 : 295.0;
-      const cloudCover = (curr && curr.cloud_cover !== undefined) ? curr.cloud_cover : 0;
+      let groundK = 295.0, cloudCover = 0, timeStr = "未知時間";
+
+      if (dataSourceMode === 'current') {
+        const curr = data.current;
+        groundK = curr.temperature_2m + 273.15;
+        cloudCover = curr.cloud_cover;
+        timeStr = new Date(curr.time + 'Z').toLocaleString('zh-HK', { timeZone: 'Asia/Hong_Kong', hour12: false });
+      } else {
+        const hourly = data.hourly;
+        let targetMs = targetDate.getTime(), closestIdx = 0, minDiff = Infinity;
+        for (let i = 0; i < hourly.time.length; i++) {
+          let diff = Math.abs(new Date(hourly.time[i] + 'Z').getTime() - targetMs);
+          if (diff < minDiff) { minDiff = diff; closestIdx = i; }
+        }
+        groundK = hourly.temperature_2m[closestIdx] + 273.15;
+        cloudCover = hourly.cloud_cover[closestIdx];
+        timeStr = new Date(hourly.time[closestIdx] + 'Z').toLocaleString('zh-HK', { timeZone: 'Asia/Hong_Kong', hour12: false });
+      }
 
       let kVal = groundK - (cloudCover * 0.15);
       if (kVal < 230) kVal = 230;
 
-      return parseFloat(kVal.toFixed(1));
+      return { k: parseFloat(kVal.toFixed(1)), time: timeStr };
     } catch (e) {
-      return 282.0;
+      return { k: 282.0, time: '讀取失敗' };
     }
   }
 
   async function calculateAll() {
     layerGroupMacro.clearLayers();
     layerGroupMicro.clearLayers();
-
-    // 觸發真實衛星 API 讀取
-    fetchRealSatelliteData();
 
     const now = new Date();
     let targetTime, azimuthDeg;
@@ -282,12 +287,14 @@
     const lineStyle = currentMode === 'sunset' ? '#ff6b35' : '#00b4d8';
     document.documentElement.style.setProperty('--accent-color', lineStyle);
 
-    const fetchTimeString = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+    const hkSample = await fetchKValue(HK_LAT, HK_LON, targetTime);
+    const modeTitle = dataSourceMode === 'current' ? '⚡ 即時模型雲況' : '🎯 日落/日出時刻預報';
 
     document.getElementById('astro-info').innerHTML = `
+      <div class="data-row"><span>數據模式:</span> <b style="color:var(--accent-color);">${modeTitle}</b></div>
       <div class="data-row"><span>目標時間:</span> <b>${targetTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</b></div>
       <div class="data-row"><span>視線方位角:</span> <b>${azimuthDeg.toFixed(1)}°</b></div>
-      <div class="data-row" style="color: var(--text-sub);"><span>模型讀取時間:</span> <b>${fetchTimeString}</b></div>
+      <div class="data-row"><span>數據有效時間 (HKT):</span> <b>${hkSample.time}</b></div>
     `;
 
     [layerGroupMacro, layerGroupMicro].forEach(layer => {
@@ -299,21 +306,22 @@
     const microDistances = [];
     for (let d = 0; d <= 150; d += 15) microDistances.push(d);
     
-    const kValuesMicro = [];
+    let kValuesMicro = [], microSum = 0;
     const polylinePointsMicro = [[HK_LAT, HK_LON]];
 
     for (let d of microDistances) {
       const point = getDestinationPoint(HK_LAT, HK_LON, azimuthDeg, d);
       if (d > 0) polylinePointsMicro.push(point);
-      const kVal = await fetchKValue(point[0], point[1]);
-      kValuesMicro.push(kVal);
+      const res = await fetchKValue(point[0], point[1], targetTime);
+      kValuesMicro.push(res.k);
+      microSum += res.k;
 
       if ([30, 60, 90, 120, 150].includes(d)) {
         L.circleMarker(point, { color: lineStyle, fillColor: '#ffffff', fillOpacity: 1, radius: 4, weight: 2 }).addTo(layerGroupMicro);
         L.marker(point, {
           icon: L.divIcon({
             className: 'pin-label-clean',
-            html: `${d}km | ${kVal.toFixed(1)} K`,
+            html: `${d}km | ${res.k.toFixed(1)} K`,
             iconSize: [80, 18],
             iconAnchor: [40, 22]
           })
@@ -325,18 +333,33 @@
     mapMicro.fitBounds(L.polyline(polylinePointsMicro).getBounds(), { padding: [25, 25] });
     renderChart('kProfileChartMicro', microDistances, kValuesMicro, lineStyle, 250, 310);
 
+    // 動態產生近場分析文字 (區分日落與日出)
+    let avgMicro = microSum / kValuesMicro.length;
+    let microText = "";
+    const isSunset = (currentMode === 'sunset');
+    const actionTimeText = isSunset ? "太陽下山前" : "太陽升起前";
+
+    if (avgMicro < 285) {
+      microText = `⚠️ <b>近場（0-150km）均溫偏低（約 ${avgMicro.toFixed(1)} K）</b>：顯示近距離低層厚雲較多。${actionTimeText}（Golden Hour）直射光可能受阻，需留意本地地平線附近是否有局部破口。`;
+    } else {
+      microText = `✅ <b>近場（0-150km）均溫偏高（約 ${avgMicro.toFixed(1)} K）</b>：近場光通道通暢，${actionTimeText}（Golden Hour）直射光可以順利推進，初期視野清晰。`;
+    }
+    document.getElementById('micro-text').innerHTML = microText;
+
     // 2. 宏觀區 (0-1000km)
     const macroDistances = [];
     for (let d = 0; d <= 1000; d += 50) macroDistances.push(d);
     
-    const kValuesMacro = [];
+    let kValuesMacro = [], k500 = 290, k1000 = 290;
     const polylinePointsMacro = [[HK_LAT, HK_LON]];
 
     for (let d of macroDistances) {
       const point = getDestinationPoint(HK_LAT, HK_LON, azimuthDeg, d);
       if (d > 0) polylinePointsMacro.push(point);
-      const kVal = await fetchKValue(point[0], point[1]);
-      kValuesMacro.push(kVal);
+      const res = await fetchKValue(point[0], point[1], targetTime);
+      kValuesMacro.push(res.k);
+      if (d === 500) k500 = res.k;
+      if (d === 1000) k1000 = res.k;
     }
 
     L.polyline(polylinePointsMacro, { color: lineStyle, weight: 3.5, dashArray: '6, 8' }).addTo(layerGroupMacro);
@@ -349,13 +372,13 @@
 
     for (let item of macroKeyTargets) {
       const point = getDestinationPoint(HK_LAT, HK_LON, azimuthDeg, item.dist);
-      const kVal = await fetchKValue(point[0], point[1]);
+      const res = await fetchKValue(point[0], point[1], targetTime);
 
       L.circleMarker(point, { color: lineStyle, fillColor: '#ffffff', fillOpacity: 1, radius: 5, weight: 2 }).addTo(layerGroupMacro);
       L.marker(point, {
         icon: L.divIcon({
           className: 'pin-label-clean',
-          html: `${kVal.toFixed(1)} K`,
+          html: `${res.k.toFixed(1)} K`,
           iconSize: [60, 18],
           iconAnchor: item.anchor
         })
@@ -365,6 +388,20 @@
     mapMacro.invalidateSize();
     mapMacro.fitBounds(L.polyline(polylinePointsMacro).getBounds(), { padding: [30, 30] });
     renderChart('kProfileChartMacro', macroDistances, kValuesMacro, lineStyle, 240, 310);
+
+    // 動態產生遠場分析文字 (區分日落與日出)
+    let macroText = "";
+    const twilightPhase = isSunset ? "黃昏後光輝（Afterglow）" : "黎明前曙暮光（Pre-sunrise Twilight）";
+    const eventContext = isSunset ? "日落後" : "日出前";
+
+    if (k500 < 292) {
+      macroText = `❌ <b>500km 處偏低（${k500.toFixed(1)} K < 292 K）</b>：中場光通道有明顯雲層阻塞，${twilightPhase}階段可能較弱或沒有明顯表現。`;
+    } else if (k1000 > 292) {
+      macroText = `✨ <b>1000km 處偏高（${k1000.toFixed(1)} K > 292 K）</b>：遠端背景通透，${eventContext}相當長的一段時間內，遠方依然有機會接收到殘日或晨曦反照，維持精彩天色。`;
+    } else {
+      macroText = `🌥️ <b>遠場（500-1000km）雲況交錯</b>：中遠場有雲層分佈，具備反射霞光的條件，但需觀察局部是否有雲隙讓光線穿透。`;
+    }
+    document.getElementById('macro-text').innerHTML = macroText;
   }
 
   function renderChart(canvasId, labels, dataPoints, color, yMin, yMax) {
@@ -398,7 +435,6 @@
     });
   }
 
-  // 頁面載入後自動執行
   setTimeout(calculateAll, 300);
 </script>
 </body>
