@@ -16,6 +16,26 @@
             #map { height: 620px; }
         }
 
+        /* 💡 藍色呼吸燈動畫（雲海條件達成時觸發） */
+        @keyframes breathing-blue {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); border-color: #3b82f6; }
+            50% { box-shadow: 0 0 16px 4px rgba(59, 130, 246, 0.65); border-color: #60a5fa; }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); border-color: #3b82f6; }
+        }
+        .breathing-blue {
+            animation: breathing-blue 2s infinite ease-in-out;
+        }
+
+        /* 💡 紫色呼吸燈動畫（探測到逆溫層時觸發） */
+        @keyframes breathing-purple {
+            0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4); border-color: #a855f7; }
+            50% { box-shadow: 0 0 16px 4px rgba(168, 85, 247, 0.65); border-color: #c084fc; }
+            100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4); border-color: #a855f7; }
+        }
+        .breathing-purple {
+            animation: breathing-purple 2s infinite ease-in-out;
+        }
+
         /* 地圖上的浮動氣象針標設計 */
         .weather-pin {
             position: relative;
@@ -48,25 +68,25 @@
     <!-- 主容器 -->
     <div class="max-w-6xl mx-auto p-3 sm:p-4 md:p-8 space-y-3 sm:space-y-4">
         
-        <!-- 頂部智慧分析面板（高密度壓縮版） -->
+        <!-- 頂部智慧分析面板 -->
         <div class="bg-white shadow-md rounded-xl p-3 sm:p-5 space-y-3 border border-slate-200">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-1 border-b border-slate-100">
                 <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">香港微氣候即時監測</h1>
                 <p class="text-[11px] text-slate-400 mt-0.5 sm:mt-0" id="loading-status">連接後端載入中...</p>
             </div>
             
-            <!-- 壓縮後的 3 欄式指標卡片 -->
+            <!-- 指標卡片格 -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
                 
-                <!-- 1. 全港濕度與雲海 -->
-                <div class="bg-blue-50/70 border border-blue-200 rounded-lg p-2.5 sm:p-3 shadow-sm">
+                <!-- 1. 全港濕度與雲海卡片（符合條件時會發出藍色呼吸燈） -->
+                <div id="cloud-sea-card" class="bg-blue-50/70 border border-blue-200 rounded-lg p-2.5 sm:p-3 shadow-sm transition-all duration-500">
                     <div class="text-[11px] text-blue-600 font-semibold">全港平均濕度</div>
                     <div class="text-base sm:text-lg font-bold text-blue-900 mt-0.5" id="stat-avg-humid">--</div>
                     <div class="text-[10px] sm:text-[11px] text-blue-700 mt-0.5 truncate" id="stat-cloud-sea">評估中...</div>
                 </div>
 
-                <!-- 2. 高地溫差（大帽山 & 大老山合併卡片，極大化節省空間） -->
-                <div class="bg-purple-50/70 border border-purple-200 rounded-lg p-2.5 sm:p-3 shadow-sm">
+                <!-- 2. 高地溫差卡片（當出現逆溫時會發出紫色呼吸燈） -->
+                <div id="inversion-card" class="bg-purple-50/70 border border-purple-200 rounded-lg p-2.5 sm:p-3 shadow-sm transition-all duration-500">
                     <div class="text-[11px] text-purple-600 font-semibold">高地溫差 (vs 平地)</div>
                     <div class="flex justify-between items-center mt-1 text-xs sm:text-sm font-bold text-purple-900">
                         <span>大帽山: <span id="stat-tms" class="text-purple-700">--</span></span>
@@ -75,7 +95,7 @@
                     <div class="text-[10px] text-purple-700 mt-1 truncate" id="stat-inversion">逆溫分析中...</div>
                 </div>
 
-                <!-- 3. 內陸輻射冷卻 -->
+                <!-- 3. 內陸輻射冷卻卡片 -->
                 <div class="bg-amber-50/70 border border-amber-200 rounded-lg p-2.5 sm:p-3 shadow-sm">
                     <div class="text-[11px] text-amber-600 font-semibold">內陸輻射冷卻</div>
                     <div class="text-xs sm:text-sm font-bold text-amber-900 mt-1.5 truncate" id="stat-cooling">分析中...</div>
@@ -120,13 +140,31 @@
                     return;
                 }
 
-                // 填入高度壓縮的分析面板
+                // 填入文字數據
                 document.getElementById('stat-avg-humid').textContent = `${stats.avg_humidity || 0}% (${stats.count_95 || 0}站≥95%)`;
                 document.getElementById('stat-cloud-sea').textContent = stats.cloud_sea_status || '未知';
                 document.getElementById('stat-tms').textContent = stats.tms_diff || '資料未明';
                 document.getElementById('stat-tc').textContent = stats.tc_diff || '資料未明';
                 document.getElementById('stat-inversion').textContent = stats.inversion_status || '未知';
                 document.getElementById('stat-cooling').textContent = stats.radiation_cooling || '未知';
+
+                // 💡 智慧呼吸燈觸發邏輯
+                const cloudCard = document.getElementById('cloud-sea-card');
+                const inversionCard = document.getElementById('inversion-card');
+
+                // 條件 A：若雲海狀態為「極佳」或「良好」，觸發藍色呼吸燈
+                if (stats.cloud_sea_status && (stats.cloud_sea_status.includes('極佳') || stats.cloud_sea_status.includes('良好'))) {
+                    cloudCard.classList.add('breathing-blue');
+                } else {
+                    cloudCard.classList.remove('breathing-blue');
+                }
+
+                // 條件 B：若探測到逆溫現象（包含 ⚠️ 符號），觸發紫色呼吸燈
+                if (stats.inversion_status && stats.inversion_status.includes('⚠️')) {
+                    inversionCard.classList.add('breathing-purple');
+                } else {
+                    inversionCard.classList.remove('breathing-purple');
+                }
 
                 let markerCount = 0;
 
