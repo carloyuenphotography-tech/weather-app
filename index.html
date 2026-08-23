@@ -704,6 +704,19 @@
             <div class="solar-term-info" id="vis-update-time" style="margin-top: 12px;">💡 能見度數據更新時間：讀取中...</div>
         </div>
 
+        <!-- 7.1 天氣警告提示 (新加入) -->
+        <div class="card">
+            <div class="card-header">
+                <h2>天氣警告提示</h2>
+                <a href="https://www.hko.gov.hk/tc/wxinfo/dailywx/wxwarntoday.htm" class="btn-link" target="_blank">天文台警告 ↗</a>
+            </div>
+            <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 12px; text-align: center;">香港天文台現時生效警告概要</div>
+            <div id="warning-summary-container" style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; font-size: 0.95rem; color: #334155; line-height: 1.5; min-height: 80px; display: flex; align-items: center; justify-content: center; text-align: center;">
+                正在檢查天氣警告...
+            </div>
+            <div class="solar-term-info" id="warning-update-time" style="margin-top: 12px;">💡 資料來源：香港天文台 warnsum API</div>
+        </div>
+
         <!-- 8. 九天天氣預報 -->
         <div class="card large-card">
             <div class="card-header">

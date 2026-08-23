@@ -149,6 +149,48 @@ function initAqiMap() {
     }).addTo(aqiMap);
 }
 
+// 讀取天文台天氣警告概要 (warnsum API)
+async function fetchWeatherWarnings() {
+    const container = document.getElementById('warning-summary-container');
+    const timeEl = document.getElementById('warning-update-time');
+    try {
+        const res = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warnsum&lang=tc');
+        if (!res.ok) throw new Error('網絡請求失敗');
+        const data = await res.json();
+        
+        let activeWarnings = [];
+        // HKO warnsum JSON 格式通常為物件，各個 key 代表警告代碼，內含 details 或 info
+        for (let key in data) {
+            if (data.hasOwnProperty(key)) {
+                let warnObj = data[key];
+                // 若包含 name 或 屬於生效中狀態
+                if (warnObj && (warnObj.name || warnObj.actionCode)) {
+                    let name = warnObj.name || key;
+                    activeWarnings.push(name);
+                }
+            }
+        }
+
+        if (activeWarnings.length > 0) {
+            container.style.justifyContent = 'flex-start';
+            container.style.textAlign = 'left';
+            container.innerHTML = `<div style="color: #e11d48; font-weight: bold; margin-bottom: 6px;">⚠️ 現時生效天氣警告：</div>` +
+                                  `<ul style="margin: 0; padding-left: 20px;">` +
+                                  activeWarnings.map(w => `<li>${w}</li>`).join('') +
+                                  `</ul>`;
+        } else {
+            container.style.justifyContent = 'center';
+            container.style.textAlign = 'center';
+            container.innerHTML = `<span style="color: #166534; font-weight: bold;">🟢 目前沒有生效的天氣警告</span>`;
+        }
+        timeEl.innerHTML = `💡 天氣警告狀態更新正常`;
+    } catch (err) {
+        container.style.justifyContent = 'center';
+        container.style.textAlign = 'center';
+        container.innerHTML = `<span style="color: #991b1b;">無法載入天氣警告資料</span>`;
+    }
+}
+
 async function fetchNineDayForecast() {
     const container = document.getElementById('fnd-container');
     const generalEl = document.getElementById('fnd-general-situation');
@@ -563,6 +605,7 @@ fetchNineDayForecast();
 fetchTideData();
 fetchRhrReadData();
 loadLunarCalendarData();
+fetchWeatherWarnings(); // 初始化載入天氣警告
 
 setInterval(updateTimestamp, 1000);
 
@@ -613,10 +656,6 @@ async function fetchRhrReadData() {
             if (data.temperature && data.temperature.data) {
                 rawTemperatureData = data.temperature.data;
                 updateStationDisplay();
-            }
-
-            if (data.humidity && data.humidity.data && data.humidity.data.length > 5) { // safe check
-                // ...
             }
 
             if (data.humidity && data.humidity.data && data.humidity.data.length > 0) {
