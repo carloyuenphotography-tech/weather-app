@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>香港各區實測溫濕度衛星地圖</title>
+    <title>香港各區實測溫濕度與氣象分析地圖</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Leaflet 地圖 CSS 與 JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        #map { height: 600px; }
-        /* 仿造第二張圖質感的懸浮針標設計 */
+        #map { height: 550px; }
         .weather-pin {
             position: relative;
-            background: #0f172a; /* 深色沉穩質感 */
+            background: #0f172a;
             color: white;
             border-radius: 6px;
             padding: 4px 8px;
@@ -23,7 +21,6 @@
             text-align: center;
             white-space: nowrap;
         }
-        /* 針標下方的指向小三角 */
         .weather-pin::after {
             content: '';
             position: absolute;
@@ -42,17 +39,38 @@
 
     <div class="max-w-6xl mx-auto space-y-6">
         
-        <!-- 地圖卡片區域 -->
+        <!-- 標題與氣象智慧分析面板 -->
+        <div class="bg-white shadow-md rounded-lg p-6 space-y-4">
+            <h1 class="text-2xl font-bold text-gray-900">香港各區即時氣象與微氣候分析</h1>
+            <p class="text-xs text-gray-500" id="loading-status">正在載入即時氣象大數據...</p>
+            
+            <!-- 統計卡片格 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="text-xs text-blue-600 font-semibold">全港平均相對濕度</div>
+                    <div class="text-2xl font-bold text-blue-900 mt-1" id="stat-avg-humid">--</div>
+                </div>
+                <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                    <div class="text-xs text-indigo-600 font-semibold">雲海季節指標 (濕度 ≥ 90% / 95%)</div>
+                    <div class="text-lg font-bold text-indigo-900 mt-1" id="stat-cloud-sea">評估中...</div>
+                </div>
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <div class="text-xs text-amber-600 font-semibold">微氣候現象 (輻射冷卻 / 逆溫)</div>
+                    <div class="text-sm font-medium text-amber-900 mt-1" id="stat-analysis">分析中...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 衛星地圖區域 -->
         <div class="bg-white shadow-md rounded-lg overflow-hidden p-4">
-            <h1 class="text-xl font-bold text-gray-900 mb-1">香港各區實測溫濕度 - 衛星即時地圖</h1>
-            <p class="text-xs text-gray-500 mb-4" id="loading-status">正在載入衛星圖與實時溫濕度數據...</p>
+            <h2 class="text-lg font-bold text-gray-900 mb-3">即時衛星溫濕度分佈地圖</h2>
             <div id="map" class="rounded-lg shadow-inner"></div>
         </div>
 
-        <!-- 表格區域 -->
+        <!-- 詳細數據表格 -->
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
             <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <h2 class="text-lg font-bold text-gray-900">氣象站數據列表</h2>
+                <h2 class="text-lg font-bold text-gray-900">各氣象站實測數據清單</h2>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
@@ -72,17 +90,16 @@
         </div>
 
         <div class="text-center text-xs text-gray-500 py-2">
-            數據來源：香港天文台 / 空間數據共享入門網站 (CSDI) | 地圖圖資：Esri World Imagery 衛星影像
+            數據來源：香港天文台 / 空間數據共享入門網站 (CSDI)
         </div>
     </div>
 
     <script>
         const map = L.map('map').setView([22.3193, 114.1694], 11);
 
-        // 使用 Esri World Imagery 衛星影像地圖（與第二張圖風格一致）
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             maxZoom: 17,
-            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            attribution: 'Tiles &copy; Esri'
         }).addTo(map);
 
         async function fetchWeatherData() {
@@ -95,18 +112,26 @@
                 const response = await fetch(apiUrl);
                 if (!response.ok) throw new Error('網絡請求失敗');
                 
-                const stations = await response.json();
+                const result = await response.json();
+                const stations = result.stations;
+                const stats = result.stats;
                 
                 if (!Array.isArray(stations) || stations.length === 0) {
                     statusEl.textContent = '未能取得有效的氣象站數據。';
                     return;
                 }
 
+                // 填入統計面板數據
+                document.getElementById('stat-avg-humid').textContent = `${stats.avg_humidity}%`;
+                document.getElementById('stat-cloud-sea').textContent = `${stats.cloud_sea_status} (${stats.count_95}個站≥95%)`;
+                
+                const analysisText = stats.analysis_notes.length > 0 ? stats.analysis_notes.join(' ') : "目前氣温分佈平穩，未見明顯極端輻射冷卻。";
+                document.getElementById('stat-analysis').textContent = analysisText;
+
                 tbody.innerHTML = '';
                 let markerCount = 0;
 
                 stations.forEach(item => {
-                    // 1. 填入表格
                     const tr = document.createElement('tr');
                     tr.className = 'hover:bg-gray-50 transition-colors';
                     tr.innerHTML = `
@@ -117,12 +142,11 @@
                     `;
                     tbody.appendChild(tr);
 
-                    // 2. 在衛星地圖上顯示精美針標
                     if (item.lat && item.lng) {
                         const customIcon = L.divIcon({
                             className: 'custom-div-icon',
                             html: `<div class="weather-pin">
-                                     <div class="text-[10px] text-gray-300 truncate max-w-[100px]">${item.station}</div>
+                                     <div class="text-[10px] text-gray-300 truncate max-w-[110px]">${item.station}</div>
                                      <div>
                                         <span class="text-red-400">${item.temperature}</span> | 
                                         <span class="text-blue-400">${item.humidity}</span>
@@ -146,7 +170,7 @@
                     }
                 });
 
-                statusEl.textContent = `成功載入 ${stations.length} 個站點，已在衛星地圖上標註 ${markerCount} 個氣象站的實時溫濕度`;
+                statusEl.textContent = `成功載入 ${stations.length} 個氣象站數據，已在衛星地圖標註 ${markerCount} 個站點`;
 
             } catch (error) {
                 console.error(error);
