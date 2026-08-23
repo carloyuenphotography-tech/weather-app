@@ -10,10 +10,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        /* 響應式地圖高度：手機上 400px，電腦螢幕上 650px */
-        #map { height: 400px; width: 100%; }
+        /* 響應式地圖高度：手機上 420px，電腦螢幕上 620px */
+        #map { height: 420px; width: 100%; }
         @media (min-width: 768px) {
-            #map { height: 650px; }
+            #map { height: 620px; }
         }
 
         /* 地圖上的浮動氣象針標設計 */
@@ -45,57 +45,57 @@
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 antialiased">
 
-    <!-- 主容器：適應手機與電腦的上下左右留白 -->
-    <div class="max-w-6xl mx-auto p-3 sm:p-4 md:p-8 space-y-4 md:space-y-6">
+    <!-- 主容器 -->
+    <div class="max-w-6xl mx-auto p-3 sm:p-4 md:p-8 space-y-3 sm:space-y-4">
         
-        <!-- 頂部標題與氣象智慧分析面板 -->
-        <div class="bg-white shadow-lg rounded-xl p-4 sm:p-6 space-y-4 border border-slate-200">
-            <div>
-                <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">香港微氣候即時監測</h1>
-                <p class="text-xs text-slate-500 mt-1" id="loading-status">正在連接後端伺服器載入數據...</p>
+        <!-- 頂部智慧分析面板（高密度壓縮版） -->
+        <div class="bg-white shadow-md rounded-xl p-3 sm:p-5 space-y-3 border border-slate-200">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-1 border-b border-slate-100">
+                <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">香港微氣候即時監測</h1>
+                <p class="text-[11px] text-slate-400 mt-0.5 sm:mt-0" id="loading-status">連接後端載入中...</p>
             </div>
             
-            <!-- 統計卡片格：手機上預設 2 欄，平板/電腦 4 欄 -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 pt-1">
-                <!-- 濕度與雲海 -->
-                <div class="bg-blue-50/70 border border-blue-200 rounded-lg p-3 sm:p-4 shadow-sm">
-                    <div class="text-[11px] sm:text-xs text-blue-600 font-semibold truncate">全港平均濕度 (≥95%站數)</div>
-                    <div class="text-lg sm:text-xl font-bold text-blue-900 mt-1" id="stat-avg-humid">--</div>
-                    <div class="text-[11px] text-blue-700 mt-1 truncate" id="stat-cloud-sea">評估中...</div>
+            <!-- 壓縮後的 3 欄式指標卡片 -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
+                
+                <!-- 1. 全港濕度與雲海 -->
+                <div class="bg-blue-50/70 border border-blue-200 rounded-lg p-2.5 sm:p-3 shadow-sm">
+                    <div class="text-[11px] text-blue-600 font-semibold">全港平均濕度</div>
+                    <div class="text-base sm:text-lg font-bold text-blue-900 mt-0.5" id="stat-avg-humid">--</div>
+                    <div class="text-[10px] sm:text-[11px] text-blue-700 mt-0.5 truncate" id="stat-cloud-sea">評估中...</div>
                 </div>
-                <!-- 逆溫層：大帽山溫差 -->
-                <div class="bg-purple-50/70 border border-purple-200 rounded-lg p-3 sm:p-4 shadow-sm">
-                    <div class="text-[11px] sm:text-xs text-purple-600 font-semibold truncate">大帽山 vs 平地溫差</div>
-                    <div class="text-base sm:text-lg font-bold text-purple-900 mt-1" id="stat-tms">--</div>
-                    <div class="text-[10px] sm:text-[11px] text-purple-700 mt-1 truncate" id="stat-inversion">分析中...</div>
+
+                <!-- 2. 高地溫差（大帽山 & 大老山合併卡片，極大化節省空間） -->
+                <div class="bg-purple-50/70 border border-purple-200 rounded-lg p-2.5 sm:p-3 shadow-sm">
+                    <div class="text-[11px] text-purple-600 font-semibold">高地溫差 (vs 平地)</div>
+                    <div class="flex justify-between items-center mt-1 text-xs sm:text-sm font-bold text-purple-900">
+                        <span>大帽山: <span id="stat-tms" class="text-purple-700">--</span></span>
+                        <span>大老山: <span id="stat-tc" class="text-indigo-700">--</span></span>
+                    </div>
+                    <div class="text-[10px] text-purple-700 mt-1 truncate" id="stat-inversion">逆溫分析中...</div>
                 </div>
-                <!-- 逆溫層：大老山溫差 -->
-                <div class="bg-indigo-50/70 border border-indigo-200 rounded-lg p-3 sm:p-4 shadow-sm">
-                    <div class="text-[11px] sm:text-xs text-indigo-600 font-semibold truncate">大老山 vs 平地溫差</div>
-                    <div class="text-base sm:text-lg font-bold text-indigo-900 mt-1" id="stat-tc">--</div>
-                    <div class="text-[10px] sm:text-[11px] text-indigo-700 mt-1 truncate">高地氣象對比</div>
+
+                <!-- 3. 內陸輻射冷卻 -->
+                <div class="bg-amber-50/70 border border-amber-200 rounded-lg p-2.5 sm:p-3 shadow-sm">
+                    <div class="text-[11px] text-amber-600 font-semibold">內陸輻射冷卻</div>
+                    <div class="text-xs sm:text-sm font-bold text-amber-900 mt-1.5 truncate" id="stat-cooling">分析中...</div>
                 </div>
-                <!-- 輻射冷卻 -->
-                <div class="bg-amber-50/70 border border-amber-200 rounded-lg p-3 sm:p-4 shadow-sm col-span-2 md:col-span-1">
-                    <div class="text-[11px] sm:text-xs text-amber-600 font-semibold truncate">內陸輻射冷卻</div>
-                    <div class="text-xs sm:text-sm font-bold text-amber-900 mt-2" id="stat-cooling">分析中...</div>
-                </div>
+
             </div>
         </div>
 
         <!-- 衛星地圖區域 -->
-        <div class="bg-white shadow-lg rounded-xl overflow-hidden p-3 sm:p-4 border border-slate-200">
+        <div class="bg-white shadow-md rounded-xl overflow-hidden p-2 sm:p-3 border border-slate-200">
             <div id="map" class="rounded-lg shadow-inner z-0"></div>
         </div>
 
         <!-- 頁尾聲明 -->
-        <div class="text-center text-xs text-slate-400 py-2">
+        <div class="text-center text-[11px] text-slate-400 py-1">
             數據來源：香港天文台 / 空間數據共享入門網站 (CSDI)
         </div>
     </div>
 
     <script>
-        // 初始化地圖，手機版適度調整縮放中心與級別
         const map = L.map('map').setView([22.3193, 114.1694], 11);
 
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -120,7 +120,7 @@
                     return;
                 }
 
-                // 填入分析面板
+                // 填入高度壓縮的分析面板
                 document.getElementById('stat-avg-humid').textContent = `${stats.avg_humidity || 0}% (${stats.count_95 || 0}站≥95%)`;
                 document.getElementById('stat-cloud-sea').textContent = stats.cloud_sea_status || '未知';
                 document.getElementById('stat-tms').textContent = stats.tms_diff || '資料未明';
@@ -159,11 +159,11 @@
                     }
                 });
 
-                statusEl.textContent = `成功載入數據，已在衛星地圖標註 ${markerCount} 個氣象站`;
+                statusEl.textContent = `已標註 ${markerCount} 個氣象站`;
 
             } catch (error) {
                 console.error(error);
-                statusEl.textContent = '無法載入地圖數據，請檢查 Render 伺服器狀態。';
+                statusEl.textContent = '無法載入地圖數據。';
             }
         }
 
