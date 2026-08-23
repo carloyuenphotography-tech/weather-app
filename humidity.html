@@ -13,7 +13,7 @@
         <!-- 標題欄 -->
         <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
             <h1 class="text-xl font-bold text-gray-900">香港各區實測相對濕度</h1>
-            <p class="text-xs text-gray-500 mt-1" id="loading-status">正在從您的 Render API 載入數據...</p>
+            <p class="text-xs text-gray-500 mt-1" id="loading-status">正在解析氣象數據...</p>
         </div>
 
         <!-- 表格區域 -->
@@ -43,7 +43,6 @@
             const statusEl = document.getElementById('loading-status');
             const tbody = document.getElementById('humidity-tbody');
             
-            // 已經幫您填好您剛剛成功的 Render API 網址
             const apiUrl = 'https://hko-humidity-api-rcr3.onrender.com/humidity';
 
             try {
@@ -60,14 +59,28 @@
                 tbody.innerHTML = '';
                 let count = 0;
 
-                // 遍歷每個氣象站點
                 data.features.forEach(feature => {
                     const props = feature.properties;
                     
-                    // 根據 CSDI 返回的真實屬性名稱提取數據
+                    // 打印出資料結構，如果還有找不到的欄位可以在瀏覽器 F12 檢查
+                    console.log("站點屬性：", props);
+
+                    // 站點名稱
                     const stationName = props.AutomaticWeatherStation_en || props.STATION_NAME || props.name || '未知站點';
-                    const humidityVal = props.humidity !== undefined ? `${props.humidity}%` : (props.HUMIDITY !== undefined ? `${props.HUMIDITY}%` : '資料未明');
-                    const timeVal = props.DATETIME || props.time || '即時';
+                    
+                    // 嘗試所有可能的濕度欄位名稱 (value, val, rh, humidity 等)
+                    let rawVal = props.value !== undefined ? props.value :
+                                 (props.VAL !== undefined ? props.VAL :
+                                 (props.val !== undefined ? props.val :
+                                 (props.humidity !== undefined ? props.humidity :
+                                 (props.HUMIDITY !== undefined ? props.HUMIDITY :
+                                 (props.rh !== undefined ? props.rh :
+                                 (props.RH !== undefined ? props.RH : null))))));
+
+                    const humidityVal = rawVal !== null ? `${rawVal}%` : '資料未明';
+                    
+                    // 時間欄位
+                    const timeVal = props.DATETIME || props.time || props.TIMESTAMP || '即時';
 
                     const tr = document.createElement('tr');
                     tr.className = 'hover:bg-gray-50 transition-colors';
