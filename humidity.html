@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>香港各區實測相對濕度</title>
-    <!-- 引入 Tailwind CSS 確保排版乾淨專業 -->
+    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800 p-4 md:p-8">
@@ -13,7 +13,7 @@
         <!-- 標題欄 -->
         <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
             <h1 class="text-xl font-bold text-gray-900">香港各區實測相對濕度</h1>
-            <p class="text-xs text-gray-500 mt-1" id="loading-status">正在連接您的 Render 後端 API...</p>
+            <p class="text-xs text-gray-500 mt-1" id="loading-status">正在從您的 Render API 載入數據...</p>
         </div>
 
         <!-- 表格區域 -->
@@ -34,7 +34,7 @@
 
         <!-- 頁尾來源 -->
         <div class="bg-gray-50 px-6 py-3 border-t border-gray-200 text-xs text-gray-500">
-            數據來源：香港天文台 / 空間數據共享入門網站 (CSDI) - 透過 Render 後端服務提供
+            數據來源：香港天文台 / 空間數據共享入門網站 (CSDI)
         </div>
     </div>
 
@@ -43,20 +43,12 @@
             const statusEl = document.getElementById('loading-status');
             const tbody = document.getElementById('humidity-tbody');
             
-            // 💡 請將下方引號內的網址替換為您在 Render 上得到的專屬網址，並在後面加上 /humidity
-            // 例如：https://hko-humidity-api.onrender.com/humidity
+            // 已經幫您填好您剛剛成功的 Render API 網址
             const apiUrl = 'https://hko-humidity-api-rcr3.onrender.com/humidity';
-
-            // 防呆提示
-            if (apiUrl.includes('您的Render網址')) {
-                statusEl.textContent = '請先在程式碼中填入您的 Render 後端網址。';
-                tbody.innerHTML = `<tr><td colspan="3" class="py-6 px-6 text-center text-amber-600">請設定 API 網址後重新整理頁面</td></tr>`;
-                return;
-            }
 
             try {
                 const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('無法從後端伺服器獲取數據');
+                if (!response.ok) throw new Error('網絡請求失敗');
                 
                 const data = await response.json();
                 
@@ -68,13 +60,13 @@
                 tbody.innerHTML = '';
                 let count = 0;
 
-                // 遍歷後端傳回來的 GeoJSON 站點資料
+                // 遍歷每個氣象站點
                 data.features.forEach(feature => {
                     const props = feature.properties;
                     
-                    // 自動適應 CSDI 的不同欄位名稱大小寫
-                    const stationName = props.EN_NAME || props.STATION_NAME || props.name || props.site || '未知站點';
-                    const humidityVal = props.HUMIDITY !== undefined ? `${props.HUMIDITY}%` : (props.value !== undefined ? `${props.value}%` : '資料未明');
+                    // 根據 CSDI 返回的真實屬性名稱提取數據
+                    const stationName = props.AutomaticWeatherStation_en || props.STATION_NAME || props.name || '未知站點';
+                    const humidityVal = props.humidity !== undefined ? `${props.humidity}%` : (props.HUMIDITY !== undefined ? `${props.HUMIDITY}%` : '資料未明');
                     const timeVal = props.DATETIME || props.time || '即時';
 
                     const tr = document.createElement('tr');
@@ -92,12 +84,11 @@
 
             } catch (error) {
                 console.error(error);
-                statusEl.textContent = '無法連接到 Render 後端伺服器。';
-                tbody.innerHTML = `<tr><td colspan="3" class="py-6 px-6 text-center text-red-500">連線失敗，請檢查 Render 服務是否正在運行或網址是否正確。</td></tr>`;
+                statusEl.textContent = '無法載入數據。';
+                tbody.innerHTML = `<tr><td colspan="3" class="py-6 px-6 text-center text-red-500">發生錯誤：${error.message}</td></tr>`;
             }
         }
 
-        // 頁面載入時執行
         fetchHumidityData();
     </script>
 </body>
