@@ -12,7 +12,6 @@ CORS(app)
 TEMP_ZIP_URL = "https://static.csdi.gov.hk/csdi-webpage/download/f8e1bd259b4d58218b8ea5a07b874472/geojson"
 HUMIDITY_ZIP_URL = "https://static.csdi.gov.hk/csdi-webpage/download/04db0982a43f561db9e922cd082b09f9/geojson"
 
-# 🎯 精選核心氣象站清單（中英文並列，確保不會漏掉）
 TARGET_STATIONS = [
     "香港天文台", "HK Observatory",
     "大帽山", "Tai Mo Shan",
@@ -135,8 +134,6 @@ def get_weather():
         
         combined_result = []
         humidities = []
-        
-        # 收集各站數據用於計算溫差與逆溫
         station_temps = {}
         hko_temp = None
 
@@ -151,8 +148,9 @@ def get_weather():
             t_val = t_info.get('value')
             h_val = h_info.get('value')
 
-            temp_str = f"{t_val}°C" if t_val is not None else "資料未明"
-            humid_str = f"{h_val}%" if h_val is not None else "資料未明"
+            # 若無數據則回傳空字串，不顯示「資料未明」
+            temp_str = f"{t_val}°C" if t_val is not None else ""
+            humid_str = f"{h_val}%" if h_val is not None else ""
 
             if h_val is not None:
                 humidities.append(h_val)
@@ -171,7 +169,6 @@ def get_weather():
                 "lng": lng
             })
 
-        # 統計濕度
         avg_humid = sum(humidities) / len(humidities) if humidities else 0
         count_95 = sum(1 for h in humidities if h >= 95)
         count_90 = sum(1 for h in humidities if h >= 90)
@@ -182,33 +179,29 @@ def get_weather():
         elif avg_humid >= 90 or count_90 >= 3:
             cloud_sea_status = "良好，部分山區有望出現雲海"
 
-        # 基準平地溫度（優先用天文台，若無則取所有站點平均）
         baseline_temp = hko_temp if hko_temp is not None else (sum(station_temps.values()) / len(station_temps) if station_temps else 20)
 
-        # 計算大帽山與大老山溫差
         tai_mo_shan_temp = next((val for name, val in station_temps.items() if "大帽山" in name or "Tai Mo Shan" in name), None)
         tate_cairn_temp = next((val for name, val in station_temps.items() if "大老山" in name or "Tate's Cairn" in name), None)
 
-        tms_diff_str = "資料未明"
-        tc_diff_str = "資料未明"
+        tms_diff_str = ""
+        tc_diff_str = ""
         inversion_detected = False
 
         if tai_mo_shan_temp is not None:
             diff_tms = round(tai_mo_shan_temp - baseline_temp, 1)
-            tms_diff_str = f"{diff_tms:+.1f}°C (相對平地)"
-            # 正常大帽山應比平地低 5°C 以上；若溫差大於 -3°C 代表有顯著逆溫
+            tms_diff_str = f"{diff_tms:+.1f}°C"
             if diff_tms > -3.0:
                 inversion_detected = True
 
         if tate_cairn_temp is not None:
             diff_tc = round(tate_cairn_temp - baseline_temp, 1)
-            tc_diff_str = f"{diff_tc:+.1f}°C (相對平地)"
+            tc_diff_str = f"{diff_tc:+.1f}°C"
             if diff_tc > -2.5:
                 inversion_detected = True
 
         inversion_status = "⚠️ 探測到逆溫現象（高地氣溫異常偏高）" if inversion_detected else "正常垂直遞減（未見逆溫）"
 
-        # 輻射冷卻計算（比較內陸站點如打鼓嶺/石崗與市區天文台的溫差）
         rc_status = "未明顯出現"
         inland_stations = ["打鼓嶺", "石崗", "Ta Kwu Ling", "Shek Kong"]
         inland_temps = [val for name, val in station_temps.items() if any(i in name for i in inland_stations)]
@@ -217,9 +210,9 @@ def get_weather():
             min_inland = min(inland_temps)
             rc_diff = hko_temp - min_inland
             if rc_diff >= 2.0:
-                rc_status = f"顯著！內陸比市區低 {rc_diff:.1f}°C（輻射冷卻中）"
+                rc_status = f"顯著！內陸比市區低 {rc_diff:.1f}°C（輻射冷卻）"
             else:
-                rc_status = f"微弱（內陸與市區溫差 {rc_diff:.1f}°C）"
+                rc_status = f"微弱（溫差 {rc_diff:.1f}°C）"
 
         return jsonify({
             "stations": combined_result,
@@ -234,14 +227,7 @@ def get_weather():
             }
         })
     except Exception as e:
-        return jsonify({
-            "stations": [],
-            "stats": {
-                "avg_humidity": 0, "count_95": 0, "cloud_sea_status": "錯誤",
-                "tms_diff": "錯誤", "tc_diff": "錯誤", "inversion_status": "錯誤", "radiation_cooling": "錯誤"
-            },
-            "error": str(e)
-        }), 200
+        return jsonify({"stations": [], "stats": {}, "error": str(e)}), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
