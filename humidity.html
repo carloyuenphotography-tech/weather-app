@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>香港各區實測相對濕度</title>
-    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800 p-4 md:p-8">
@@ -13,7 +12,7 @@
         <!-- 標題欄 -->
         <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
             <h1 class="text-xl font-bold text-gray-900">香港各區實測相對濕度</h1>
-            <p class="text-xs text-gray-500 mt-1" id="loading-status">正在解析氣象數據...</p>
+            <p class="text-xs text-gray-500 mt-1" id="loading-status">正在載入各區實時相對濕度...</p>
         </div>
 
         <!-- 表格區域 -->
@@ -27,7 +26,7 @@
                     </tr>
                 </thead>
                 <tbody id="humidity-tbody" class="divide-y divide-gray-200 text-sm">
-                    <tr><td colspan="3" class="py-6 px-6 text-center text-gray-400">正在載入數據...</td></tr>
+                    <tr><td colspan="3" class="py-6 px-6 text-center text-gray-400">正在連接伺服器獲取數據...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -49,51 +48,28 @@
                 const response = await fetch(apiUrl);
                 if (!response.ok) throw new Error('網絡請求失敗');
                 
-                const data = await response.json();
+                const stations = await response.json();
                 
-                if (!data.features || data.features.length === 0) {
+                if (!Array.isArray(stations) || stations.length === 0) {
                     statusEl.textContent = '未能取得有效的氣象站數據。';
                     return;
                 }
 
                 tbody.innerHTML = '';
-                let count = 0;
 
-                data.features.forEach(feature => {
-                    const props = feature.properties;
-                    
-                    // 打印出資料結構，如果還有找不到的欄位可以在瀏覽器 F12 檢查
-                    console.log("站點屬性：", props);
-
-                    // 站點名稱
-                    const stationName = props.AutomaticWeatherStation_en || props.STATION_NAME || props.name || '未知站點';
-                    
-                    // 嘗試所有可能的濕度欄位名稱 (value, val, rh, humidity 等)
-                    let rawVal = props.value !== undefined ? props.value :
-                                 (props.VAL !== undefined ? props.VAL :
-                                 (props.val !== undefined ? props.val :
-                                 (props.humidity !== undefined ? props.humidity :
-                                 (props.HUMIDITY !== undefined ? props.HUMIDITY :
-                                 (props.rh !== undefined ? props.rh :
-                                 (props.RH !== undefined ? props.RH : null))))));
-
-                    const humidityVal = rawVal !== null ? `${rawVal}%` : '資料未明';
-                    
-                    // 時間欄位
-                    const timeVal = props.DATETIME || props.time || props.TIMESTAMP || '即時';
-
+                // 直接把後端整理好的乾淨清單渲染到表格上
+                stations.forEach(item => {
                     const tr = document.createElement('tr');
                     tr.className = 'hover:bg-gray-50 transition-colors';
                     tr.innerHTML = `
-                        <td class="py-3 px-6 font-medium text-gray-900">${stationName}</td>
-                        <td class="py-3 px-6 text-blue-600 font-semibold">${humidityVal}</td>
-                        <td class="py-3 px-6 text-gray-500">${timeVal}</td>
+                        <td class="py-3 px-6 font-medium text-gray-900">${item.station}</td>
+                        <td class="py-3 px-6 text-blue-600 font-semibold">${item.humidity}</td>
+                        <td class="py-3 px-6 text-gray-500">${item.time}</td>
                     `;
                     tbody.appendChild(tr);
-                    count++;
                 });
 
-                statusEl.textContent = `成功載入 ${count} 個氣象站的實時相對濕度數據`;
+                statusEl.textContent = `成功載入 ${stations.length} 個氣象站的實時相對濕度數據`;
 
             } catch (error) {
                 console.error(error);
