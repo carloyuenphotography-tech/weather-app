@@ -12,7 +12,7 @@ CORS(app)
 TEMP_ZIP_URL = "https://static.csdi.gov.hk/csdi-webpage/download/f8e1bd259b4d58218b8ea5a07b874472/geojson"
 HUMIDITY_ZIP_URL = "https://static.csdi.gov.hk/csdi-webpage/download/04db0982a43f561db9e922cd082b09f9/geojson"
 
-# 🎯 精選核心氣象站清單（專注於高地逆溫、內陸輻射冷卻與主要市區代表）
+# 🎯 精選核心氣象站清單（中英文並列，確保不會漏掉）
 TARGET_STATIONS = [
     "香港天文台", "HK Observatory",
     "大帽山", "Tai Mo Shan",
@@ -27,7 +27,7 @@ TARGET_STATIONS = [
     "長洲", "Cheung Chau",
     "將軍澳", "Tseung Kwan O",
     "九龍城", "Kowloon City",
-    "橫瀾島", "Walang Island",
+    "橫瀾島", "Waglan Island",
     "滘西洲", "Kau Sai Chau"
 ]
 
@@ -44,7 +44,6 @@ def fetch_single_station(feature, val_type):
         station_name_en = props.get('AutomaticWeatherStation_en') or ''
         station_name = station_name_tc or station_name_en or '未知站點'
 
-        # 篩選機制：如果不在精選清單內，直接略過，不發送 CSV 請求！
         is_target = any(target.lower() in station_name.lower() for target in TARGET_STATIONS)
         if not is_target:
             return None, None
@@ -133,12 +132,10 @@ def get_weather():
         
         combined_result = []
         humidities = []
-        high_alt_temps = {}
-        low_alt_temps = {}
-        radiation_cooling_stations = []
         
-        high_stations = ["大帽山", "大老山"]
-        cooling_targets = ["打鼓嶺", "石崗", "濕地公園", "西貢"]
+        # 收集各站數據用於計算溫差與逆溫
+        station_temps = {}
+        hko_temp = None
 
         for station in all_stations:
             t_info = temp_data.get(station, {})
@@ -157,16 +154,10 @@ def get_weather():
             if h_val is not None:
                 humidities.append(h_val)
 
-            if any(hs in station for hs in high_stations):
-                if t_val is not None:
-                    high_alt_temps[station] = t_val
-            else:
-                if t_val is not None:
-                    low_alt_temps[station] = t_val
-
-            if any(ct in station for ct in cooling_targets):
-                if t_val is not None:
-                    radiation_cooling_stations.append({"station": station, "temp": t_val})
+            if t_val is not None:
+                station_temps[station] = t_val
+                if "天文台" in station or "HK Observatory" in station:
+                    hko_temp = t_val
 
             combined_result.append({
                 "station": station,
@@ -177,26 +168,55 @@ def get_weather():
                 "lng": lng
             })
 
+        # 統計濕度
         avg_humid = sum(humidities) / len(humidities) if humidities else 0
         count_95 = sum(1 for h in humidities if h >= 95)
+        count_90 = sum(1 for h in humidities if h >= 90)
 
         cloud_sea_status = "條件未成熟"
         if avg_humid >= 95 or count_95 >= 2:
             cloud_sea_status = "極佳！全港高度潮濕，極利於觀賞雲海"
-        elif avg_humid >= 90 or sum(1 for h in humidities if h >= 90) >= 3:
+        elif avg_humid >= 90 or count_90 >= 3:
             cloud_sea_status = "良好，部分山區有望出現雲海"
 
-        inversion_status = "未探測到顯著逆溫"
-        if high_alt_temps and low_alt_temps:
-            avg_low_temp = sum(low_alt_temps.values()) / len(low_alt_temps)
-            max_high_temp = max(high_alt_temps.values())
-            if max_high_temp >= (avg_low_temp - 1.5):
-                inversion_status = "⚠️ 探測到逆溫現象（高地氣溫異常偏高）"
+        # 基準平地溫度（優先用天文台，若無則取所有站點平均）
+        baseline_temp = hko_temp if hko_temp is not None else (sum(station_temps.values()) / len(station_temps) if station_temps else 20)
 
+        # 計算大帽山與大老山溫差
+        tai_mo_shan_temp = next((val for name, val in station_temps.items() if "大帽山" in name or "Tai Mo Shan" in name), None)
+        tate_cairn_temp = next((val for name, val in station_temps.items() if "大老山" in name or "Tate's Cairn" in name), None)
+
+        tms_diff_str = "資料未明"
+        tc_diff_str = "資料未明"
+        inversion_detected = False
+
+        if tai_mo_shan_temp is not None:
+            diff_tms = round(tai_mo_shan_temp - baseline_temp, 1)
+            tms_diff_str = f"{diff_tms:+.1f}°C (相對平地)"
+            # 正常大帽山應比平地低 5°C 以上；若溫差大於 -3°C 代表有顯著逆溫
+            if diff_tms > -3.0:
+                inversion_detected = True
+
+        if tate_cairn_temp is not None:
+            diff_tc = round(tate_cairn_temp - baseline_temp, 1)
+            tc_diff_str = f"{diff_tc:+.1f}°C (相對平地)"
+            if diff_tc > -2.5:
+                inversion_detected = True
+
+        inversion_status = "⚠️ 探測到逆溫現象（高地氣溫異常偏高）" if inversion_detected else "正常垂直遞減（未見逆溫）"
+
+        # 輻射冷卻計算（比較內陸站點如打鼓嶺/石崗與市區天文台的溫差）
         rc_status = "未明顯出現"
-        if radiation_cooling_stations:
-            min_rc_temp = min([s['temp'] for s in radiation_cooling_stations])
-            rc_status = f"內陸站點最低錄得 {min_rc_temp}°C，輻射冷卻運作中"
+        inland_stations = ["打鼓嶺", "石崗", "Ta Kwu Ling", "Shek Kong"]
+        inland_temps = [val for name, val in station_temps.items() if any(i in name for i in inland_stations)]
+        
+        if inland_temps and hko_temp is not None:
+            min_inland = min(inland_temps)
+            rc_diff = hko_temp - min_inland
+            if rc_diff >= 2.0:
+                rc_status = f"顯著！內陸比市區低 {rc_diff:.1f}°C（輻射冷卻中）"
+            else:
+                rc_status = f"微弱（內陸與市區溫差 {rc_diff:.1f}°C）"
 
         return jsonify({
             "stations": combined_result,
@@ -204,6 +224,8 @@ def get_weather():
                 "avg_humidity": round(avg_humid, 1),
                 "count_95": count_95,
                 "cloud_sea_status": cloud_sea_status,
+                "tms_diff": tms_diff_str,
+                "tc_diff": tc_diff_str,
                 "inversion_status": inversion_status,
                 "radiation_cooling": rc_status
             }
@@ -212,11 +234,8 @@ def get_weather():
         return jsonify({
             "stations": [],
             "stats": {
-                "avg_humidity": 0,
-                "count_95": 0,
-                "cloud_sea_status": "讀取錯誤",
-                "inversion_status": "讀取錯誤",
-                "radiation_cooling": "讀取錯誤"
+                "avg_humidity": 0, "count_95": 0, "cloud_sea_status": "錯誤",
+                "tms_diff": "錯誤", "tc_diff": "錯誤", "inversion_status": "錯誤", "radiation_cooling": "錯誤"
             },
             "error": str(e)
         }), 200
