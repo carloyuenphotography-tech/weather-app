@@ -42,9 +42,8 @@
         <!-- 氣象智慧分析面板 -->
         <div class="bg-white shadow-md rounded-lg p-6 space-y-4">
             <h1 class="text-2xl font-bold text-gray-900">香港微氣候即時監測（雲海、逆溫層與輻射冷卻）</h1>
-            <p class="text-xs text-gray-500" id="loading-status">正在載入香港天文台衛星氣象大數據...</p>
+            <p class="text-xs text-gray-500" id="loading-status">正在連接後端伺服器載入數據...</p>
             
-            <!-- 統計卡片格 -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div class="text-xs text-blue-600 font-semibold">全港平均濕度</div>
@@ -55,11 +54,11 @@
                     <div class="text-sm font-bold text-indigo-900 mt-1" id="stat-cloud-sea">評估中...</div>
                 </div>
                 <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                    <div class="text-xs text-purple-600 font-semibold">逆溫層狀態 (大帽山/大老山vs平地)</div>
+                    <div class="text-xs text-purple-600 font-semibold">逆溫層狀態</div>
                     <div class="text-xs font-bold text-purple-900 mt-1" id="stat-inversion">分析中...</div>
                 </div>
                 <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                    <div class="text-xs text-amber-600 font-semibold">內陸輻射冷卻 (打鼓嶺/石崗等)</div>
+                    <div class="text-xs text-amber-600 font-semibold">內陸輻射冷卻</div>
                     <div class="text-xs font-bold text-amber-900 mt-1" id="stat-cooling">分析中...</div>
                 </div>
             </div>
@@ -71,7 +70,7 @@
         </div>
 
         <div class="text-center text-xs text-gray-500 py-2">
-            數據來源：香港天文台 / 空間數據共享入門網站 (CSDI) | 衛星圖資：Esri World Imagery
+            數據來源：香港天文台 / 空間數據共享入門網站 (CSDI)
         </div>
     </div>
 
@@ -85,7 +84,6 @@
 
         async function fetchWeatherData() {
             const statusEl = document.getElementById('loading-status');
-            
             const apiUrl = 'https://hko-humidity-api-rcr3.onrender.com/humidity';
 
             try {
@@ -93,19 +91,19 @@
                 if (!response.ok) throw new Error('網絡請求失敗');
                 
                 const result = await response.json();
-                const stations = result.stations;
-                const stats = result.stats;
+                const stations = result.stations || [];
+                const stats = result.stats || {};
                 
-                if (!Array.isArray(stations) || stations.length === 0) {
-                    statusEl.textContent = '未能取得有效的氣象站數據。';
+                if (stations.length === 0) {
+                    statusEl.textContent = '暫無氣象站數據。';
                     return;
                 }
 
-                // 填入智慧分析面板
-                document.getElementById('stat-avg-humid').textContent = `${stats.avg_humidity}%`;
-                document.getElementById('stat-cloud-sea').textContent = stats.cloud_sea_status;
-                document.getElementById('stat-inversion').textContent = stats.inversion_status;
-                document.getElementById('stat-cooling').textContent = stats.radiation_cooling;
+                // 填入分析面板
+                document.getElementById('stat-avg-humid').textContent = `${stats.avg_humidity || 0}%`;
+                document.getElementById('stat-cloud-sea').textContent = stats.cloud_sea_status || '未知';
+                document.getElementById('stat-inversion').textContent = stats.inversion_status || '未知';
+                document.getElementById('stat-cooling').textContent = stats.radiation_cooling || '未知';
 
                 let markerCount = 0;
 
@@ -138,11 +136,11 @@
                     }
                 });
 
-                statusEl.textContent = `成功加載即時大數據，已在衛星地圖標註 ${markerCount} 個氣象站`;
+                statusEl.textContent = `成功載入數據，已在衛星地圖標註 ${markerCount} 個氣象站`;
 
             } catch (error) {
                 console.error(error);
-                statusEl.textContent = '無法載入地圖數據。';
+                statusEl.textContent = '無法載入地圖數據，請檢查 Render 伺服器狀態。';
             }
         }
 
