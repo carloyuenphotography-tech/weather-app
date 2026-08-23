@@ -3,14 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>香港各區實測相對濕度地圖</title>
+    <title>香港各區實測相對濕度立體地形地圖</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 引入 Leaflet 地圖 CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- 引入 Leaflet 地圖 JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        #map { height: 450px; }
+        #map { height: 550px; }
+        /* 自定義地圖上的濕度標籤樣式 */
+        .humidity-badge {
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            white-space: nowrap;
+            text-align: center;
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800 p-4 md:p-8">
@@ -19,8 +31,8 @@
         
         <!-- 地圖卡片區域 -->
         <div class="bg-white shadow-md rounded-lg overflow-hidden p-4">
-            <h1 class="text-xl font-bold text-gray-900 mb-2">香港各區實測相對濕度地圖</h1>
-            <p class="text-xs text-gray-500 mb-4" id="loading-status">正在載入地圖與實時數據...</p>
+            <h1 class="text-xl font-bold text-gray-900 mb-1">香港各區實測相對濕度 - 地形地圖</h1>
+            <p class="text-xs text-gray-500 mb-4" id="loading-status">正在載入地形圖與實時濕度數據...</p>
             <!-- 地圖容器 -->
             <div id="map" class="rounded-lg shadow-inner"></div>
         </div>
@@ -48,18 +60,18 @@
 
         <!-- 頁尾來源 -->
         <div class="text-center text-xs text-gray-500 py-2">
-            數據來源：香港天文台 / 空間數據共享入門網站 (CSDI)
+            數據來源：香港天文台 / 空間數據共享入門網站 (CSDI) | 地圖風格：OpenTopoMap
         </div>
     </div>
 
     <script>
-        // 初始化地圖，中心點設在香港，縮放級別 11
+        // 初始化地圖，中心點設在香港
         const map = L.map('map').setView([22.3193, 114.1694], 11);
 
-        // 加入免費的 OpenStreetMap 圖資
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap 貢獻者'
+        // 使用 OpenTopoMap（地形、等高線風格，呈現立體山脈感）
+        L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            maxZoom: 17,
+            attribution: 'Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap (CC-BY-SA)'
         }).addTo(map);
 
         async function fetchHumidityData() {
@@ -93,11 +105,22 @@
                     `;
                     tbody.appendChild(tr);
 
-                    // 2. 如果有經緯度，在地圖上加入標記 (Marker)
+                    // 2. 在地圖上直接顯示帶有數值的標籤
                     if (item.lat && item.lng) {
-                        const marker = L.marker([item.lat, item.lng]).addTo(map);
+                        // 建立自定義 HTML 標籤
+                        const customIcon = L.divIcon({
+                            className: 'custom-div-icon',
+                            html: `<div class="humidity-badge">
+                                     <div class="text-gray-800 text-[10px] truncate max-w-[90px]">${item.station}</div>
+                                     <div class="text-blue-600">${item.humidity}</div>
+                                   </div>`,
+                            iconSize: [90, 36],
+                            iconAnchor: [45, 18]
+                        });
+
+                        const marker = L.marker([item.lat, item.lng], { icon: customIcon }).addTo(map);
                         
-                        // 點擊標記時彈出視窗顯示詳情
+                        // 點擊時依然可以彈出詳細視窗
                         marker.bindPopup(`
                             <div style="font-family: sans-serif;">
                                 <strong style="font-size: 14px;">${item.station}</strong><br>
@@ -109,7 +132,7 @@
                     }
                 });
 
-                statusEl.textContent = `成功載入 ${stations.length} 個站點，已在圖上標註 ${markerCount} 個氣象站`;
+                statusEl.textContent = `成功載入 ${stations.length} 個站點，已在地形圖上標註 ${markerCount} 個氣象站實時濕度`;
 
             } catch (error) {
                 console.error(error);
