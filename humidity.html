@@ -4,11 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>香港微氣候即時監測地圖</title>
+    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Leaflet 地圖 CSS 與 JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        #map { height: 650px; }
+        /* 響應式地圖高度：手機上 400px，電腦螢幕上 650px */
+        #map { height: 400px; width: 100%; }
+        @media (min-width: 768px) {
+            #map { height: 650px; }
+        }
+
+        /* 地圖上的浮動氣象針標設計 */
         .weather-pin {
             position: relative;
             background: #0f172a;
@@ -35,53 +43,59 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans text-gray-800 p-4 md:p-8">
+<body class="bg-slate-100 font-sans text-slate-800 antialiased">
 
-    <div class="max-w-6xl mx-auto space-y-6">
+    <!-- 主容器：適應手機與電腦的上下左右留白 -->
+    <div class="max-w-6xl mx-auto p-3 sm:p-4 md:p-8 space-y-4 md:space-y-6">
         
-        <!-- 氣象智慧分析面板 -->
-        <div class="bg-white shadow-md rounded-lg p-6 space-y-4">
-            <h1 class="text-2xl font-bold text-gray-900">香港微氣候即時監測（雲海、逆溫與輻射冷卻）</h1>
-            <p class="text-xs text-gray-500" id="loading-status">正在連接後端伺服器載入數據...</p>
+        <!-- 頂部標題與氣象智慧分析面板 -->
+        <div class="bg-white shadow-lg rounded-xl p-4 sm:p-6 space-y-4 border border-slate-200">
+            <div>
+                <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">香港微氣候即時監測</h1>
+                <p class="text-xs text-slate-500 mt-1" id="loading-status">正在連接後端伺服器載入數據...</p>
+            </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+            <!-- 統計卡片格：手機上預設 2 欄，平板/電腦 4 欄 -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 pt-1">
                 <!-- 濕度與雲海 -->
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div class="text-xs text-blue-600 font-semibold">全港平均濕度 (≥95%站數)</div>
-                    <div class="text-xl font-bold text-blue-900 mt-1" id="stat-avg-humid">--</div>
-                    <div class="text-xs text-blue-700 mt-1" id="stat-cloud-sea">評估中...</div>
+                <div class="bg-blue-50/70 border border-blue-200 rounded-lg p-3 sm:p-4 shadow-sm">
+                    <div class="text-[11px] sm:text-xs text-blue-600 font-semibold truncate">全港平均濕度 (≥95%站數)</div>
+                    <div class="text-lg sm:text-xl font-bold text-blue-900 mt-1" id="stat-avg-humid">--</div>
+                    <div class="text-[11px] text-blue-700 mt-1 truncate" id="stat-cloud-sea">評估中...</div>
                 </div>
                 <!-- 逆溫層：大帽山溫差 -->
-                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                    <div class="text-xs text-purple-600 font-semibold">大帽山 vs 平地溫差</div>
-                    <div class="text-lg font-bold text-purple-900 mt-1" id="stat-tms">--</div>
-                    <div class="text-[11px] text-purple-700 mt-1" id="stat-inversion">分析中...</div>
+                <div class="bg-purple-50/70 border border-purple-200 rounded-lg p-3 sm:p-4 shadow-sm">
+                    <div class="text-[11px] sm:text-xs text-purple-600 font-semibold truncate">大帽山 vs 平地溫差</div>
+                    <div class="text-base sm:text-lg font-bold text-purple-900 mt-1" id="stat-tms">--</div>
+                    <div class="text-[10px] sm:text-[11px] text-purple-700 mt-1 truncate" id="stat-inversion">分析中...</div>
                 </div>
                 <!-- 逆溫層：大老山溫差 -->
-                <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-                    <div class="text-xs text-indigo-600 font-semibold">大老山 vs 平地溫差</div>
-                    <div class="text-lg font-bold text-indigo-900 mt-1" id="stat-tc">--</div>
-                    <div class="text-[11px] text-indigo-700 mt-1">高地氣象對比</div>
+                <div class="bg-indigo-50/70 border border-indigo-200 rounded-lg p-3 sm:p-4 shadow-sm">
+                    <div class="text-[11px] sm:text-xs text-indigo-600 font-semibold truncate">大老山 vs 平地溫差</div>
+                    <div class="text-base sm:text-lg font-bold text-indigo-900 mt-1" id="stat-tc">--</div>
+                    <div class="text-[10px] sm:text-[11px] text-indigo-700 mt-1 truncate">高地氣象對比</div>
                 </div>
                 <!-- 輻射冷卻 -->
-                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                    <div class="text-xs text-amber-600 font-semibold">內陸輻射冷卻</div>
-                    <div class="text-sm font-bold text-amber-900 mt-2" id="stat-cooling">分析中...</div>
+                <div class="bg-amber-50/70 border border-amber-200 rounded-lg p-3 sm:p-4 shadow-sm col-span-2 md:col-span-1">
+                    <div class="text-[11px] sm:text-xs text-amber-600 font-semibold truncate">內陸輻射冷卻</div>
+                    <div class="text-xs sm:text-sm font-bold text-amber-900 mt-2" id="stat-cooling">分析中...</div>
                 </div>
             </div>
         </div>
 
         <!-- 衛星地圖區域 -->
-        <div class="bg-white shadow-md rounded-lg overflow-hidden p-4">
-            <div id="map" class="rounded-lg shadow-inner"></div>
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden p-3 sm:p-4 border border-slate-200">
+            <div id="map" class="rounded-lg shadow-inner z-0"></div>
         </div>
 
-        <div class="text-center text-xs text-gray-500 py-2">
+        <!-- 頁尾聲明 -->
+        <div class="text-center text-xs text-slate-400 py-2">
             數據來源：香港天文台 / 空間數據共享入門網站 (CSDI)
         </div>
     </div>
 
     <script>
+        // 初始化地圖，手機版適度調整縮放中心與級別
         const map = L.map('map').setView([22.3193, 114.1694], 11);
 
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -121,14 +135,14 @@
                         const customIcon = L.divIcon({
                             className: 'custom-div-icon',
                             html: `<div class="weather-pin">
-                                     <div class="text-[10px] text-gray-300 truncate max-w-[120px]">${item.station}</div>
+                                     <div class="text-[10px] text-slate-300 truncate max-w-[110px]">${item.station}</div>
                                      <div>
                                         <span class="text-red-400">${item.temperature}</span> | 
                                         <span class="text-blue-400">${item.humidity}</span>
                                      </div>
                                    </div>`,
-                            iconSize: [120, 42],
-                            iconAnchor: [60, 48]
+                            iconSize: [110, 40],
+                            iconAnchor: [55, 46]
                         });
 
                         const marker = L.marker([item.lat, item.lng], { icon: customIcon }).addTo(map);
