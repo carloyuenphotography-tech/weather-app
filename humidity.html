@@ -1,184 +1,193 @@
-<!DOCTYPE html>
-<html lang="zh-HK">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>香港各區實測溫濕度與氣象分析地圖</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>
-        #map { height: 550px; }
-        .weather-pin {
-            position: relative;
-            background: #0f172a;
-            color: white;
-            border-radius: 6px;
-            padding: 4px 8px;
-            font-size: 11px;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-            text-align: center;
-            white-space: nowrap;
-        }
-        .weather-pin::after {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 6px 6px 0;
-            border-style: solid;
-            border-color: #0f172a transparent;
-            display: block;
-            width: 0;
-        }
-    </style>
-</head>
-<body class="bg-gray-100 font-sans text-gray-800 p-4 md:p-8">
+import io
+import zipfile
+import csv
+import requests
+from flask import Flask, jsonify
+from flask_cors import CORS
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
-    <div class="max-w-6xl mx-auto space-y-6">
+app = Flask(__name__)
+CORS(app)
+
+TEMP_ZIP_URL = "https://static.csdi.gov.hk/csdi-webpage/download/f8e1bd259b4d58218b8ea5a07b874472/geojson"
+HUMIDITY_ZIP_URL = "https://static.csdi.gov.hk/csdi-webpage/download/04db0982a43f561db9e922cd082b09f9/geojson"
+
+def fetch_single_station(feature, val_type):
+    props = feature.get('properties', {})
+    geometry = feature.get('geometry', {})
+    coords = geometry.get('coordinates', [])
+    
+    lng = coords[0] if len(coords) > 0 else None
+    lat = coords[1] if len(coords) > 1 else None
+
+    # 優先抓取繁體中文站名
+    station_name_tc = props.get('AutomaticWeatherStation_tc') or props.get('AutomaticWeatherStation_en') or props.get('name') or '未知站點'
+    data_url = props.get('Data_url')
+
+    val_str = None
+    timestamp = "即時"
+
+    if data_url:
+        try:
+            csv_res = requests.get(data_url, timeout=3)
+            if csv_res.status_code == 200:
+                csv_content = csv_res.content.decode('utf-8', errors='ignore')
+                csv_reader = csv.DictReader(io.StringIO(csv_content))
+                rows = list(csv_reader)
+                if rows:
+                    latest_row = rows[-1]
+                    for key, val in latest_row.items():
+                        k_lower = key.lower() if key else ""
+                        if val_type == 'temp' and ('temp' in k_lower or 'temperature' in k_lower) and val:
+                            try:
+                                val_str = float(val)
+                            except:
+                                pass
+                        elif val_type == 'humidity' and ('humidity' in k_lower or 'rh' in k_lower) and val:
+                            try:
+                                val_str = float(val)
+                            except:
+                                pass
+                        if ('time' in k_lower or 'date' in k_lower) and val:
+                            timestamp = val
+        except Exception:
+            pass
+
+    return station_name_tc, {
+        "value": val_str,
+        "time": timestamp,
+        "lat": lat,
+        "lng": lng
+    }
+
+def fetch_station_data(zip_url, val_type):
+    data_map = {}
+    try:
+        response = requests.get(zip_url, timeout=5)
+        if response.status_code != 200:
+            return data_map
+
+        with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+            file_list = z.namelist()
+            target_file = next((f for f in file_list if f.endswith('.json') or f.endswith('.geojson')), None)
+            if not target_file:
+                return data_map
+
+            import json
+            with z.open(target_file) as f:
+                geo_data = json.loads(f.read().decode('utf-8'))
+                features = geo_data.get('features', [])
+
+                with ThreadPoolExecutor(max_workers=10) as executor:
+                    futures = [executor.submit(fetch_single_station, feature, val_type) for feature in features]
+                    for future in as_completed(futures):
+                        s_name, s_info = future.result()
+                        if s_name:
+                            data_map[s_name] = s_info
+    except Exception as e:
+        print(f"Error fetching {zip_url}: {e}")
+    return data_map
+
+@app.route('/')
+def home():
+    return "HKO Weather API 正在運行中！"
+
+@app.route('/humidity', methods=['GET'])
+def get_weather():
+    try:
+        temp_data = fetch_station_data(TEMP_ZIP_URL, 'temp')
+        humid_data = fetch_station_data(HUMIDITY_ZIP_URL, 'humidity')
+
+        all_stations = set(list(temp_data.keys()) + list(humid_data.keys()))
         
-        <!-- 標題與氣象智慧分析面板 -->
-        <div class="bg-white shadow-md rounded-lg p-6 space-y-4">
-            <h1 class="text-2xl font-bold text-gray-900">香港各區即時氣象與微氣候分析</h1>
-            <p class="text-xs text-gray-500" id="loading-status">正在載入即時氣象大數據...</p>
-            
-            <!-- 統計卡片格 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div class="text-xs text-blue-600 font-semibold">全港平均相對濕度</div>
-                    <div class="text-2xl font-bold text-blue-900 mt-1" id="stat-avg-humid">--</div>
-                </div>
-                <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-                    <div class="text-xs text-indigo-600 font-semibold">雲海季節指標 (濕度 ≥ 90% / 95%)</div>
-                    <div class="text-lg font-bold text-indigo-900 mt-1" id="stat-cloud-sea">評估中...</div>
-                </div>
-                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                    <div class="text-xs text-amber-600 font-semibold">微氣候現象 (輻射冷卻 / 逆溫)</div>
-                    <div class="text-sm font-medium text-amber-900 mt-1" id="stat-analysis">分析中...</div>
-                </div>
-            </div>
-        </div>
+        combined_result = []
+        humidities = []
+        
+        # 用於逆溫層與輻射冷卻分析的資料收集
+        high_alt_temps = {}
+        low_alt_temps = {}
+        radiation_cooling_stations = []
+        
+        high_stations = ["大帽山", "大老山", "Tai Mo Shan", "Tate's Cairn"]
+        cooling_targets = ["打鼓嶺", "石崗", "濕地公園", "西貢", "Ta Kwu Ling", "Shek Kong", "Wetland Park", "Sai Kung"]
 
-        <!-- 衛星地圖區域 -->
-        <div class="bg-white shadow-md rounded-lg overflow-hidden p-4">
-            <h2 class="text-lg font-bold text-gray-900 mb-3">即時衛星溫濕度分佈地圖</h2>
-            <div id="map" class="rounded-lg shadow-inner"></div>
-        </div>
+        for station in all_stations:
+            t_info = temp_data.get(station, {})
+            h_info = humid_data.get(station, {})
 
-        <!-- 詳細數據表格 -->
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
-            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <h2 class="text-lg font-bold text-gray-900">各氣象站實測數據清單</h2>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50 text-gray-700 text-sm border-b border-gray-200">
-                            <th class="py-3 px-6 font-semibold">氣象站 / 地區</th>
-                            <th class="py-3 px-6 font-semibold">氣溫</th>
-                            <th class="py-3 px-6 font-semibold">相對濕度</th>
-                            <th class="py-3 px-6 font-semibold">數據時間</th>
-                        </tr>
-                    </thead>
-                    <tbody id="weather-tbody" class="divide-y divide-gray-200 text-sm">
-                        <tr><td colspan="4" class="py-6 px-6 text-center text-gray-400">正在載入數據...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+            lat = t_info.get('lat') or h_info.get('lat')
+            lng = t_info.get('lng') or h_info.get('lng')
+            time_val = t_info.get('time') or h_info.get('time') or '即時'
 
-        <div class="text-center text-xs text-gray-500 py-2">
-            數據來源：香港天文台 / 空間數據共享入門網站 (CSDI)
-        </div>
-    </div>
+            t_val = t_info.get('value')
+            h_val = h_info.get('value')
 
-    <script>
-        const map = L.map('map').setView([22.3193, 114.1694], 11);
+            temp_str = f"{t_val}°C" if t_val is not None else "資料未明"
+            humid_str = f"{h_val}%" if h_val is not None else "資料未明"
 
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            maxZoom: 17,
-            attribution: 'Tiles &copy; Esri'
-        }).addTo(map);
+            if h_val is not None:
+                humidities.append(h_val)
 
-        async function fetchWeatherData() {
-            const statusEl = document.getElementById('loading-status');
-            const tbody = document.getElementById('weather-tbody');
-            
-            const apiUrl = 'https://hko-humidity-api-rcr3.onrender.com/humidity';
+            # 分類高地與低地氣溫，用於逆溫層計算
+            if any(hs in station for hs in high_stations):
+                if t_val is not None:
+                    high_alt_temps[station] = t_val
+            else:
+                if t_val is not None:
+                    low_alt_temps[station] = t_val
 
-            try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('網絡請求失敗');
-                
-                const result = await response.json();
-                const stations = result.stations;
-                const stats = result.stats;
-                
-                if (!Array.isArray(stations) || stations.length === 0) {
-                    statusEl.textContent = '未能取得有效的氣象站數據。';
-                    return;
-                }
+            # 輻射冷卻檢測
+            if any(ct in station for ct in cooling_targets):
+                if t_val is not None:
+                    radiation_cooling_stations.append({"station": station, "temp": t_val})
 
-                // 填入統計面板數據
-                document.getElementById('stat-avg-humid').textContent = `${stats.avg_humidity}%`;
-                document.getElementById('stat-cloud-sea').textContent = `${stats.cloud_sea_status} (${stats.count_95}個站≥95%)`;
-                
-                const analysisText = stats.analysis_notes.length > 0 ? stats.analysis_notes.join(' ') : "目前氣温分佈平穩，未見明顯極端輻射冷卻。";
-                document.getElementById('stat-analysis').textContent = analysisText;
+            combined_result.append({
+                "station": station,
+                "temperature": temp_str,
+                "humidity": humid_str,
+                "time": time_val,
+                "lat": lat,
+                "lng": lng
+            })
 
-                tbody.innerHTML = '';
-                let markerCount = 0;
+        # 雲海統計
+        avg_humid = sum(humidities) / len(humidities) if humidities else 0
+        count_90 = sum(1 for h in humidities if h >= 90)
+        count_95 = sum(1 for h in humidities if h >= 95)
 
-                stations.forEach(item => {
-                    const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-gray-50 transition-colors';
-                    tr.innerHTML = `
-                        <td class="py-3 px-6 font-medium text-gray-900">${item.station}</td>
-                        <td class="py-3 px-6 text-red-600 font-semibold">${item.temperature}</td>
-                        <td class="py-3 px-6 text-blue-600 font-semibold">${item.humidity}</td>
-                        <td class="py-3 px-6 text-gray-500">${item.time}</td>
-                    `;
-                    tbody.appendChild(tr);
+        cloud_sea_status = "條件未成熟"
+        if avg_humid >= 95 or count_95 >= 3:
+            cloud_sea_status = "極佳！全港高度潮濕，極利於觀賞雲海"
+        elif avg_humid >= 90 or count_90 >= 5:
+            cloud_sea_status = "良好，部分山區有望出現雲海"
 
-                    if (item.lat && item.lng) {
-                        const customIcon = L.divIcon({
-                            className: 'custom-div-icon',
-                            html: `<div class="weather-pin">
-                                     <div class="text-[10px] text-gray-300 truncate max-w-[110px]">${item.station}</div>
-                                     <div>
-                                        <span class="text-red-400">${item.temperature}</span> | 
-                                        <span class="text-blue-400">${item.humidity}</span>
-                                     </div>
-                                   </div>`,
-                            iconSize: [110, 42],
-                            iconAnchor: [55, 48]
-                        });
+        # 逆溫層（Inversion Layer）判斷邏輯
+        inversion_status = "未探測到顯著逆溫"
+        if high_alt_temps and low_alt_temps:
+            avg_low_temp = sum(low_alt_temps.values()) / len(low_alt_temps)
+            max_high_temp = max(high_alt_temps.values())
+            # 若高地溫度接近甚至高於平地平均溫，代表出現逆溫
+            if max_high_temp >= (avg_low_temp - 1.5):
+                inversion_status = "⚠️ 探測到逆溫現象（高地氣溫異常偏高/與平地相若）"
 
-                        const marker = L.marker([item.lat, item.lng], { icon: customIcon }).addTo(map);
-                        
-                        marker.bindPopup(`
-                            <div style="font-family: sans-serif;">
-                                <strong style="font-size: 14px;">${item.station}</strong><br>
-                                氣溫：<span style="color: #dc2626; font-weight: bold;">${item.temperature}</span><br>
-                                相對濕度：<span style="color: #2563eb; font-weight: bold;">${item.humidity}</span><br>
-                                <span style="font-size: 11px; color: #6b7280;">時間：${item.time}</span>
-                            </div>
-                        `);
-                        markerCount++;
-                    }
-                });
+        # 輻射冷卻判斷
+        rc_status = "未明顯出現"
+        if radiation_cooling_stations:
+            min_rc_temp = min([s['temp'] for s in radiation_cooling_stations])
+            rc_status = f"內陸站點（如打鼓嶺/石崗等）最低錄得 {min_rc_temp}°C，輻射冷卻作用運作中"
 
-                statusEl.textContent = `成功載入 ${stations.length} 個氣象站數據，已在衛星地圖標註 ${markerCount} 個站點`;
-
-            } catch (error) {
-                console.error(error);
-                statusEl.textContent = '無法載入地圖數據。';
+        return jsonify({
+            "stations": combined_result,
+            "stats": {
+                "avg_humidity": round(avg_humid, 1),
+                "count_95": count_95,
+                "cloud_sea_status": cloud_sea_status,
+                "inversion_status": inversion_status,
+                "radiation_cooling": rc_status
             }
-        }
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-        fetchWeatherData();
-    </script>
-</body>
-</html>
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
