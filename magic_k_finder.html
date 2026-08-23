@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>香港霞光預測：光通道與曙暮光分析</title>
+  <title>香港霞光預測：Magic Hour 光通道分析</title>
   
   <!-- 網頁瀏覽器標籤圖示 (Favicon) -->
   <link rel="icon" type="image/png" href="magic_k_finder_ico.png">
@@ -96,16 +96,17 @@
     .btn-sunset { background: var(--accent-orange); }
     .btn-sunrise { background: var(--accent-blue); }
 
+    /* K值優先，寬度加大確保完整顯示 */
     .pin-label-clean {
-      background: rgba(15, 15, 18, 0.92) !important;
+      background: rgba(15, 15, 18, 0.95) !important;
       border: 1.5px solid var(--accent-color, #ff6b35) !important;
       color: var(--accent-color, #ff6b35) !important;
       font-size: 11px !important;
       font-weight: 800 !important;
-      padding: 2px 6px !important;
-      border-radius: 12px !important;
+      padding: 3px 8px !important;
+      border-radius: 14px !important;
       white-space: nowrap !important;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.7) !important;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.8) !important;
       text-align: center; line-height: 1;
     }
 
@@ -121,7 +122,7 @@
 <body>
 
 <div class="app-container">
-  <h2>🌅 霞光預測：光通道與曙暮光分析</h2>
+  <h2>🌅 霞光預測：Magic Hour 光通道分析</h2>
 
   <div class="tab-group">
     <button id="btn-tab-sunset" class="tab-btn active-sunset" onclick="switchMode('sunset')">🌇 今日日落</button>
@@ -134,7 +135,7 @@
   </div>
 
   <div class="card">
-    <button id="calc-btn" class="action-btn btn-sunset" onclick="calculateAll()">🔍 執行光通道與雲況分析</button>
+    <button id="calc-btn" class="action-btn btn-sunset" onclick="calculateAll()">🔍 執行光通道與 Magic Hour 分析</button>
     <div id="astro-info" style="margin-top: 6px;"></div>
   </div>
 
@@ -144,13 +145,13 @@
       <span>🔎 近場前景分析 (0-150km)</span>
       <span class="badge-macro">每 15km 採樣</span>
     </div>
-    <div id="micro-subtitle" style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;">決定日落前黃金時刻 (Golden Hour) 直射光是否被阻擋</div>
+    <div id="micro-subtitle" style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;">評估 Golden Hour 直射金光通道是否暢通</div>
     <div id="windy-map-micro" class="map-micro"></div>
     <div class="chart-container">
       <canvas id="kProfileChartMicro"></canvas>
     </div>
     <div id="micro-analysis" class="analysis-box">
-      <div class="analysis-title">📊 近場光通道評估</div>
+      <div class="analysis-title">✨ Golden Hour（黃金時刻）通道評估</div>
       <div id="micro-text">正在分析 0-150km 通道狀況...</div>
     </div>
   </div>
@@ -161,14 +162,14 @@
       <span>🔭 遠場背景分析 (0-1000km)</span>
       <span class="badge-macro">每 50km 採樣</span>
     </div>
-    <div id="macro-subtitle" style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;">決定黃昏後光輝 (Afterglow) 與各階段 Twilight 表現</div>
+    <div id="macro-subtitle" style="font-size: 0.75rem; color: var(--text-sub); margin-top: 2px;">評估民用與航海曙暮光霞光通道表現</div>
     <div id="windy-map-macro" class="map-macro"></div>
     <div class="chart-container">
       <canvas id="kProfileChartMacro"></canvas>
     </div>
     <div id="macro-analysis" class="analysis-box">
-      <div class="analysis-title">✨ 曙暮光 (Twilight) 階段評估</div>
-      <div id="macro-text">正在分析 150-1000km 遠端反射狀況...</div>
+      <div class="analysis-title">🌆 曙暮光（Civil & Nautical Twilight）通道評估</div>
+      <div id="macro-text">正在分析各階段曙暮光反射狀況...</div>
     </div>
   </div>
 
@@ -208,11 +209,11 @@
     document.getElementById('calc-btn').className = `action-btn ${mode === 'sunset' ? 'btn-sunset' : 'btn-sunrise'}`;
     
     if (mode === 'sunset') {
-      document.getElementById('micro-subtitle').innerText = "決定日落前黃金時刻 (Golden Hour) 直射光是否被阻擋";
-      document.getElementById('macro-subtitle').innerText = "決定黃昏後光輝 (Afterglow) 與各階段 Twilight 表現";
+      document.getElementById('micro-subtitle').innerText = "評估日落前 Golden Hour 直射金光通道是否暢通";
+      document.getElementById('macro-subtitle').innerText = "評估民用與航海曙暮光（Afterglow）霞光通道表現";
     } else {
-      document.getElementById('micro-subtitle').innerText = "決定日出前晨曦與黃金時刻 (Golden Hour) 直射光是否被阻擋";
-      document.getElementById('macro-subtitle').innerText = "決定黎明前曙暮光 (Pre-sunrise Twilight) 與高空雲反射表現";
+      document.getElementById('micro-subtitle').innerText = "評估日出前 Golden Hour 直射金光通道是否暢通";
+      document.getElementById('macro-subtitle').innerText = "評估民用與航海曙暮光（Pre-sunrise Twilight）霞光通道表現";
     }
 
     calculateAll();
@@ -307,11 +308,11 @@
       L.marker([HK_LAT, HK_LON], { icon: L.divIcon({ className: 'pin-label-hk', html: '香港', iconSize: [32, 16], iconAnchor: [16, -6] }) }).addTo(layer);
     });
 
-    // 1. 微觀區 (0-150km)
+    // 1. 微觀區 (0-150km) -> Golden Hour
     const microDistances = [];
     for (let d = 0; d <= 150; d += 15) microDistances.push(d);
     
-    let kValuesMicro = [], microSum = 0;
+    let kValuesMicro = [], k150 = 290;
     const polylinePointsMicro = [[HK_LAT, HK_LON]];
 
     for (let d of microDistances) {
@@ -319,16 +320,16 @@
       if (d > 0) polylinePointsMicro.push(point);
       const res = await fetchKValue(point[0], point[1], targetTime);
       kValuesMicro.push(res.k);
-      microSum += res.k;
+      if (d === 150) k150 = res.k;
 
       if ([30, 60, 90, 120, 150].includes(d)) {
         L.circleMarker(point, { color: lineStyle, fillColor: '#ffffff', fillOpacity: 1, radius: 4, weight: 2 }).addTo(layerGroupMicro);
         L.marker(point, {
           icon: L.divIcon({
             className: 'pin-label-clean',
-            html: `${d}km | ${res.k.toFixed(1)} K`,
-            iconSize: [80, 18],
-            iconAnchor: [40, 22]
+            html: `${res.k.toFixed(1)} K | ${d}km`, // 先顯示 K 值，再顯示距離
+            iconSize: [100, 22],
+            iconAnchor: [50, 26]
           })
         }).addTo(layerGroupMicro);
       }
@@ -338,23 +339,20 @@
     mapMicro.fitBounds(L.polyline(polylinePointsMicro).getBounds(), { padding: [25, 25] });
     renderChart('kProfileChartMicro', microDistances, kValuesMicro, lineStyle, 250, 310);
 
-    let avgMicro = microSum / kValuesMicro.length;
+    // Golden Hour 評估 (以 292K 為界)[cite: 1]
     let microText = "";
-    const isSunset = (currentMode === 'sunset');
-    const actionTimeText = isSunset ? "太陽下山前" : "太陽升起前";
-
-    if (avgMicro < 285) {
-      microText = `⚠️ <b>近場（0-150km）均溫偏低（約 ${avgMicro.toFixed(1)} K）</b>：顯示近距離低層厚雲較多。${actionTimeText}（Golden Hour）直射光可能受阻，需留意本地地平線附近是否有局部破口。`;
+    if (k150 >= 292 || (kValuesMicro.reduce((a,b)=>a+b,0)/kValuesMicro.length) >= 292) {
+      microText = `✅ <b>Golden Hour（黃金時刻）通道暢通（≥ 292 K）</b>：150公里內大氣通透無低層厚雲阻擋，直射金光可以順利推進，黃金時刻金光燦爛[cite: 1]。`;
     } else {
-      microText = `✅ <b>近場（0-150km）均溫偏高（約 ${avgMicro.toFixed(1)} K）</b>：近場光通道通暢，${actionTimeText}（Golden Hour）直射光可以順利推進，初期視野清晰。`;
+      microText = `⚠️ <b>Golden Hour（黃金時刻）通道阻塞（< 292 K）</b>：150公里內低層厚雲或水氣偏多，直射金光可能受阻[cite: 1]。`;
     }
     document.getElementById('micro-text').innerHTML = microText;
 
-    // 2. 宏觀區 (0-1000km)
+    // 2. 宏觀區 (0-1000km) -> Civil & Nautical Twilight
     const macroDistances = [];
     for (let d = 0; d <= 1000; d += 50) macroDistances.push(d);
     
-    let kValuesMacro = [], k500 = 290, k1000 = 290;
+    let kValuesMacro = [], k400 = 290, k1000 = 290;
     const polylinePointsMacro = [[HK_LAT, HK_LON]];
 
     for (let d of macroDistances) {
@@ -362,7 +360,7 @@
       if (d > 0) polylinePointsMacro.push(point);
       const res = await fetchKValue(point[0], point[1], targetTime);
       kValuesMacro.push(res.k);
-      if (d === 500) k500 = res.k;
+      if (Math.abs(d - 400) < 25) k400 = res.k;
       if (d === 1000) k1000 = res.k;
     }
 
@@ -382,9 +380,9 @@
       L.marker(point, {
         icon: L.divIcon({
           className: 'pin-label-clean',
-          html: `${res.k.toFixed(1)} K`,
-          iconSize: [60, 18],
-          iconAnchor: item.anchor
+          html: `${res.k.toFixed(1)} K | ${item.dist}km`, // 先顯示 K 值，再顯示距離
+          iconSize: [100, 22],
+          iconAnchor: [50, 26]
         })
       }).addTo(layerGroupMacro);
     }
@@ -393,17 +391,17 @@
     mapMacro.fitBounds(L.polyline(polylinePointsMacro).getBounds(), { padding: [30, 30] });
     renderChart('kProfileChartMacro', macroDistances, kValuesMacro, lineStyle, 240, 310);
 
+    // Civil Twilight (民用曙暮光 ~400km) 與 Nautical Twilight (航海曙暮光 ~1000km) 評估
     let macroText = "";
-    const twilightPhase = isSunset ? "黃昏後光輝（Afterglow）" : "黎明前曙暮光（Pre-sunrise Twilight）";
-    const eventContext = isSunset ? "日落後" : "日出前";
+    let civilStatus = k400 >= 292 ? "暢通 (有機會迎來核心霞光/火燒雲)" : "阻塞 (雲層較厚，霞光可能較弱)";
+    let nauticalStatus = k1000 >= 292 ? "暢通 (高空通透，餘光/Afterglow 可延續)" : "阻塞 (光線難以傳遞，天色迅速黯淡)";
 
-    if (k500 < 292) {
-      macroText = `❌ <b>500km 處偏低（${k500.toFixed(1)} K < 292 K）</b>：中場光通道有明顯雲層阻塞，${twilightPhase}階段可能較弱或沒有明顯表現。`;
-    } else if (k1000 > 292) {
-      macroText = `✨ <b>1000km 處偏高（${k1000.toFixed(1)} K > 292 K）</b>：遠端背景通透，${eventContext}相當長的一段時間內，遠方依然有機會接收到殘日或晨曦反照，維持精彩天色。`;
-    } else {
-      macroText = `🌥️ <b>遠場（500-1000km）雲況交錯</b>：中遠場有雲層分佈，具備反射霞光的條件，但需觀察局部是否有雲隙讓光線穿透。`;
-    }
+    macroText = `
+      🌆 <b>民用曙暮光（Civil Twilight / 約 400km）通道：<b>${civilStatus}</b><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;➔ 決定日落後/日出前第一波核心霞光反射條件（K值: ${k400.toFixed(1)} K）[cite: 1]。<br>
+      ⛵ <b>航海曙暮光（Nautical Twilight / 約 1000km）通道：<b>${nauticalStatus}</b><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;➔ 決定遠端深藍時段與黃昏後光輝（Afterglow）表現（K值: ${k1000.toFixed(1)} K）[cite: 1]。
+    `;
     document.getElementById('macro-text').innerHTML = macroText;
   }
 
