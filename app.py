@@ -26,7 +26,8 @@ TARGET_STATIONS = [
     "赤鱲角", "Chek Lap Kok",
     "長洲", "Cheung Chau",
     "將軍澳", "Tseung Kwan O",
-    "九龍城", "Kowloon City"
+    "九龍城", "Kowloon City",
+    "橫瀾島", "Walang Island",
 ]
 
 def fetch_single_station(feature, val_type):
